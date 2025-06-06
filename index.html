@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía del Tiempo - Guardianes de San Juan</title>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=Roboto:wght@400;700&display=swap');
+
+        :root {
+            --color-primary: #f39c12; /* Naranja/Dorado principal */
+            --color-secondary: #e67e22; /* Naranja más oscuro */
+            --color-background-dark: #121828; /* Azul noche muy oscuro */
+            --color-background-medium: #161e31; /* Azul noche intermedio */
+            --color-background-light: #1a243a; /* Azul noche más claro */
+
+            --color-text-primary-on-dark: #e0e0e0;
+            --color-text-secondary-on-dark: #bdc3c7;
+            --color-text-on-primary: #121828; /* Texto oscuro sobre fondo primario */
+
+            --font-primary: 'Teko', sans-serif;
+            --font-secondary: 'Roboto', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-secondary);
+            background-color: var(--color-background-dark);
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+            color: var(--color-text-primary-on-dark);
+            margin: 0;
+            padding: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        #root {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--color-background-medium);
+            border-radius: 15px;
+            box-shadow: 0 10px 50px rgba(243,156,18, 0.35);
+            overflow: hidden;
+            border: 3px solid var(--color-primary);
+        }
+
+        .app-container {
+            text-align: center;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* --- LOGIN PAGE --- */
+        .login-container {
+            padding: 30px 25px;
+            background: linear-gradient(145deg, var(--color-background-medium), var(--color-background-dark));
+            color: var(--color-text-primary-on-dark);
+        }
+        .login-container img.logo {
+            width: 310px; /* Aumentado un 40% desde 220px */
+            margin-bottom: 10px;
+        }
+        .login-container h1 {
+            font-family: var(--font-primary);
+            font-size: 2.5rem;
+            margin: 0 0 8px 0;
+            color: var(--color-primary);
+            line-height: 1.1;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        .login-container .lema {
+            font-family: var(--font-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: var(--color-text-secondary-on-dark);
+        }
+        .login-container input {
+            font-family: var(--font-secondary);
+            width: calc(100% - 24px);
+            padding: 12px;
+            margin-top: 5px;
+            border: 2px solid var(--color-primary);
+            border-radius: 5px;
+            background: var(--color-background-light);
+            color: var(--color-text-primary-on-dark);
+            font-size: 1.1rem;
+        }
+        .login-container input::placeholder {
+            color: var(--color-text-secondary-on-dark);
+            opacity: 0.7;
+        }
+        .login-container button {
+            font-family: var(--font-primary);
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            background-color: var(--color-primary);
+            color: var(--color-text-on-primary);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .login-container button:hover {
+            background-color: var(--color-secondary);
+            color: white;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+        .login-container label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+            color: var(--color-text-secondary-on-dark);
+            text-align: left;
+        }
+
+        /* --- HEADER --- */
+        .header {
+            background-color: var(--color-background-dark);
+            color: var(--color-text-primary-on-dark);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--color-primary);
+        }
+        .header-info span, .header-score .score, .header-score .timer {
+            font-family: var(--font-primary);
+            font-size: 1.5rem;
+            display: block;
+        }
+        .header-info .team-name {
+            font-size: 1.8rem;
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+        .header-info .team-title {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary-on-dark);
+            letter-spacing: 0.5px;
+        }
+        .header-score { text-align: right; }
+        .header-score .score { color: var(--color-primary); font-weight: 500; }
+        .header-score .timer { color: var(--color-text-primary-on-dark); }
+
+        /* --- DASHBOARD & CONTAINERS --- */
+        .dashboard-content {
+            padding: 20px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .stage-container, .challenge-container, .end-container, .en-ruta-container {
+            border: 2px solid var(--color-primary);
+            border-radius: 10px;
+            padding: 20px;
+            background: var(--color-background-light);
+            color: var(--color-text-primary-on-dark);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            animation: fadeIn 0.6s ease-in-out;
+            margin-bottom: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h3 {
+            font-family: var(--font-primary);
+            font-size: 2rem;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--color-primary);
+            border-bottom: 2px solid var(--color-secondary);
+            padding-bottom: 10px;
+            line-height: 1.2;
+            font-weight: 600;
+        }
+        .stage-container h3, .challenge-container h3 {
+            font-size: 1.8rem;
+        }
+
+        p { font-size: 1rem; line-height: 1.6; color: var(--color-text-secondary-on-dark); margin-bottom: 15px; }
+        strong { color: var(--color-text-primary-on-dark); font-weight: 700; }
+
+        input:not(.login-container input) {
+            font-family: var(--font-secondary);
+            width: calc(100% - 24px);
+            padding: 12px;
+            font-size: 1.05rem;
+            border: 1px solid var(--color-text-secondary-on-dark);
+            border-radius: 5px;
+            margin-top: 10px;
+            background-color: var(--color-background-medium);
+            color: var(--color-text-primary-on-dark);
+        }
+        input:not(.login-container input)::placeholder { color: var(--color-text-secondary-on-dark); opacity: 0.6; }
+
+        /* --- BOTONES --- */
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        @media (min-width: 400px) {
+            .button-group {
+                flex-direction: row;
+            }
+        }
+
+        .primary-button, .secondary-button {
+            font-family: var(--font-primary);
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: 2px solid transparent;
+        }
+        .primary-button:disabled, .secondary-button:disabled {
+            background-color: #56595d;
+            cursor: not-allowed;
+            color: #909397;
+            box-shadow: none;
+            transform: none;
+            border-color: #56595d;
+        }
+
+        .primary-button {
+            background-color: var(--color-primary);
+            color: var(--color-text-on-primary);
+            border-color: var(--color-primary);
+        }
+        .primary-button:hover:not(:disabled) {
+            background-color: var(--color-secondary);
+            border-color: var(--color-secondary);
+            color: white;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .secondary-button {
+            background-color: transparent;
+            color: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+        .secondary-button:hover:not(:disabled) {
+            background-color: var(--color-primary);
+            color: var(--color-text-on-primary);
+            transform: translateY(-2px);
+        }
+
+        .feedback { margin-top: 15px; font-size: 1.1rem; font-weight: bold; }
+        .feedback.success { color: #27ae60; }
+        .feedback.error { color: #e74c3c; }
+
+        /* ... otros estilos ... */
+        .en-ruta-container .primary-button { margin-top: 20px; }
+        .challenge-container .primary-button { margin-top: 20px; }
+        .transmission-box, .mecenas-box { background-color: rgba(243,156,18, 0.07); border-left: 4px solid var(--color-primary); padding: 12px 18px; margin: 20px 0; border-radius: 4px; }
+        .transmission-box p, .mecenas-box p { margin: 5px 0; color: var(--color-text-secondary-on-dark); font-style: italic; }
+        .transmission-box strong, .mecenas-box strong { color: var(--color-primary); font-style: normal; font-weight: 600; }
+        .challenge-timer { font-family: var(--font-primary); font-size: 2.5rem; color: #e74c3c; margin: 10px 0 15px 0; animation: pulseTemporal 1.5s infinite; }
+        @keyframes pulseTemporal { 0% { opacity: 0.7; transform: scale(1); } 50% { opacity: 1; transform: scale(1.03); } 100% { opacity: 0.7; transform: scale(1); } }
+        .trivia-options { list-style: none; padding: 0; margin-top: 15px; }
+        .trivia-options li { background: var(--color-background-medium); color: var(--color-text-primary-on-dark); margin: 10px 0; padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; border: 2px solid var(--color-text-secondary-on-dark); font-size: 1rem; }
+        .trivia-options li:hover { background: var(--color-background-light); transform: translateX(5px); border-color: var(--color-primary); }
+        .trivia-options li.selected { background: var(--color-primary); color: var(--color-text-on-primary); border-color: var(--color-secondary); font-weight: bold; }
+        .en-ruta-container, .end-container { text-align: center; }
+        .en-ruta-container .portal-image { width: 100%; max-width: 220px; height: auto; border-radius: 8px; margin-bottom: 15px; opacity: 0.7; border: 2px solid var(--color-primary); }
+        .end-container .medal-image { width: 100px; margin-bottom: 10px; }
+        .dev-reset-button { position: fixed; bottom: 10px; right: 10px; background-color: #c0392b; color: white; padding: 8px 12px; border-radius: 5px; font-size: 0.9rem; font-family: var(--font-secondary); cursor: pointer; z-index: 2000; border: none; opacity: 0.8; transition: opacity 0.3s ease; }
+        .dev-reset-button:hover { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- DATOS COMPLETOS DEL EVENTO ---
+        const eventData = [
+            // --- SANTA LUCÍA ---
+            // 1. Parroquia Santa Lucía
+            {
+                id: 1,
+                department: "Santa Lucía",
+                location: "Parroquia Santa Lucía - El Templo Ecléctico",
+                missionName: "Ancla: Vestigios del Sismo",
+                enabler: "Consigna: Busquen el año del catastrófico terremoto que destruyó el 'hermoso templo colonial'.\nPista: Este evento marcó un antes y un después en la arquitectura de toda la provincia.",
+                enablerKeyword: "1944",
+                transmission: "Guardián, hemos detectado una cicatriz profunda en la línea de tiempo de este lugar sagrado. Debes anclar el año del evento que lo cambió todo para estabilizarla.",
+                challenge: { type: "trivia", question: "¿En qué año fue inaugurado el templo de estilo ecléctico que reemplazó a la primera capilla?", options: ["1894", "1900", "1944", "1964"], correctAnswer: "1900" },
+                nextMissionId: 2
+            },
+            {
+                id: 2,
+                department: "Santa Lucía",
+                location: "Parroquia Santa Lucía - El Templo Moderno",
+                missionName: "Ancla: La Fe Reconstruida",
+                enabler: "Consigna: Encuentren el año de inauguración de la iglesia moderna y actual, que reemplazó a la destruida por el gran sismo.\nPista: Se inauguró durante las fiestas patronales de diciembre.",
+                enablerKeyword: "1964",
+                transmission: "La fe de un pueblo se manifiesta en su capacidad de renacer. Encuentra el año en que este templo moderno abrió sus puertas para sellar esta memoria.",
+                challenge: { type: "trivia", question: "¿Qué importante evento religioso, que congrega a miles de fieles, se celebra cada diciembre en la parroquia?", options: ["La Fiesta del Sol", "El aniversario del departamento", "La Fiesta Patronal de Santa Lucía", "La peregrinación a la Difunta Correa"], correctAnswer: "La Fiesta Patronal de Santa Lucía" },
+                nextMissionId: 3
+            },
+            // 2. Monumento "La Luz del Mundo"
+            {
+                id: 3,
+                department: "Santa Lucía",
+                location: "Monumento La Luz del Mundo - Orígenes",
+                missionName: "Ancla: El Primer Destello",
+                enabler: "Consigna: Identifiquen el año en que los primeros pobladores se reunían en esta zona, fecha a la que rinde homenaje la farola monumentaria.\nPista: El lugar era conocido históricamente como 'La Legua'.",
+                enablerKeyword: "1869",
+                transmission: "Detecto una débil señal de luz proveniente del pasado. Viaja al año de origen, cuando esta esquina se convirtió en un punto de encuentro vital para los pioneros.",
+                challenge: { type: "trivia", question: "Según la tradición, ¿qué se utilizaba en el mangrullo para orientar a los viajeros antes de la lámpara de carburo?", options: ["Una fogata", "Una lámpara de aceite", "Antorchas", "Un farol eléctrico"], correctAnswer: "Una lámpara de aceite" },
+                nextMissionId: 4
+            },
+            {
+                id: 4,
+                department: "Santa Lucía",
+                location: "Monumento La Luz del Mundo - La 'Bichadora'",
+                missionName: "Ancla: El Ojo del Pasado",
+                enabler: "Consigna: ¿Qué tipo de institución de seguridad, que contaba con una torre de vigilancia llamada 'bichadora', funcionó en esta esquina 'décadas atrás'?\nPista: Su función era velar por la seguridad de los viajeros.",
+                enablerKeyword: "Un puesto policial",
+                transmission: "La seguridad de los viajeros era crucial. En esta esquina existió una institución protectora. Ancla su nombre para recordar su importante labor.",
+                challenge: { type: "trivia", question: "¿Qué apodo le daban los antiguos pobladores al lugar donde se encendía la luz, marcando el límite de la ciudad iluminada?", options: ["El faro de La Legua", "El portal de la ciudad", "Donde terminaba el mundo", "La esquina del viajero"], correctAnswer: "Donde terminaba el mundo" },
+                nextMissionId: 5
+            },
+            // 3. Puente de Hierro de Alto de Sierra
+            {
+                id: 5,
+                department: "Santa Lucía",
+                location: "Puente de Hierro - Hito de Ingeniería",
+                missionName: "Ancla: El Nacimiento del Gigante de Hierro",
+                enabler: "Consigna: Encuentren el año de inauguración del puente, el más antiguo de su tipo en la provincia.\nPista: Su construcción fue una hazaña de la ingeniería para cruzar el caudaloso río.",
+                enablerKeyword: "1893",
+                transmission: "Este gigante de metal fue una revolución para su época. Anclar su año de nacimiento es vital para preservar la memoria del progreso.",
+                challenge: { type: "trivia", question: "¿Para qué medio de transporte fue construido originalmente este puente metálico?", options: ["Peatones y carretas", "Tráfico carretero", "Ferrocarril", "Animales de carga"], correctAnswer: "Ferrocarril" },
+                nextMissionId: 6
+            },
+            {
+                id: 6,
+                department: "Santa Lucía",
+                location: "Puente de Hierro - Legado Protegido",
+                missionName: "Ancla: El Manto de la Historia",
+                enabler: "Consigna: Busquen el año en que la vieja estructura de hierro fue preservada y declarada Monumento Histórico Provincial.\nPista: Esto ocurrió después de la construcción de un puente nuevo y paralelo en 2012.",
+                enablerKeyword: "2021",
+                transmission: "El tiempo no pudo con él, y la ley lo protegió para siempre. Encuentra el año en que se reconoció oficialmente su valor histórico.",
+                challenge: { type: "trivia", question: "¿Qué longitud tiene este histórico puente de un solo carril?", options: ["150 metros", "200 metros", "244 metros", "300 metros"], correctAnswer: "244 metros" },
+                nextMissionId: 7
+            },
+            // 4. Plaza General San Martín (Santa Lucía)
+            {
+                id: 7,
+                department: "Santa Lucía",
+                location: "Plaza General San Martín - Orígenes",
+                missionName: "Ancla: El Corazón del Pueblo",
+                enabler: "Consigna: ¿En qué siglo se remonta la existencia de esta plaza, corazón del departamento?\nPista: Ha sido el centro de la vida comunitaria desde la creación del pueblo.",
+                enablerKeyword: "Siglo XIX",
+                transmission: "Todo pueblo tiene un corazón que late al ritmo de su gente. Viaja al siglo en que este corazón comenzó a latir.",
+                challenge: { type: "trivia", question: "Además de la renovación de solados y luces LED, ¿qué elemento histórico se puso en valor durante la remodelación de la plaza?", options: ["La fuente central", "El mástil principal", "La calesita", "El reloj de sol"], correctAnswer: "La calesita" },
+                nextMissionId: 8
+            },
+            {
+                id: 8,
+                department: "Santa Lucía",
+                location: "Plaza General San Martín - Remodelación",
+                missionName: "Ancla: La Renovación del Encuentro",
+                enabler: "Consigna: Hallen el año en que la plaza fue totalmente remodelada, con motivo del 152° aniversario del departamento.\nPista: En su reinauguración se agregó Wi-Fi público y se descubrió una placa conmemorativa.",
+                enablerKeyword: "2021",
+                transmission: "Los espacios evolucionan para seguir uniendo a las personas. Ancla el año de la gran transformación de este punto de encuentro.",
+                challenge: { type: "trivia", question: "¿Qué importante evento anual, que dura tres noches, se celebra en esta plaza cada mes de diciembre?", options: ["El Festival del Sol", "El Aniversario de Santa Lucía", "La Fiesta Nacional de Santa Lucía", "La Feria de las Colectividades"], correctAnswer: "La Fiesta Nacional de Santa Lucía" },
+                nextMissionId: 9
+            },
+            // --- DEPARTAMENTO CAPITAL ---
+            // 1. Plaza 25 de Mayo
+            {
+                id: 9,
+                department: "Capital",
+                location: "Plaza 25 de Mayo - Fundación",
+                missionName: "Ancla: La Primera Piedra",
+                enabler: "Consigna: ¿En qué año se fundó San Juan de la Frontera, momento en que se reservó por primera vez el terreno para esta plaza?\nPista: Fue antes de que una catastrófica inundación obligara a trasladar la ciudad.",
+                enablerKeyword: "1562",
+                transmission: "Toda gran ciudad tiene un punto de origen. Viaja al año fundacional para anclar el primer latido de San Juan.",
+                challenge: { type: "trivia", question: "¿Qué ilustre sanjuanino propuso cambiar el nombre de 'Plaza de Armas' a '25 de Mayo'?", options: ["Francisco Narciso de Laprida", "Guillermo Rawson", "Agustín Gnecco", "Domingo F. Sarmiento"], correctAnswer: "Domingo F. Sarmiento" },
+                nextMissionId: 10
+            },
+            {
+                id: 10,
+                department: "Capital",
+                location: "Plaza 25 de Mayo - Traslado",
+                missionName: "Ancla: El Renacer de las Aguas",
+                enabler: "Consigna: Descubran el año en que la ciudad y la plaza fueron trasladadas a su ubicación actual después de una gran inundación.\nPista: Ocurrió 31 años después de la fundación original.",
+                enablerKeyword: "1593",
+                transmission: "La naturaleza obligó a un nuevo comienzo. Fija en la línea de tiempo el año en que la ciudad renació de las aguas y se estableció en su lugar definitivo.",
+                challenge: { type: "trivia", question: "Además de leer bandos, ¿qué otra actividad pública se realizaba en la plaza durante la época colonial?", options: ["Justas de caballeros", "Corridas de toros", "Mercados de esclavos", "Obras de teatro"], correctAnswer: "Corridas de toros" },
+                nextMissionId: 11
+            },
+            // ... (Continuación de todas las demás misiones hasta la misión final)
+            // 2. Catedral
+            {
+                id: 11,
+                department: "Capital",
+                location: "Catedral - Orígenes Jesuitas",
+                missionName: "Ancla: La Semilla de la Fe",
+                enabler: "Consigna: Encuentren el año de fundación del templo original, que sirvió como Iglesia Mayor durante 232 años.\nPista: Fue elevado a catedral a inicios del siglo XIX.",
+                enablerKeyword: "1712",
+                transmission: "Mucho antes del moderno campanil, una orden religiosa sembró la primera semilla de fe en este solar. Ancla su año de fundación.",
+                challenge: { type: "trivia", question: "¿Qué orden religiosa fundó la iglesia matriz original en este mismo solar?", options: ["Franciscanos", "Dominicos", "Agustinos", "Jesuitas"], correctAnswer: "Jesuitas" },
+                nextMissionId: 12
+            },
+            {
+                id: 12,
+                department: "Capital",
+                location: "Catedral - Símbolo Moderno",
+                missionName: "Ancla: La Inauguración Moderna",
+                enabler: "Consigna: Busquen la fecha exacta de inauguración de la actual y moderna catedral, reconocida como una de las más modernas del país.\nPista: Ocurrió 35 años después del devastador terremoto de 1944.",
+                enablerKeyword: "16 de diciembre de 1979",
+                transmission: "De las ruinas emergió un símbolo de resiliencia. La fecha exacta de su inauguración es un testamento al espíritu sanjuanino. ¡Encuéntrala!",
+                challenge: { type: "trivia", question: "¿Qué altura tiene el distintivo campanil de ladrillo rojo que se ha convertido en un ícono urbano?", options: ["44 metros", "51 metros", "62 metros", "79 metros"], correctAnswer: "51 metros" },
+                nextMissionId: 13
+            },
+            // 3. Convento de Santo Domingo
+            {
+                id: 13,
+                department: "Capital",
+                location: "Convento de Santo Domingo - El Libertador",
+                missionName: "Ancla: La Estadía del General",
+                enabler: "Consigna: ¿En qué año se hospedó el General San Martín en una modesta celda de este convento?\nPista: Lo hizo mientras organizaba la campaña libertadora y el Cruce de los Andes.",
+                enablerKeyword: "1815",
+                transmission: "Los muros de este convento fueron testigos de la planificación de la gesta más grande de América. Ancla el año en que el Libertador caminó por estos pasillos.",
+                challenge: { type: "trivia", question: "¿Qué división del Ejército de los Andes utilizó el convento como cuartel?", options: ["El Regimiento de Granaderos a Caballo", "La División Cabot", "La División del Sur", "La Artillería de Montaña"], correctAnswer: "La División Cabot" },
+                nextMissionId: 14
+            },
+            {
+                id: 14,
+                department: "Capital",
+                location: "Convento de Santo Domingo - La Ruptura",
+                missionName: "Ancla: El Sismo Devastador",
+                enabler: "Consigna: Identifiquen el año del sismo que afectó gravemente al edificio original del convento.\nPista: A pesar de la destrucción, la celda de San Martín fue rescatada.",
+                enablerKeyword: "1944",
+                transmission: "Nuevamente, la tierra tembló y la historia se partió en dos. Fija el año de la gran ruptura para comprender la reconstrucción.",
+                challenge: { type: "trivia", question: "¿Qué otra parte del convento original permaneció en pie tras el terremoto y fue restaurada?", options: ["El altar mayor", "La biblioteca", "El antiguo campanario dominico", "El portón principal"], correctAnswer: "El antiguo campanario dominico" },
+                nextMissionId: 15
+            },
+            // ... (Resto de las misiones hasta la final)
+            // Misión Final
+            {
+                id: 31, // Último ID antes del final
+                department: "Rivadavia",
+                location: "Centro Ambiental Anchipurac - El Renacimiento",
+                missionName: "Ancla: De la Basura a la Vanguardia",
+                enabler: "Consigna: Encuentren el año de inauguración del moderno edificio de Anchipurac.\nPista: Su nombre simboliza energía y renovación.",
+                enablerKeyword: "2018",
+                transmission: "Donde hubo olvido, hoy hay futuro. Ancla el año en que este lugar renació como un símbolo de conciencia ambiental.",
+                challenge: { type: "trivia", question: "¿Qué significa la palabra de origen huarpe 'Anchipurac'?", options: ["Tierra Limpia", "Agua Pura", "Montaña Sagrada", "Rayo"], correctAnswer: "Rayo" },
+                nextMissionId: 32
+            },
+            {
+                id: 32,
+                department: "Rivadavia Ancestral",
+                location: "Parque de Rivadavia (Punto de Llegada)",
+                missionName: "Misión: Sellar la Brecha Temporal",
+                enabler: "¡Guardián, has llegado al nexo! El 'Ancla Temporal Final' para estabilizar la línea del tiempo de San Juan te será revelada por el Guardián Mayor al completar tu informe en la 'Guía del Tiempo'. Ingresa la palabra 'LEGADO' para confirmar la restauración.",
+                enablerKeyword: "LEGADO",
+                transmission: "Mensaje Urgente del Guardián Mayor: '¡Lo lograron! La Amenaza del Olvido retrocede gracias a su valor. Ingresen el Ancla Final. ¡El legado de San Juan está a salvo!'",
+                challenge: { type: "final" },
+                nextMissionId: null
+            }
+        ];
+
+        // --- CÓDIGOS DE ESCUADRÓN VÁLIDOS ---
+        const validSquadCodes = {
+            "GUARDIAN01": "Los CronoExploradores",
+            "TIEMPOXYZ": "Vigías del Pasado",
+            "SANJUAN2025": "Escuadrón Reliquia",
+            "ASVTEST": "Equipo ASV Beta"
+        };
+
+        // --- COMPONENTES DE REACT ---
+
+        const Header = ({ teamName, score, timer }) => {
+            const formatTime = (totalSeconds) => {
+                const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+                const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+                const seconds = String(totalSeconds % 60).padStart(2, '0');
+                return `${hours}:${minutes}:${seconds}`;
+            };
+            return (
+                <div className="header">
+                    <div className="header-info">
+                        <span className="team-name">{teamName || "Escuadrón Desconocido"}</span>
+                        <span className="team-title">GUARDIANES DEL TIEMPO</span>
+                    </div>
+                    <div className="header-score">
+                        <span className="score">{score} FRAGMENTOS</span>
+                        <span className="timer">⏳ {formatTime(timer)}</span>
+                    </div>
+                </div>
+            );
+        };
+
+        const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
+            const [squadCode, setSquadCode] = React.useState('');
+            const logoUrl = "imagenes/LOGO 3 (1).png";
+            const handleLoginInternal = () => {
+                const normalizedCode = squadCode.toUpperCase().trim();
+                if (validSquadCodes[normalizedCode]) {
+                    onLogin(normalizedCode, validSquadCodes[normalizedCode]);
+                    if (typeof setErrorMessage === 'function') setErrorMessage('');
+                } else {
+                    if (typeof setErrorMessage === 'function') setErrorMessage('⚠️ Código de Escuadrón no válido. ¡El tiempo se agota!');
+                }
+            };
+            return (
+                <div className="login-container">
+                    <img src={logoUrl} alt="Logo Guardianes del Tiempo" className="logo" onError={(e) => { e.target.onerror = null; e.target.src="https://i.imgur.com/ZKiX1mO.png"; }} />
+                    <h1>RUTA DEL TESORO:<br/>GUARDIANES DEL TIEMPO</h1>
+                    <p className="lema">"¡El legado de San Juan te necesita! ¿Aceptas la misión?"</p>
+                    <label htmlFor="squadCode">Código de Escuadrón:</label>
+                    <input id="squadCode" type="text" placeholder="Ingresa tu código secreto" value={squadCode} onChange={(e) => setSquadCode(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleLoginInternal()} />
+                    <button className="primary-button" onClick={handleLoginInternal}>ACTIVAR GUÍA DEL TIEMPO</button>
+                    {errorMessage && <p className="feedback error" style={{ marginTop: '15px' }}>{errorMessage}</p>}
+                </div>
+            );
+        };
+        
+        const EnRutaPage = ({ nextLocation, onArrival, department }) => {
+             return(
+                 <div className="en-ruta-container">
+                     <img src="https://images.unsplash.com/photo-1520034475321-cbe63696469a?q=80&w=800&auto=format&fit=crop" alt="Portal Temporal Estilizado" className="portal-image"/>
+                     <h3>VIAJANDO A TRAVÉS DEL TIEMPO...</h3>
+                     <p>Próxima Sincronización: <strong>{nextLocation}</strong></p>
+                     <p>Departamento: <strong>{department}</strong></p>
+                     <p>¡Mantén el rumbo, Guardián! Evita las 'distorsiones temporales' (¡y las multas de tránsito!).</p>
+                     <button className="primary-button" onClick={onArrival}>LLEGADA CONFIRMADA: {nextLocation.toUpperCase()}</button>
+                 </div>
+             );
+         };
+
+        const EndGamePage = ({ score, finalTime, teamName }) => {
+           return (
+               <div className="end-container">
+                   <img src="https://cdn-icons-png.flaticon.com/512/784/784408.png" alt="Medalla o Trofeo Guardián" className="medal-image"/>
+                   <h3>¡MISIÓN TEMPORAL COMPLETADA, {teamName}!</h3>
+                   <p>Has estabilizado la línea del tiempo de San Juan. ¡La 'Amenaza del Olvido' ha sido contenida gracias a tu escuadrón!</p>
+                   <p><strong>Fragmentos de Historia Restaurados: {score}</strong></p>
+                   <p><strong>Tiempo Total de la Misión: {finalTime}</strong></p>
+                   <p>¡Has ganado tu Medalla "Guardián del Tiempo"! 🏅 Los "Custodios Mayores" y otros reconocimientos serán anunciados en el Concilio de Guardianes.</p>
+                   <p style={{fontSize: "0.9rem", marginTop: "20px"}}><em>No olvides compartir tu hazaña y prepararte para la celebración.</em></p>
+               </div>
+           );
+        };
+
+        const ChallengeSection = ({ stage, onChallengeComplete }) => {
+            const { challenge } = stage;
+            const [selectedOption, setSelectedOption] = React.useState('');
+            const [feedback, setFeedback] = React.useState({ message: '', type: ''});
+            const [triviaTimer, setTriviaTimer] = React.useState(0);
+
+            React.useEffect(() => {
+                setFeedback({ message: '', type: ''});
+                setSelectedOption('');
+                setTriviaTimer(0);
+                const interval = setInterval(() => {
+                    setTriviaTimer(prev => prev + 1);
+                }, 1000);
+                return () => clearInterval(interval);
+            }, [stage]);
+
+            const calculatePoints = (timeInSeconds) => {
+                if (timeInSeconds <= 30) return 50;
+                if (timeInSeconds <= 60) return 35;
+                if (timeInSeconds <= 90) return 20;
+                return 10;
+            };
+
+            const handleSubmit = () => {
+                const finalTime = triviaTimer;
+                const isCorrect = selectedOption.toUpperCase() === challenge.correctAnswer.toUpperCase();
+                const pointsWon = isCorrect ? calculatePoints(finalTime) : 0;
+
+                setFeedback({
+                    message: isCorrect ? `✔️ ¡Respuesta Correcta! Has recuperado ${pointsWon} Fragmentos en ${finalTime}s.` : `❌ Respuesta Incorrecta. No se han recuperado Fragmentos, ¡pero la misión continúa!`,
+                    type: isCorrect ? 'success' : 'error'
+                });
+                
+                setTimeout(() => {
+                    onChallengeComplete(pointsWon);
+                }, 2500);
+            };
+
+            return (
+                <div className="challenge-container">
+                    <h3>{`DESAFÍO: ${stage.missionName || stage.location}`}</h3>
+                    <div className="challenge-timer">⏱️ {triviaTimer}s</div>
+                    <p>{challenge.question}</p>
+                    {stage.transmission && challenge.type !== "final" && <div className="transmission-box" style={{marginBottom: "20px"}}><p><strong>📡 Transmisión Interceptada:</strong> {stage.transmission}</p></div>}
+                    <ul className="trivia-options">
+                        {challenge.options.map(option => (
+                            <li key={option} className={selectedOption === option ? 'selected' : ''} onClick={() => !feedback.message && setSelectedOption(option)}>
+                                {option}
+                            </li>
+                        ))}
+                    </ul>
+                    <button className="primary-button" onClick={handleSubmit} disabled={!selectedOption || feedback.message}>VERIFICAR TRANSMISIÓN</button>
+                    {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
+                </div>
+            );
+        };
+
+        const CurrentStage = ({ stage, onUnlock }) => {
+            const [keyword, setKeyword] = React.useState('');
+            const [error, setError] = React.useState('');
+            const [anchorTimer, setAnchorTimer] = React.useState(0);
+
+            React.useEffect(() => {
+                const interval = setInterval(() => {
+                    setAnchorTimer(prev => prev + 1);
+                }, 1000);
+                return () => clearInterval(interval);
+            }, [stage]);
+
+            const calculateAnchorPoints = (timeInSeconds) => {
+                if (timeInSeconds <= 60) return 100;
+                if (timeInSeconds <= 120) return 80;
+                if (timeInSeconds <= 180) return 60;
+                if (timeInSeconds <= 240) return 40;
+                if (timeInSeconds <= 300) return 20;
+                return 0;
+            };
+
+            const handleUnlockInternal = () => {
+                if (keyword.toUpperCase().trim() === stage.enablerKeyword.toUpperCase().trim()) {
+                    const points = calculateAnchorPoints(anchorTimer);
+                    setError('');
+                    onUnlock(points);
+                } else {
+                    setError('🚫 Ancla Temporal incorrecta. ¡La distorsión persiste!');
+                }
+            };
+            
+            const handleSkip = () => {
+                setError('');
+                onUnlock(0);
+            };
+
+            if (stage.challenge && stage.challenge.type === 'final') {
+                return (
+                    <div className="stage-container">
+                        <h3>{stage.missionName || `Coordenada Final: ${stage.location}`}</h3>
+                        {stage.transmission && <div className="transmission-box"><p><strong>📡 Transmisión Prioritaria:</strong> {stage.transmission}</p></div>}
+                        <p><strong>Misión de Sellado:</strong> {stage.enabler}</p>
+                        <input type="text" placeholder="Ingresa el Ancla Temporal Final" value={keyword} onChange={(e) => setKeyword(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()}/>
+                        <div className="button-group">
+                             <button className="primary-button" onClick={handleUnlockInternal}>✨ SELLAR BRECHA TEMPORAL ✨</button>
+                        </div>
+                        {error && <p className="feedback error">{error}</p>}
+                    </div>
+                );
+            }
+
+            return (
+                <div className="stage-container">
+                    <h3>{stage.missionName || `Coordenada Actual: ${stage.location}`}</h3>
+                    <div className="challenge-timer">⏱️ {anchorTimer}s</div>
+                    <p><strong>Departamento:</strong> {stage.department}</p>
+                    {stage.transmission && <div className="transmission-box"><p><strong>📡 Transmisión Interceptada:</strong> {stage.transmission}</p></div>}
+                    <p><strong>Objetivo de la Coordenada:</strong> {stage.enabler}</p>
+                    <input type="text" placeholder="Ingresa el 'Ancla Temporal'" value={keyword} onChange={(e) => setKeyword(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()}/>
+                    <div className="button-group">
+                        <button className="secondary-button" onClick={handleSkip}>No sé</button>
+                        <button className="primary-button" onClick={handleUnlockInternal}>🗝️ ANCLAR RECUERDO</button>
+                    </div>
+                    {error && <p className="feedback error">{error}</p>}
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [appState, setAppState] = React.useState(() => {
+                const savedState = localStorage.getItem('guardianesAppState');
+                try {
+                    const parsedState = savedState ? JSON.parse(savedState) : null;
+                    if (parsedState && typeof parsedState.status === 'string' && parsedState.status !== 'login') {
+                        return parsedState;
+                    }
+                } catch (e) {
+                    console.error("Error al parsear el estado de localStorage, usando estado inicial.", e);
+                    localStorage.removeItem('guardianesAppState');
+                }
+                return {
+                    status: 'login',
+                    squadCode: null,
+                    teamName: '',
+                    currentMissionId: eventData.length > 0 ? eventData[0].id : 0,
+                    score: 0,
+                    mainTimer: 0,
+                    finalTimeDisplay: '',
+                    errorMessage: ''
+                };
+            });
+
+            React.useEffect(() => {
+                localStorage.setItem('guardianesAppState', JSON.stringify(appState));
+            }, [appState]);
+
+            React.useEffect(() => {
+                let interval;
+                if (appState.status !== 'login' && appState.status !== 'finished') {
+                    interval = setInterval(() => {
+                        setAppState(prev => ({ ...prev, mainTimer: prev.mainTimer + 1 }));
+                    }, 1000);
+                }
+                return () => clearInterval(interval);
+            }, [appState.status]);
+
+            const currentStageData = eventData.find(m => m.id === appState.currentMissionId);
+
+            const handleLogin = (code, name) => {
+                setAppState(prev => ({
+                    ...prev,
+                    status: 'inGame_Lock',
+                    squadCode: code,
+                    teamName: name,
+                    currentMissionId: eventData.length > 0 ? eventData[0].id : 0,
+                    score: 0,
+                    mainTimer: 0,
+                    finalTimeDisplay: '',
+                    errorMessage: ''
+                }));
+            };
+
+            const setLoginErrorMessage = (message) => {
+                setAppState(prev => ({ ...prev, errorMessage: message }));
+            };
+
+            const handleUnlock = (pointsEarned) => {
+                if (!currentStageData) return;
+                const newScore = appState.score + pointsEarned;
+
+                if (currentStageData.challenge.type === 'final') {
+                    const totalSeconds = appState.mainTimer;
+                    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+                    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+                    const seconds = String(totalSeconds % 60).padStart(2, '0');
+                    setAppState(prev => ({ ...prev, score: newScore, status: 'finished', finalTimeDisplay: `${hours}:${minutes}:${seconds}` }));
+                } else {
+                    setAppState(prev => ({ ...prev, score: newScore, status: 'inGame_Challenge' }));
+                }
+            };
+
+            const handleChallengeComplete = (pointsEarned) => {
+                if (!currentStageData) return;
+                const newScore = appState.score + pointsEarned;
+
+                if (typeof currentStageData.nextMissionId === 'number') {
+                    setAppState(prev => ({ ...prev, score: newScore, status: 'inGame_OnTheRoad' }));
+                } else {
+                    const totalSeconds = appState.mainTimer;
+                    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+                    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+                    const seconds = String(totalSeconds % 60).padStart(2, '0');
+                    setAppState(prev => ({ ...prev, score: newScore, status: 'finished', finalTimeDisplay: `${hours}:${minutes}:${seconds}` }));
+                }
+            };
+
+            const handleArrival = () => {
+                if (!currentStageData) return;
+                if (typeof currentStageData.nextMissionId === 'number') {
+                    const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
+                    if (nextMission) {
+                         setAppState(prev => ({ ...prev, currentMissionId: nextMission.id, status: 'inGame_Lock' }));
+                    } else {
+                        console.error(`Error: No se encontró la misión con ID ${currentStageData.nextMissionId}. Finalizando.`);
+                        setAppState(prev => ({ ...prev, status: 'finished' }));
+                    }
+                } else {
+                    setAppState(prev => ({ ...prev, status: 'finished' }));
+                }
+            };
+
+            const handleResetDevelopment = () => {
+                if (window.confirm("¿Seguro que quieres reiniciar toda la misión y borrar los datos guardados? (Solo para desarrollo)")) {
+                    localStorage.removeItem('guardianesAppState');
+                    setAppState({
+                        status: 'login',
+                        squadCode: null,
+                        teamName: '',
+                        currentMissionId: eventData.length > 0 ? eventData[0].id : 0,
+                        score: 0,
+                        mainTimer: 0,
+                        finalTimeDisplay: '',
+                        errorMessage: ''
+                    });
+                }
+            };
+
+            const renderContent = () => {
+                if (appState.status.startsWith('inGame') && (!eventData || eventData.length === 0)) {
+                    return <p style={{padding: "20px"}}>Esperando carga de misiones del Guardián Mayor...</p>;
+                }
+                
+                if (!currentStageData && (appState.status !== 'login' && appState.status !== 'finished')) {
+                    return <p style={{padding: "20px"}}>Detectando anomalía temporal... (Error: Misión no encontrada o datos corruptos).</p>;
+                }
+
+                switch(appState.status) {
+                    case 'login':
+                        return <LoginPage onLogin={handleLogin} setErrorMessage={setLoginErrorMessage} errorMessage={appState.errorMessage} />;
+                    case 'inGame_Lock':
+                        return currentStageData ? <CurrentStage stage={currentStageData} onUnlock={handleUnlock} /> : <p>Cargando misión...</p>;
+                    case 'inGame_Challenge':
+                        return currentStageData ? <ChallengeSection stage={currentStageData} onChallengeComplete={handleChallengeComplete} /> : <p>Cargando desafío...</p>;
+                    case 'inGame_OnTheRoad':
+                        const nextMission = currentStageData ? eventData.find(m => m.id === currentStageData.nextMissionId) : null;
+                        const nextLocationDisplay = nextMission ? (nextMission.location || "Nuevo Sector Temporal") : "Destino Final";
+                        const nextDepartmentDisplay = nextMission ? nextMission.department : "Dimensión Desconocida";
+                        return <EnRutaPage nextLocation={nextLocationDisplay} department={nextDepartmentDisplay} onArrival={handleArrival} />;
+                    case 'finished':
+                        return <EndGamePage score={appState.score} finalTime={appState.finalTimeDisplay} teamName={appState.teamName} />;
+                    default:
+                        console.error("Estado de la aplicación desconocido:", appState.status);
+                        return <LoginPage onLogin={handleLogin} setErrorMessage={setLoginErrorMessage} errorMessage={"Error en la Guía del Tiempo. Intenta ingresar tu código nuevamente."} />;
+                }
+            };
+
+            return (
+                <div className="app-container">
+                    {appState.status !== 'login' && <Header teamName={appState.teamName} score={appState.score} timer={appState.mainTimer} />}
+                    <div className="dashboard-content">
+                        {renderContent()}
+                    </div>
+                    {appState.status !== 'login' && <button className="dev-reset-button" onClick={handleResetDevelopment}>RESET (DEV)</button>}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+
+    </script>
+</body>
+</html>
