@@ -104,33 +104,76 @@ const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
     );
 };
 
-const EnRutaPage = ({ nextLocation, onArrival, department }) => (
-    <div className="en-ruta-container">
-        <img src="imagenes/VIAJANDO.png" alt="Portal Temporal Estilizado" className="portal-image" onError={(e) => { e.target.onerror = null; e.target.src='https://images.unsplash.com/photo-1520034475321-cbe63696469a?q=80&w=800&auto=format&fit=crop'; }} />
-        <h3>VIAJANDO A TRAVÉS DEL TIEMPO...</h3>
-        <p>Próxima Sincronización: <strong>{nextLocation}</strong></p>
-        <p>Departamento: <strong>{department}</strong></p>
-        <p>¡Mantén el rumbo, Guardián! Evita las 'distorsiones temporales' (¡y las multas de tránsito!).</p>
-        <button className="primary-button" onClick={onArrival}>LLEGADA CONFIRMADA</button>
-    </div>
-);
+// --- COMPONENTE MODIFICADO: EnRutaPage con Barra de Progreso ---
+const EnRutaPage = ({ nextLocation, onArrival, department }) => {
+    // Lógica de viaje
+    const [isTraveling, setIsTraveling] = React.useState(true);
 
+    React.useEffect(() => {
+        const travelTimer = setTimeout(() => {
+            setIsTraveling(false);
+        }, 10000); // 10 segundos
+        return () => clearTimeout(travelTimer);
+    }, []);
+
+    return (
+        <div className="en-ruta-container">
+            <img src="imagenes/VIAJANDO.png" alt="Portal Temporal Estilizado" className="portal-image" onError={(e) => { e.target.onerror = null; e.target.src='https://images.unsplash.com/photo-1520034475321-cbe63696469a?q=80&w=800&auto=format&fit=crop'; }} />
+            <h3>VIAJANDO A TRAVÉS DEL TIEMPO...</h3>
+            <p>Próxima Sincronización: <strong>{nextLocation}</strong> ({department})</p>
+            
+            {/* --- BARRA DE PROGRESO --- */}
+            <p className="progress-info">Sincronizando coordenadas temporales...</p>
+            <div className="progress-bar-container">
+                <div className="progress-bar-filler"></div>
+            </div>
+
+            <p>¡Mantén el rumbo, Guardián! Evita las 'distorsiones temporales' (¡y las multas de tránsito!).</p>
+            
+            <button className="primary-button" onClick={onArrival} disabled={isTraveling}>
+                {isTraveling ? 'SINCRONIZANDO...' : 'LLEGADA CONFIRMADA'}
+            </button>
+        </div>
+    );
+};
+
+// --- COMPONENTE MODIFICADO: LongTravelPage con Barra de Progreso ---
 const LongTravelPage = ({ onArrival, nextDepartment }) => {
+    // Lógica de viaje
+    const [isTraveling, setIsTraveling] = React.useState(true);
+
+    React.useEffect(() => {
+        const travelTimer = setTimeout(() => {
+            setIsTraveling(false);
+        }, 10000); // 10 segundos
+        return () => clearTimeout(travelTimer);
+    }, []);
+
     const imageUrl = nextDepartment === 'Capital' 
         ? 'imagenes/VIAJANDO1.png' 
         : nextDepartment === 'Rivadavia' 
             ? 'imagenes/VIAJANDO2.png' 
-            : 'imagenes/VIAJANDO.png'; // Imagen por defecto
+            : 'imagenes/VIAJANDO.png';
 
     return (
         <div className="en-ruta-container">
             <img src={imageUrl} alt={`Viajando a ${nextDepartment}`} className="portal-image" />
             <h3>HORA DE VIAJAR MÁS LEJOS</h3>
             <p>Rápido, debemos movernos a <strong>{nextDepartment}</strong>, han aparecido nuevos fragmentos de la historia que debemos recoger.</p>
+            
+            {/* --- BARRA DE PROGRESO --- */}
+            <p className="progress-info">Abriendo portal de largo alcance...</p>
+            <div className="progress-bar-container">
+                <div className="progress-bar-filler"></div>
+            </div>
+
             <p style={{fontStyle: 'italic', fontSize: '0.9rem', opacity: 0.8}}>
                 Es importante que respetes las señales de tránsito, hay controles secretos que pueden restarte puntos.
             </p>
-            <button className="primary-button" onClick={onArrival}>HEMOS LLEGADO AL NUEVO DEPARTAMENTO</button>
+            
+            <button className="primary-button" onClick={onArrival} disabled={isTraveling}>
+                {isTraveling ? 'VIAJANDO...' : 'HEMOS LLEGADO'}
+            </button>
         </div>
     );
 };
@@ -325,19 +368,16 @@ const getInitialState = (missions) => ({
 });
 
 const App = () => {
-    // --- NUEVO: ESTADO PARA GUARDAR LAS MISIONES CARGADAS ---
     const [missions, setMissions] = React.useState([]);
-    const [isLoading, setIsLoading] = React.useState(true); // Para saber si estamos cargando datos
+    const [isLoading, setIsLoading] = React.useState(true);
     const [appState, setAppState] = React.useState(null);
 
-    // --- NUEVO: EFECTO PARA CARGAR MISIONES DESDE misiones.json ---
     React.useEffect(() => {
         fetch('./misiones.json')
             .then(response => response.json())
             .then(data => {
                 setMissions(data);
                 
-                // Una vez cargados los datos, inicializamos el estado del juego
                 const savedState = localStorage.getItem('guardianesAppState');
                 try {
                     const parsedState = savedState ? JSON.parse(savedState) : null;
@@ -352,14 +392,13 @@ const App = () => {
                     setAppState(getInitialState(data));
                 }
 
-                setIsLoading(false); // Terminamos de cargar
+                setIsLoading(false);
             })
             .catch(error => {
                 console.error("Error al cargar las misiones desde misiones.json:", error);
-                setIsLoading(false); // Dejamos de cargar incluso si hay error
-                // Opcional: mostrar un mensaje de error en la UI
+                setIsLoading(false);
             });
-    }, []); // El array vacío [] asegura que esto se ejecute solo una vez
+    }, []);
 
 
     React.useEffect(() => {
@@ -379,7 +418,6 @@ const App = () => {
     }, [appState]);
 
 
-    // Si estamos cargando o no tenemos estado, mostramos un mensaje
     if (isLoading || !appState) {
         return (
             <div className="app-container" style={{ padding: '40px', textAlign: 'center' }}>
@@ -388,7 +426,6 @@ const App = () => {
         );
     }
     
-    // El resto de la lógica ahora usa 'missions' en lugar de 'eventData'
     const currentStageData = missions.find(m => m.id === appState.currentMissionId);
 
     const handleLogin = (code, name) => {

@@ -595,3 +595,45 @@ input:not(.login-container input)::placeholder {
     border: 2px solid var(--color-background-light);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
+
+/* --- NUEVA FUNCIONALIDAD: Barra de Progreso de Viaje --- */
+
+.progress-info {
+    font-size: 0.9rem;
+    font-style: italic;
+    color: var(--color-text-secondary-on-dark);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.progress-bar-container {
+    width: 90%;
+    height: 25px;
+    background-color: var(--color-background-dark);
+    border-radius: 15px;
+    border: 2px solid var(--color-primary);
+    margin: 20px auto;
+    padding: 3px; /* Espacio interior para que la barra se vea bien */
+    box-sizing: border-box;
+    overflow: hidden; /* Asegura que la barra interior no se salga */
+}
+
+.progress-bar-filler {
+    width: 100%; /* El ancho se animará de 0 a 100, pero lo controlamos con transform */
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-secondary), var(--color-primary));
+    border-radius: 10px;
+    transform-origin: left;
+    /* Aplicamos la animación de llenado */
+    animation: fillProgressBar 10s linear forwards;
+}
+
+@keyframes fillProgressBar {
+    from {
+        transform: scaleX(0); /* Empieza sin ancho */
+    }
+    to {
+        transform: scaleX(1); /* Termina al 100% del ancho */
+    }
+}
