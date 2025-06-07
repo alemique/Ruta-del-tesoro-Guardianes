@@ -256,6 +256,42 @@ const formatTime = (totalSeconds) => {
     return `${hours}:${minutes}:${seconds}`;
 };
 
+// <-- INICIO: NUEVA FUNCIÓN PARA PISTAS DINÁMICAS
+const generarPistaDinamica = (respuesta) => {
+    const respuestaComoArray = respuesta.split('');
+    const indicesLetras = [];
+    
+    respuestaComoArray.forEach((char, index) => {
+        if (char !== ' ') {
+            indicesLetras.push(index);
+        }
+    });
+
+    const maxLetrasARevelar = Math.min(indicesLetras.length, 5);
+    const minLetrasARevelar = Math.min(indicesLetras.length, 3);
+    const cantidadARevelar = Math.floor(Math.random() * (maxLetrasARevelar - minLetrasARevelar + 1)) + minLetrasARevelar;
+
+    for (let i = indicesLetras.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indicesLetras[i], indicesLetras[j]] = [indicesLetras[j], indicesLetras[i]];
+    }
+
+    const indicesARevelar = new Set(indicesLetras.slice(0, cantidadARevelar));
+
+    const pistaGenerada = respuestaComoArray.map((char, index) => {
+        if (char === ' ') {
+            return ' ';
+        }
+        if (indicesARevelar.has(index)) {
+            return char;
+        }
+        return '_';
+    }).join('');
+
+    return pistaGenerada;
+};
+// <-- FIN: NUEVA FUNCIÓN
+
 async function sendResultsToBackend(data) {
     if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('URL_QUE_COPIASTE')) {
         console.warn("URL del script no configurada. No se enviarán los datos.");
@@ -345,68 +381,43 @@ const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
 
 const EnRutaPage = ({ nextLocation, onArrival, department }) => {
     const [isTraveling, setIsTraveling] = React.useState(true);
-
     React.useEffect(() => {
         const travelTimer = setTimeout(() => {
             setIsTraveling(false);
-        }, 10000); // 10 segundos
+        }, 10000); 
         return () => clearTimeout(travelTimer);
     }, []);
-
     return (
         <div className="en-ruta-container">
             <img src="imagenes/VIAJANDO.png" alt="Portal Temporal Estilizado" className="portal-image" onError={(e) => { e.target.onerror = null; e.target.src='https://images.unsplash.com/photo-1520034475321-cbe63696469a?q=80&w=800&auto=format&fit=crop'; }} />
             <h3>VIAJANDO A TRAVÉS DEL TIEMPO...</h3>
             <p>Próxima Sincronización: <strong>{nextLocation}</strong> ({department})</p>
-            
             <p className="progress-info">Sincronizando coordenadas temporales...</p>
-            <div className="progress-bar-container">
-                <div className="progress-bar-filler"></div>
-            </div>
-
+            <div className="progress-bar-container"><div className="progress-bar-filler"></div></div>
             <p>¡Mantén el rumbo, Guardián! Evita las 'distorsiones temporales' (¡y las multas de tránsito!).</p>
-            
-            <button className="primary-button" onClick={onArrival} disabled={isTraveling}>
-                {isTraveling ? 'SINCRONIZANDO...' : 'LLEGADA CONFIRMADA'}
-            </button>
+            <button className="primary-button" onClick={onArrival} disabled={isTraveling}>{isTraveling ? 'SINCRONIZANDO...' : 'LLEGADA CONFIRMADA'}</button>
         </div>
     );
 };
 
 const LongTravelPage = ({ onArrival, nextDepartment }) => {
     const [isTraveling, setIsTraveling] = React.useState(true);
-
     React.useEffect(() => {
         const travelTimer = setTimeout(() => {
             setIsTraveling(false);
-        }, 10000); // 10 segundos
+        }, 10000);
         return () => clearTimeout(travelTimer);
     }, []);
-
-    const imageUrl = nextDepartment === 'Capital' 
-        ? 'imagenes/VIAJANDO1.png' 
-        : nextDepartment === 'Rivadavia' 
-            ? 'imagenes/VIAJANDO2.png' 
-            : 'imagenes/VIAJANDO.png';
-
+    const imageUrl = nextDepartment === 'Capital' ? 'imagenes/VIAJANDO1.png' : nextDepartment === 'Rivadavia' ? 'imagenes/VIAJANDO2.png' : 'imagenes/VIAJANDO.png';
     return (
         <div className="en-ruta-container">
             <img src={imageUrl} alt={`Viajando a ${nextDepartment}`} className="portal-image" />
             <h3>HORA DE VIAJAR MÁS LEJOS</h3>
             <p>Rápido, debemos movernos a <strong>{nextDepartment}</strong>, han aparecido nuevos fragmentos de la historia que debemos recoger.</p>
-            
             <p className="progress-info">Abriendo portal de largo alcance...</p>
-            <div className="progress-bar-container">
-                <div className="progress-bar-filler"></div>
-            </div>
-
-            <p style={{fontStyle: 'italic', fontSize: '0.9rem', opacity: 0.8}}>
-                Es importante que respetes las señales de tránsito, hay controles secretos que pueden restarte puntos.
-            </p>
-            
-            <button className="primary-button" onClick={onArrival} disabled={isTraveling}>
-                {isTraveling ? 'VIAJANDO...' : 'HEMOS LLEGADO'}
-            </button>
+            <div className="progress-bar-container"><div className="progress-bar-filler"></div></div>
+            <p style={{fontStyle: 'italic', fontSize: '0.9rem', opacity: 0.8}}>Es importante que respetes las señales de tránsito, hay controles secretos que pueden restarte puntos.</p>
+            <button className="primary-button" onClick={onArrival} disabled={isTraveling}>{isTraveling ? 'VIAJANDO...' : 'HEMOS LLEGADO'}</button>
         </div>
     );
 };
@@ -429,26 +440,21 @@ const TriviaSection = ({ stage, onComplete }) => {
     const [feedback, setFeedback] = React.useState({ message: '', type: ''});
     const [triviaTimer, setTriviaTimer] = React.useState(0);
     const [glowClass, setGlowClass] = React.useState('');
-
     React.useEffect(() => {
         const interval = setInterval(() => setTriviaTimer(prev => prev + 1), 1000);
         return () => clearInterval(interval);
     }, []);
-
     const calculatePoints = (timeInSeconds) => {
         if (timeInSeconds <= 30) return 50;
         if (timeInSeconds <= 60) return 35;
         if (timeInSeconds <= 90) return 20;
         return 10;
     };
-
     const handleSubmit = () => {
         const finalTime = triviaTimer;
         const isCorrect = selectedOption.toUpperCase() === challenge.correctAnswer.toUpperCase();
         const pointsWon = isCorrect ? calculatePoints(finalTime) : 0;
-        
         setGlowClass(isCorrect ? 'success-glow' : 'error-glow');
-
         setFeedback({
             message: isCorrect ? `✔️ ¡Respuesta Correcta! Has recuperado ${pointsWon} Fragmentos.` : `❌ Respuesta Incorrecta. No se han recuperado Fragmentos.`,
             type: isCorrect ? 'success' : 'error'
@@ -457,7 +463,6 @@ const TriviaSection = ({ stage, onComplete }) => {
             onComplete({ points: pointsWon, time: finalTime });
         }, 2500);
     };
-
     return (
         <div className={`challenge-container ${glowClass}`}>
             <h3>{missionName}</h3>
@@ -476,14 +481,16 @@ const TriviaSection = ({ stage, onComplete }) => {
     );
 };
 
-const AnchorSection = ({ stage, onComplete }) => {
+// <-- INICIO: COMPONENTE ANCHORSECTION COMPLETAMENTE MODIFICADO
+const AnchorSection = ({ stage, onComplete, onHintRequest, score }) => {
     const { anchor } = stage;
     const [keyword, setKeyword] = React.useState('');
     const [error, setError] = React.useState('');
     const [anchorTimer, setAnchorTimer] = React.useState(0);
     const [isLocked, setIsLocked] = React.useState(false);
-    const [feedback, setFeedback] = React.useState({ message: '', type: ''});
+    const [feedback, setFeedback] = React.useState({ message: '', type: '' });
     const [glowClass, setGlowClass] = React.useState('');
+    const [pistaGenerada, setPistaGenerada] = React.useState(null);
 
     React.useEffect(() => {
         const interval = setInterval(() => {
@@ -491,6 +498,14 @@ const AnchorSection = ({ stage, onComplete }) => {
         }, 1000);
         return () => clearInterval(interval);
     }, [isLocked]);
+    
+    const handleHintRequest = () => {
+        if (score >= 25 && !pistaGenerada) {
+            onHintRequest();
+            const pista = generarPistaDinamica(anchor.enablerKeyword);
+            setPistaGenerada(pista);
+        }
+    };
 
     const calculateAnchorPoints = (timeInSeconds) => {
         if (timeInSeconds <= 60) return 100;
@@ -515,7 +530,7 @@ const AnchorSection = ({ stage, onComplete }) => {
             setTimeout(() => setGlowClass(''), 1500);
         }
     };
-    
+
     const handleSkip = () => {
         setIsLocked(true);
         setError('');
@@ -537,7 +552,25 @@ const AnchorSection = ({ stage, onComplete }) => {
             <p><strong>Departamento:</strong> {stage.department}</p>
             {anchor.transmission && <div className="transmission-box"><p><strong>📡 Transmisión Interceptada:</strong> {anchor.transmission}</p></div>}
             <p><strong>Objetivo de la Coordenada:</strong> {anchor.enabler}</p>
-            <input type="text" placeholder="Ingresa el 'Ancla Temporal'" value={keyword} onChange={handleInputChange} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()}/>
+
+            {!pistaGenerada && (
+                <div className="hint-request-container">
+                    <button
+                        className="hint-button"
+                        onClick={handleHintRequest}
+                        disabled={score < 25 || isLocked}>
+                        SOLICITAR PISTA (-25 Fragmentos)
+                    </button>
+                </div>
+            )}
+            
+            {pistaGenerada && (
+                <div className="hint-box hint-dynamic">
+                    <p><strong>💡 Pista Recuperada:</strong> {pistaGenerada}</p>
+                </div>
+            )}
+
+            <input type="text" placeholder="Ingresa el 'Ancla Temporal'" value={keyword} onChange={handleInputChange} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()} />
             <div className="button-group">
                 <button className="secondary-button" onClick={handleSkip} disabled={isLocked}>No sé</button>
                 <button className="primary-button" onClick={handleUnlockInternal} disabled={isLocked}>🗝️ ANCLAR RECUERDO</button>
@@ -547,6 +580,7 @@ const AnchorSection = ({ stage, onComplete }) => {
         </div>
     );
 };
+// <-- FIN: COMPONENTE ANCHORSECTION COMPLETAMENTE MODIFICADO
 
 const FinalSection = ({stage, onComplete}) => {
     const [keyword, setKeyword] = React.useState('');
@@ -631,6 +665,15 @@ const App = () => {
         const newScore = appState.score + anchorResult.points;
         setAppState(prev => ({ ...prev, score: newScore, subStage: 'trivia', pendingAnchorResult: anchorResult }));
     };
+    
+    // <-- INICIO: NUEVA FUNCIÓN PARA MANEJAR EL COSTO DE LA PISTA
+    const handleRequestHint = () => {
+        setAppState(prev => ({
+            ...prev,
+            score: Math.max(0, prev.score - 25)
+        }));
+    };
+    // <-- FIN: NUEVA FUNCIÓN
     
     const handleTriviaComplete = (triviaResult) => {
         if (!currentStageData || !appState.pendingAnchorResult) return;
@@ -722,7 +765,16 @@ const App = () => {
 
             case 'in_game': {
                 if(currentStageData.type === 'final') return <FinalSection stage={currentStageData} onComplete={handleFinalComplete} />;
-                if (appState.subStage === 'anchor') return <AnchorSection stage={currentStageData} onComplete={handleAnchorComplete} />;
+                
+                // <-- INICIO: LLAMADA A ANCHORSECTION MODIFICADA
+                if (appState.subStage === 'anchor') return <AnchorSection 
+                                                                stage={currentStageData} 
+                                                                onComplete={handleAnchorComplete}
+                                                                onHintRequest={handleRequestHint}
+                                                                score={appState.score}
+                                                            />;
+                // <-- FIN: LLAMADA MODIFICADA
+                
                 if (appState.subStage === 'trivia') return <TriviaSection stage={currentStageData} onComplete={handleTriviaComplete} />;
                 break;
             }

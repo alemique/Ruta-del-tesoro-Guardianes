@@ -620,3 +620,23 @@ input:not(.login-container input)::placeholder {
         transform: scaleX(1);
     }
 }
+
+/* ... al final del archivo estilos.css ... */
+
+.hint-box.hint-dynamic p {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.2rem;
+    font-weight: bold;
+    letter-spacing: 0.15em; /* Añade espacio entre caracteres para legibilidad */
+    text-align: center;
+    word-break: break-all;
+}
+
+.hint-box.hint-dynamic strong {
+    display: block;
+    font-family: var(--font-secondary); /* El título de la pista mantiene la fuente normal */
+    font-size: 1rem;
+    letter-spacing: normal;
+    margin-bottom: 10px;
+    text-align: left;
+}
