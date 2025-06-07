@@ -2,9 +2,9 @@
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1ZFHimOa4v30i80tQOKVyBy-O7M8jpwqrC4x0VOts0WBb9bCa-0h0zeJ1DYvL2DOF/exec';
 
 // --- LISTA DE USUARIOS AUTORIZADOS ---
-// Generamos una lista de usuarios "Guardian" del 01 al 50 y añadimos el administrador.
+// Creamos la lista de usuarios exactamente como fue solicitada.
 const validUsers = [
-    'Admin01',
+    'ADMIN',
     ...Array.from({ length: 50 }, (_, i) => `Guardian${String(i + 1).padStart(2, '0')}`)
 ];
 
@@ -267,7 +267,6 @@ async function sendResultsToBackend(data) {
     try {
         console.log("Enviando actualización al backend...", payload);
         const formData = new FormData();
-        // El script de Google espera un parámetro 'payload' que contiene los datos como texto
         formData.append('payload', JSON.stringify(payload));
         
         await fetch(GOOGLE_SCRIPT_URL, {
