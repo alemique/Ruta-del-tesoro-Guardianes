@@ -403,9 +403,9 @@ const EnRutaPage = ({ nextLocation, onArrival, department, onFinishEarly }) => {
             <p>Próxima Sincronización: <strong>{nextLocation}</strong> ({department})</p>
             <p className="progress-info">Sincronizando coordenadas temporales...</p>
             <div className="progress-bar-container"><div className="progress-bar-filler"></div></div>
-            <button className="finish-early-button" onClick={onFinishEarly}>Terminar Aquí</button>
             <p>¡Mantén el rumbo, Guardián! Evita las 'distorsiones temporales' (¡y las multas de tránsito!).</p>
             <button className="primary-button" onClick={onArrival} disabled={isTraveling}>{isTraveling ? 'SINCRONIZANDO...' : 'LLEGADA CONFIRMADA'}</button>
+            <button className="finish-early-button" onClick={onFinishEarly}>Terminar Aquí</button>
         </div>
     );
 };
@@ -426,9 +426,9 @@ const LongTravelPage = ({ onArrival, nextDepartment, onFinishEarly }) => {
             <p>Rápido, debemos movernos a <strong>{nextDepartment}</strong>, han aparecido nuevos fragmentos de la historia que debemos recoger.</p>
             <p className="progress-info">Abriendo portal de largo alcance...</p>
             <div className="progress-bar-container"><div className="progress-bar-filler"></div></div>
-            <button className="finish-early-button" onClick={onFinishEarly}>Terminar Aquí</button>
             <p style={{fontStyle: 'italic', fontSize: '0.9rem', opacity: 0.8}}>Es importante que respetes las señales de tránsito, hay controles secretos que pueden restarte puntos.</p>
             <button className="primary-button" onClick={onArrival} disabled={isTraveling}>{isTraveling ? 'VIAJANDO...' : 'HEMOS LLEGADO'}</button>
+            <button className="finish-early-button" onClick={onFinishEarly}>Terminar Aquí</button>
         </div>
     );
 };
