@@ -356,17 +356,25 @@ const EnRutaPage = ({ nextLocation, onArrival, department }) => (
     </div>
 );
 
-const LongTravelPage = ({ onArrival, nextDepartment }) => (
-    <div className="en-ruta-container">
-        <img src="imagenes/VIAJANDO.png" alt="Portal Temporal Estilizado" className="portal-image" />
-        <h3>HORA DE VIAJAR MÁS LEJOS</h3>
-        <p>Rápido, debemos movernos a <strong>{nextDepartment}</strong>, han aparecido nuevos fragmentos de la historia que debemos recoger.</p>
-        <p style={{fontStyle: 'italic', fontSize: '0.9rem', opacity: 0.8}}>
-            Es importante que respetes las señales de tránsito, hay controles secretos que pueden restarte puntos.
-        </p>
-        <button className="primary-button" onClick={onArrival}>HEMOS LLEGADO AL NUEVO DEPARTAMENTO</button>
-    </div>
-);
+const LongTravelPage = ({ onArrival, nextDepartment }) => {
+    const imageUrl = nextDepartment === 'Capital' 
+        ? 'imagenes/VIAJANDO1.png' 
+        : nextDepartment === 'Rivadavia' 
+            ? 'imagenes/VIAJANDO2.png' 
+            : 'imagenes/VIAJANDO.png'; // Imagen por defecto
+
+    return (
+        <div className="en-ruta-container">
+            <img src={imageUrl} alt={`Viajando a ${nextDepartment}`} className="portal-image" />
+            <h3>HORA DE VIAJAR MÁS LEJOS</h3>
+            <p>Rápido, debemos movernos a <strong>{nextDepartment}</strong>, han aparecido nuevos fragmentos de la historia que debemos recoger.</p>
+            <p style={{fontStyle: 'italic', fontSize: '0.9rem', opacity: 0.8}}>
+                Es importante que respetes las señales de tránsito, hay controles secretos que pueden restarte puntos.
+            </p>
+            <button className="primary-button" onClick={onArrival}>HEMOS LLEGADO AL NUEVO DEPARTAMENTO</button>
+        </div>
+    );
+};
 
 const EndGamePage = ({ score, finalTime, teamName }) => (
     <div className="end-container">
