@@ -125,7 +125,7 @@ const eventData = [
     {
         id: 21, department: "Capital", location: "Museo Agustín Gnecco",
         anchor: { missionName: "Ancla: La Pasión del Coleccionista", enabler: "Consigna: ¿En qué año fue fundado formalmente este museo, considerado el más antiguo de la provincia?\nPista: Su creación fue impulsada por un apasionado coleccionista y erudito local.", enablerKeyword: "1911", transmission: "La pasión de un hombre por la historia dio origen al museo más antiguo de San Juan. Ancla el año de su fundación oficial." },
-        trivia: { missionName: "Trivia: Criterio Innovador", challenge: { question: "¿Qué criterio innovador para su tiempo utilizó Agustín Gnecco para formar su colección?", options: ["Coleccionar solo objetos de oro y plata.", "Preservar objetos de la vida cotidiana del pueblo común.", "Reunir únicamente artefactos militares.", "Adquirir solo arte religioso."], correctAnswer: "Preservar objetos de la vida cotidiana del pueblo común." } },
+        trivia: { missionName: "Trivia: Criterio Innovador", challenge: { question: "¿Qué criterio innovador para su tiempo utilizó Agustín Gnecco para formar su colección?", options: ["Coleccionar solo objetos de oro e plata.", "Preservar objetos de la vida cotidiana del pueblo común.", "Reunir únicamente artefactos militares.", "Adquirir solo arte religioso."], correctAnswer: "Preservar objetos de la vida cotidiana del pueblo común." } },
         nextMissionId: 22
     },
     {
@@ -255,7 +255,7 @@ const Header = ({ teamName, score, timer }) => {
         const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
         const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
         const seconds = String(totalSeconds % 60).padStart(2, '0');
-        return `<span class="math-inline">\{hours\}\:</span>{minutes}:${seconds}`;
+        return `${hours}:${minutes}:${seconds}`;
     };
     return (
         <div className="header">
@@ -488,6 +488,20 @@ const FinalSection = ({stage, onComplete}) => {
      );
 }
 
+// --- CAMBIO 1: CREAMOS UNA FUNCIÓN PARA EL ESTADO INICIAL ---
+// Esto nos permite reutilizar fácilmente el estado de inicio de la aplicación.
+const getInitialState = () => ({
+    status: 'login',
+    squadCode: null,
+    teamName: '',
+    currentMissionId: eventData.length > 0 ? eventData[0].id : 1,
+    subStage: 'anchor',
+    score: 0,
+    mainTimer: 0,
+    finalTimeDisplay: '',
+    errorMessage: ''
+});
+
 const App = () => {
     const [appState, setAppState] = React.useState(() => {
         const savedState = localStorage.getItem('guardianesAppState');
@@ -500,16 +514,8 @@ const App = () => {
             console.error("Error al parsear localStorage, usando estado inicial.", e);
             localStorage.removeItem('guardianesAppState');
         }
-        return {
-            status: 'login',
-            squadCode: null,
-            teamName: '',
-            currentMissionId: eventData.length > 0 ? eventData[0].id : 1,
-            subStage: 'anchor',
-            score: 0,
-            mainTimer: 0,
-            finalTimeDisplay: ''
-        };
+        // Usamos la nueva función para establecer el estado inicial
+        return getInitialState();
     });
 
     React.useEffect(() => {
@@ -530,15 +536,10 @@ const App = () => {
 
     const handleLogin = (code, name) => {
         setAppState({
+            ...getInitialState(), // Usamos el estado inicial para asegurarnos de que todo se resetea
             status: 'in_game',
             squadCode: code,
             teamName: name,
-            currentMissionId: eventData.length > 0 ? eventData[0].id : 1,
-            subStage: 'anchor',
-            score: 0,
-            mainTimer: 0,
-            finalTimeDisplay: '',
-            errorMessage: ''
         });
     };
     
@@ -563,7 +564,7 @@ const App = () => {
         const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
         const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
         const seconds = String(totalSeconds % 60).padStart(2, '0');
-        setAppState(prev => ({ ...prev, score: currentScore, status: 'finished', finalTimeDisplay: `<span class="math-inline">\{hours\}\:</span>{minutes}:${seconds}` }));
+        setAppState(prev => ({ ...prev, score: currentScore, status: 'finished', finalTimeDisplay: `${hours}:${minutes}:${seconds}` }));
     };
 
     const handleArrival = () => {
@@ -578,10 +579,13 @@ const App = () => {
         }
     };
 
+    // --- CAMBIO 2: LÓGICA DE REINICIO MEJORADA ---
     const handleResetDevelopment = () => {
         if (window.confirm("¿Seguro que quieres reiniciar toda la misión y borrar los datos guardados? (Solo para desarrollo)")) {
+            // 1. Limpiamos el almacenamiento como antes
             localStorage.removeItem('guardianesAppState');
-            window.location.reload();
+            // 2. En lugar de recargar, reseteamos el estado de React al inicial. ¡Es instantáneo!
+            setAppState(getInitialState());
         }
     };
 
@@ -633,4 +637,3 @@ const App = () => {
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
-"
