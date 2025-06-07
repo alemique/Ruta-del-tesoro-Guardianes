@@ -296,7 +296,6 @@ const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
                 <h2 className="sponsors-title">ASISTENTES DEL TIEMPO</h2>
                 <p className="sponsors-description">Recuerda visitar nuestros Asistentes del Tiempo, tendrán sorpresas y puntos bonus para vos.</p>
                 <div className="sponsors-grid">
-                    {/* --- AQUI REEMPLAZAMOS LOS DIVS POR IMAGENES --- */}
                     <div className="sponsor-item"><img src="imagenes/muni cap.png" alt="Logo Municipalidad de la Capital" className="sponsor-logo" /></div>
                     <div className="sponsor-item"><img src="imagenes/muni riv.png" alt="Logo Municipalidad de Rivadavia" className="sponsor-logo" /></div>
                     <div className="sponsor-item"><img src="imagenes/muni santa lucia.jpg" alt="Logo Municipalidad de Santa Lucía" className="sponsor-logo" /></div>
@@ -308,6 +307,16 @@ const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
                     <div className="sponsor-item"><img src="imagenes/cocacola.png" alt="Logo Coca-Cola" className="sponsor-logo" /></div>
                 </div>
             </div>
+
+            {/* --- INICIO DE LA NUEVA SECCIÓN DE ORGANIZADORES --- */}
+            <div className="organizers-section">
+                <h2 className="organizers-title">ORGANIZADORES</h2>
+                <p className="organizers-description">Estamos en cada punto de interés para acompañarte en este gran desafío.</p>
+                <div className="organizer-logo-container">
+                    <img src="imagenes/logoasv.jpg" alt="Logo ASV - Organizador" className="organizer-logo" />
+                </div>
+            </div>
+            {/* --- FIN DE LA NUEVA SECCIÓN DE ORGANIZADORES --- */}
 
             {errorMessage && <p className="feedback error" style={{ marginTop: '15px' }}>{errorMessage}</p>}
         </div>

@@ -136,3 +136,44 @@ input:not(.login-container input)::placeholder { color: var(--color-text-seconda
     /* 'contain' asegura que el logo se vea completo sin deformarse */
     object-fit: contain; 
 }
+
+/* --- Estilos para la Sección de Organizadores --- */
+
+.organizers-section {
+    margin-top: 40px;
+    padding-top: 25px;
+    border-top: 2px solid var(--color-secondary);
+}
+
+.organizers-title {
+    font-family: var(--font-primary);
+    font-size: 1.8rem;
+    color: var(--color-primary);
+    margin: 0 0 5px 0;
+    padding: 0;
+    border-bottom: none;
+    text-transform: uppercase;
+}
+
+.organizers-description {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary-on-dark);
+    margin-bottom: 20px;
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Usamos flexbox para centrar el logo fácilmente */
+.organizer-logo-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.organizer-logo {
+    max-width: 200px; /* Un tamaño máximo para que no sea demasiado grande */
+    border-radius: 10px; /* Bordes redondeados para el logo */
+    border: 2px solid var(--color-background-light);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
