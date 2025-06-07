@@ -717,3 +717,26 @@ input:not(.login-container input)::placeholder {
   font-weight: bold;
   color: var(--color-text-primary-on-dark);
 }
+
+/* --- ESTILO PARA EL BOTÓN DE FINALIZAR ANTICIPADO --- */
+.finish-early-button {
+    background: none;
+    border: 1px solid var(--color-text-secondary-on-dark);
+    color: var(--color-text-secondary-on-dark);
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    font-family: var(--font-secondary);
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 25px; /* Lo separa de la barra de progreso */
+    margin-bottom: 15px; /* Lo separa del texto inferior */
+    transition: all 0.3s ease;
+    display: inline-block; /* Asegura que los márgenes funcionen bien */
+}
+
+.finish-early-button:hover {
+    background-color: var(--color-feedback-error);
+    color: white;
+    border-color: var(--color-feedback-error);
+    transform: scale(1.05);
+}

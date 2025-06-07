@@ -301,13 +301,16 @@ const generarPistaDinamica = (respuesta) => {
 
 
 async function sendResultsToBackend(data) {
+    // Hemos adaptado la lógica del tiempo aquí para que siempre envíe un valor formateado
+    const timeToSend = data.finalTimeDisplay || formatTime(data.mainTimer);
+
     if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('URL_QUE_COPIASTE')) {
         console.warn("URL del script no configurada. No se enviarán los datos.");
         return;
     }
     const payload = {
         teamName: data.teamName,
-        totalTime: data.status === 'finished' ? data.finalTimeDisplay : formatTime(data.mainTimer),
+        totalTime: timeToSend,
         totalScore: data.score,
         missionResults: data.missionResults
     };
@@ -400,11 +403,9 @@ const EnRutaPage = ({ nextLocation, onArrival, department, onFinishEarly }) => {
             <p>Próxima Sincronización: <strong>{nextLocation}</strong> ({department})</p>
             <p className="progress-info">Sincronizando coordenadas temporales...</p>
             <div className="progress-bar-container"><div className="progress-bar-filler"></div></div>
+            <button className="finish-early-button" onClick={onFinishEarly}>Terminar Aquí</button>
             <p>¡Mantén el rumbo, Guardián! Evita las 'distorsiones temporales' (¡y las multas de tránsito!).</p>
-            <div className="button-group">
-                <button className="secondary-button" onClick={onFinishEarly}>Terminar Aquí</button>
-                <button className="primary-button" onClick={onArrival} disabled={isTraveling}>{isTraveling ? 'SINCRONIZANDO...' : 'LLEGADA CONFIRMADA'}</button>
-            </div>
+            <button className="primary-button" onClick={onArrival} disabled={isTraveling}>{isTraveling ? 'SINCRONIZANDO...' : 'LLEGADA CONFIRMADA'}</button>
         </div>
     );
 };
@@ -425,11 +426,9 @@ const LongTravelPage = ({ onArrival, nextDepartment, onFinishEarly }) => {
             <p>Rápido, debemos movernos a <strong>{nextDepartment}</strong>, han aparecido nuevos fragmentos de la historia que debemos recoger.</p>
             <p className="progress-info">Abriendo portal de largo alcance...</p>
             <div className="progress-bar-container"><div className="progress-bar-filler"></div></div>
+            <button className="finish-early-button" onClick={onFinishEarly}>Terminar Aquí</button>
             <p style={{fontStyle: 'italic', fontSize: '0.9rem', opacity: 0.8}}>Es importante que respetes las señales de tránsito, hay controles secretos que pueden restarte puntos.</p>
-            <div className="button-group">
-                <button className="secondary-button" onClick={onFinishEarly}>Terminar Aquí</button>
-                <button className="primary-button" onClick={onArrival} disabled={isTraveling}>{isTraveling ? 'VIAJANDO...' : 'HEMOS LLEGADO'}</button>
-            </div>
+            <button className="primary-button" onClick={onArrival} disabled={isTraveling}>{isTraveling ? 'VIAJANDO...' : 'HEMOS LLEGADO'}</button>
         </div>
     );
 };
@@ -442,6 +441,24 @@ const EndGamePage = ({ score, finalTime, teamName }) => (
         <p><strong>Fragmentos de Historia Restaurados: {score}</strong></p>
         <p><strong>Tiempo Total de la Misión: {finalTime}</strong></p>
         <p>¡Has ganado tu Medalla "Guardián del Tiempo"! 🏅 Los "Custodios Mayores" y otros reconocimientos serán anunciados en el Concilio de Guardianes.</p>
+        <p style={{fontSize: "0.9rem", marginTop: "20px"}}><em>No olvides compartir tu hazaña y prepararte para la celebración.</em></p>
+        
+        <Leaderboard />
+    </div>
+);
+
+// --- NUEVO COMPONENTE PARA FINALIZACIÓN ANTICIPADA ---
+const AbortedGamePage = ({ score, finalTime, teamName }) => (
+    <div className="end-container">
+        <img src="https://cdn-icons-png.flaticon.com/512/784/784408.png" alt="Medalla o Trofeo Guardián" className="medal-image"/>
+        <h3>MISION TEMPORAL DETENIDA</h3>
+        <p><strong>{teamName}</strong></p>
+        <p>Has estabilizado sólo una parte del tiempo de San Juan. ¡La ´Amenaza del Olvido´ ha logrado avanzar en la línea del tiempo.</p>
+        
+        <p><strong>Fragmentos de Historia Restaurados: {score}</strong></p>
+        <p><strong>Tiempo Total de la Misión: {finalTime}</strong></p>
+        
+        <p>¡Has hecho un gran esfuerzo, tu Medalla de "Guardián del Tiempo"! 🏅 Los "Custodios Mayores" y otros reconocimientos serán anunciados en el Concilio de Guardianes.</p>
         <p style={{fontSize: "0.9rem", marginTop: "20px"}}><em>No olvides compartir tu hazaña y prepararte para la celebración.</em></p>
         
         <Leaderboard />
@@ -729,7 +746,7 @@ const App = () => {
 
     React.useEffect(() => {
         let interval;
-        if (appState.status !== 'login' && appState.status !== 'finished') {
+        if (appState.status !== 'login' && appState.status !== 'finished' && appState.status !== 'aborted') {
             interval = setInterval(() => {
                 setAppState(prev => ({ ...prev, mainTimer: prev.mainTimer + 1 }));
             }, 1000);
@@ -826,7 +843,19 @@ const App = () => {
 
     const handleFinishEarly = () => {
         if (window.confirm('¿Estas seguro? Esto finalizará tu partida')) {
-            handleFinalComplete(0);
+            const totalSeconds = appState.mainTimer;
+            const finalTime = formatTime(totalSeconds);
+            const finalScore = appState.score || 0;
+            
+            const finalState = { 
+                ...appState, 
+                score: finalScore, 
+                status: 'aborted',
+                finalTimeDisplay: finalTime 
+            };
+            
+            setAppState(finalState);
+            sendResultsToBackend(finalState);
         }
     };
 
@@ -878,6 +907,9 @@ const App = () => {
 
             case 'finished':
                 return <EndGamePage score={appState.score} finalTime={appState.finalTimeDisplay} teamName={appState.teamName} />;
+            
+            case 'aborted':
+                return <AbortedGamePage score={appState.score} finalTime={appState.finalTimeDisplay} teamName={appState.teamName} />;
             
             default:
                 return <p>Error: Estado desconocido.</p>;
