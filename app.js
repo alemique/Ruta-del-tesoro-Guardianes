@@ -1,6 +1,13 @@
 // --- CONFIGURACIÓN DEL BACKEND ---
-// URL de la aplicación web de Google Apps Script.
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1ZFHimOa4v30i80tQOKVyBy-O7M8jpwqrC4x0VOts0WBb9bCa-0h0zeJ1DYvL2DOF/exec';
+
+// --- LISTA DE USUARIOS AUTORIZADOS ---
+// Generamos una lista de usuarios "Guardian" del 01 al 50 y añadimos el administrador.
+const validUsers = [
+    'Admin01',
+    ...Array.from({ length: 50 }, (_, i) => `Guardian${String(i + 1).padStart(2, '0')}`)
+];
+
 
 // --- DATOS COMPLETOS DEL EVENTO ---
 const eventData = [
@@ -244,13 +251,6 @@ const eventData = [
         nextMissionId: null
     }
 ];
-// --- CÓDIGOS DE ESCUADRÓN VÁLIDOS ---
-const validSquadCodes = {
-    "GUARDIAN01": "Los CronoExploradores",
-    "TIEMPOXYZ": "Vigías del Pasado",
-    "SANJUAN2025": "Escuadrón Reliquia",
-    "ASVTEST": "Equipo ASV Beta"
-};
 
 // --- Función para enviar datos al Backend de Google Sheets ---
 async function sendResultsToBackend(data) {
@@ -266,15 +266,13 @@ async function sendResultsToBackend(data) {
     };
     try {
         console.log("Enviando actualización al backend...", payload);
+        const formData = new FormData();
+        // El script de Google espera un parámetro 'payload' que contiene los datos como texto
+        formData.append('payload', JSON.stringify(payload));
+        
         await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors',
-            cache: 'no-cache',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload),
-            redirect: 'follow',
+            body: formData,
         });
         console.log("Actualización enviada con éxito.");
     } catch (error) {
@@ -308,12 +306,12 @@ const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
     const [squadCode, setSquadCode] = React.useState('');
     const logoUrl = "imagenes/LOGO 3 (1).png";
     const handleLoginInternal = () => {
-        const normalizedCode = squadCode.toUpperCase().trim();
-        if (validSquadCodes[normalizedCode]) {
-            onLogin(normalizedCode, validSquadCodes[normalizedCode]);
+        const enteredCode = squadCode.trim();
+        if (validUsers.includes(enteredCode)) {
+            onLogin(enteredCode, enteredCode);
             if (typeof setErrorMessage === 'function') setErrorMessage('');
         } else {
-            if (typeof setErrorMessage === 'function') setErrorMessage('⚠️ Código de Escuadrón no válido. ¡El tiempo se agota!');
+            if (typeof setErrorMessage === 'function') setErrorMessage('⚠️ Código de Guardián no válido. Verifica tus credenciales.');
         }
     };
     return (
@@ -321,8 +319,8 @@ const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
             <img src={logoUrl} alt="Logo Guardianes del Tiempo" className="logo" onError={(e) => { e.target.onerror = null; e.target.src="https://i.imgur.com/ZKiX1mO.png"; }} />
             <h1>RUTA DEL TESORO:<br/>GUARDIANES DEL TIEMPO</h1>
             <p className="lema">"¡El legado de San Juan te necesita! ¿Aceptas la misión?"</p>
-            <label htmlFor="squadCode">Código de Escuadrón:</label>
-            <input id="squadCode" type="text" placeholder="Ingresa tu código secreto" value={squadCode} onChange={(e) => setSquadCode(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleLoginInternal()} />
+            <label htmlFor="squadCode">Código de Guardián:</label>
+            <input id="squadCode" type="text" placeholder="Ingresa tu código de Guardián" value={squadCode} onChange={(e) => setSquadCode(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleLoginInternal()} />
             <button className="primary-button" onClick={handleLoginInternal}>ACTIVAR GUÍA DEL TIEMPO</button>
             <div className="sponsors-section">
                 <h2 className="sponsors-title">ASISTENTES DEL TIEMPO</h2>
