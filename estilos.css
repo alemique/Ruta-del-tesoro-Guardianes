@@ -71,3 +71,68 @@ input:not(.login-container input)::placeholder { color: var(--color-text-seconda
 .end-container .medal-image { width: 100px; margin-bottom: 10px; }
 .dev-reset-button { position: fixed; bottom: 10px; right: 10px; background-color: #c0392b; color: white; padding: 8px 12px; border-radius: 5px; font-size: 0.9rem; font-family: var(--font-secondary); cursor: pointer; z-index: 2000; border: none; opacity: 0.8; transition: opacity 0.3s ease; }
 .dev-reset-button:hover { opacity: 1; }
+/* --- Estilos para la Sección de Asistentes del Tiempo --- */
+
+.sponsors-section {
+    margin-top: 40px;
+    padding-top: 25px;
+    border-top: 2px solid var(--color-secondary);
+    opacity: 0.85; /* Le damos una opacidad sutil para diferenciarla */
+    transition: opacity 0.3s ease;
+}
+
+.sponsors-section:hover {
+    opacity: 1; /* La sección se vuelve nítida al pasar el mouse */
+}
+
+.sponsors-title {
+    font-family: var(--font-primary);
+    font-size: 1.8rem;
+    color: var(--color-primary);
+    margin: 0 0 5px 0;
+    padding: 0;
+    border-bottom: none; /* Quitamos el borde que tienen los h3 por defecto */
+    text-transform: uppercase;
+}
+
+.sponsors-description {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary-on-dark);
+    margin-bottom: 20px;
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.sponsors-grid {
+    display: grid;
+    /* Creamos 3 columnas de igual tamaño (1fr = 1 fracción) */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px; /* Espacio entre los logos */
+}
+
+.sponsor-logo-placeholder {
+    background-color: var(--color-background-light);
+    border: 1px dashed var(--color-text-secondary-on-dark);
+    border-radius: 8px;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.sponsor-logo-placeholder:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-background-medium);
+    transform: scale(1.05);
+}
+
+/* Pseudo-elemento para mostrar la palabra "Logo" dentro del recuadro */
+.sponsor-logo-placeholder::before {
+    content: 'Logo';
+    font-family: var(--font-secondary);
+    color: var(--color-text-secondary-on-dark);
+    font-size: 0.9rem;
+    opacity: 0.4;
+}

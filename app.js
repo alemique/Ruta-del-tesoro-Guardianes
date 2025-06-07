@@ -291,6 +291,25 @@ const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
             <label htmlFor="squadCode">Código de Escuadrón:</label>
             <input id="squadCode" type="text" placeholder="Ingresa tu código secreto" value={squadCode} onChange={(e) => setSquadCode(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleLoginInternal()} />
             <button className="primary-button" onClick={handleLoginInternal}>ACTIVAR GUÍA DEL TIEMPO</button>
+            
+            {/* --- INICIO DE LA NUEVA SECCIÓN DE ASISTENTES --- */}
+            <div className="sponsors-section">
+                <h2 className="sponsors-title">ASISTENTES DEL TIEMPO</h2>
+                <p className="sponsors-description">Recuerda visitar nuestros Asistentes del Tiempo, tendrán sorpresas y puntos bonus para vos.</p>
+                <div className="sponsors-grid">
+                    <div className="sponsor-logo-placeholder"></div>
+                    <div className="sponsor-logo-placeholder"></div>
+                    <div className="sponsor-logo-placeholder"></div>
+                    <div className="sponsor-logo-placeholder"></div>
+                    <div className="sponsor-logo-placeholder"></div>
+                    <div className="sponsor-logo-placeholder"></div>
+                    <div className="sponsor-logo-placeholder"></div>
+                    <div className="sponsor-logo-placeholder"></div>
+                    <div className="sponsor-logo-placeholder"></div>
+                </div>
+            </div>
+            {/* --- FIN DE LA NUEVA SECCIÓN DE ASISTENTES --- */}
+
             {errorMessage && <p className="feedback error" style={{ marginTop: '15px' }}>{errorMessage}</p>}
         </div>
     );
