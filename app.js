@@ -255,7 +255,7 @@ const Header = ({ teamName, score, timer }) => {
         const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
         const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
         const seconds = String(totalSeconds % 60).padStart(2, '0');
-        return `${hours}:${minutes}:${seconds}`;
+        return `<span class="math-inline">\{hours\}\:</span>{minutes}:${seconds}`;
     };
     return (
         <div className="header">
@@ -563,7 +563,7 @@ const App = () => {
         const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
         const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
         const seconds = String(totalSeconds % 60).padStart(2, '0');
-        setAppState(prev => ({ ...prev, score: currentScore, status: 'finished', finalTimeDisplay: `${hours}:${minutes}:${seconds}` }));
+        setAppState(prev => ({ ...prev, score: currentScore, status: 'finished', finalTimeDisplay: `<span class="math-inline">\{hours\}\:</span>{minutes}:${seconds}` }));
     };
 
     const handleArrival = () => {
@@ -633,3 +633,4 @@ const App = () => {
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
+"
