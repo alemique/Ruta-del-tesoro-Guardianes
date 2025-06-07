@@ -1,5 +1,5 @@
 // --- CONFIGURACIÓN DEL BACKEND ---
-// NOTA: He actualizado esta URL con la última que me pasaste para el ranking.
+// URL actualizada para incluir la función del ranking.
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym5-onTOyzlqZn_G4O-5acxAZzReYjIOY5SF8tBh3TtT2jEFVw6IZ2MMMtkHGtRl0F/exec';
 
 // --- LISTA DE USUARIOS AUTORIZADOS (LÓGICA) ---
@@ -385,7 +385,7 @@ const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
     );
 };
 
-const EnRutaPage = ({ nextLocation, onArrival, department }) => {
+const EnRutaPage = ({ nextLocation, onArrival, department, onFinishEarly }) => {
     const [isTraveling, setIsTraveling] = React.useState(true);
     React.useEffect(() => {
         const travelTimer = setTimeout(() => {
@@ -401,12 +401,15 @@ const EnRutaPage = ({ nextLocation, onArrival, department }) => {
             <p className="progress-info">Sincronizando coordenadas temporales...</p>
             <div className="progress-bar-container"><div className="progress-bar-filler"></div></div>
             <p>¡Mantén el rumbo, Guardián! Evita las 'distorsiones temporales' (¡y las multas de tránsito!).</p>
-            <button className="primary-button" onClick={onArrival} disabled={isTraveling}>{isTraveling ? 'SINCRONIZANDO...' : 'LLEGADA CONFIRMADA'}</button>
+            <div className="button-group">
+                <button className="secondary-button" onClick={onFinishEarly}>Terminar Aquí</button>
+                <button className="primary-button" onClick={onArrival} disabled={isTraveling}>{isTraveling ? 'SINCRONIZANDO...' : 'LLEGADA CONFIRMADA'}</button>
+            </div>
         </div>
     );
 };
 
-const LongTravelPage = ({ onArrival, nextDepartment }) => {
+const LongTravelPage = ({ onArrival, nextDepartment, onFinishEarly }) => {
     const [isTraveling, setIsTraveling] = React.useState(true);
     React.useEffect(() => {
         const travelTimer = setTimeout(() => {
@@ -423,7 +426,10 @@ const LongTravelPage = ({ onArrival, nextDepartment }) => {
             <p className="progress-info">Abriendo portal de largo alcance...</p>
             <div className="progress-bar-container"><div className="progress-bar-filler"></div></div>
             <p style={{fontStyle: 'italic', fontSize: '0.9rem', opacity: 0.8}}>Es importante que respetes las señales de tránsito, hay controles secretos que pueden restarte puntos.</p>
-            <button className="primary-button" onClick={onArrival} disabled={isTraveling}>{isTraveling ? 'VIAJANDO...' : 'HEMOS LLEGADO'}</button>
+            <div className="button-group">
+                <button className="secondary-button" onClick={onFinishEarly}>Terminar Aquí</button>
+                <button className="primary-button" onClick={onArrival} disabled={isTraveling}>{isTraveling ? 'VIAJANDO...' : 'HEMOS LLEGADO'}</button>
+            </div>
         </div>
     );
 };
@@ -437,6 +443,8 @@ const EndGamePage = ({ score, finalTime, teamName }) => (
         <p><strong>Tiempo Total de la Misión: {finalTime}</strong></p>
         <p>¡Has ganado tu Medalla "Guardián del Tiempo"! 🏅 Los "Custodios Mayores" y otros reconocimientos serán anunciados en el Concilio de Guardianes.</p>
         <p style={{fontSize: "0.9rem", marginTop: "20px"}}><em>No olvides compartir tu hazaña y prepararte para la celebración.</em></p>
+        
+        <Leaderboard />
     </div>
 );
 
@@ -622,6 +630,80 @@ const FinalSection = ({stage, onComplete}) => {
     );
 };
 
+// ===================================================================================
+// ¡NUEVO COMPONENTE! - LA TABLA DE POSICIONES (LEADERBOARD)
+// ===================================================================================
+const Leaderboard = () => {
+  const LEADERBOARD_URL = 'https://script.google.com/macros/s/AKfycbym5-onTOyzlqZn_G4O-5acxAZzReYjIOY5SF8tBh3TtT2jEFVw6IZ2MMMtkHGtRl0F/exec'; 
+
+  const [ranking, setRanking] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+
+  React.useEffect(() => {
+    const fetchRanking = async () => {
+      if (!LEADERBOARD_URL || LEADERBOARD_URL.includes('URL_QUE_COPIASTE')) {
+        setError('URL del ranking no configurada.');
+        setIsLoading(false);
+        return;
+      }
+      
+      try {
+        const response = await fetch(LEADERBOARD_URL);
+        if (!response.ok) {
+          throw new Error('La respuesta del servidor no fue correcta.');
+        }
+        const data = await response.json();
+        if (data.error) {
+           throw new Error(data.error);
+        }
+        setRanking(data);
+      } catch (err) {
+        setError('No se pudo cargar el ranking. Intenta más tarde.');
+        console.error("Error al obtener el ranking:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRanking();
+  }, []);
+
+  if (isLoading) {
+    return <p className="feedback">Cargando el Ranking de Guardianes...</p>;
+  }
+
+  if (error) {
+    return <p className="feedback error">{error}</p>;
+  }
+
+  return (
+    <div className="leaderboard-container">
+      <h3>CONCILIO DE GUARDIANES</h3>
+      <table className="leaderboard-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Guardián</th>
+            <th>Fragmentos</th>
+            <th>Tiempo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ranking.slice(0, 10).map((team, index) => (
+            <tr key={index}>
+              <td>{index + 1}</td>
+              <td>{team.teamName}</td>
+              <td>{team.score}</td>
+              <td>{team.time}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
 
 // --- BLOQUE PRINCIPAL DE LA APP ---
 const getInitialState = () => ({ status: 'login', squadCode: null, teamName: '', currentMissionId: eventData.length > 0 ? eventData[0].id : 1, subStage: 'anchor', score: 0, mainTimer: 0, finalTimeDisplay: '', errorMessage: '', missionResults: [], pendingAnchorResult: null });
@@ -742,6 +824,12 @@ const App = () => {
         }
     };
 
+    const handleFinishEarly = () => {
+        if (window.confirm('¿Estas seguro? Esto finalizará tu partida')) {
+            handleFinalComplete(0);
+        }
+    };
+
     const renderContent = () => {
         if (appState.status === 'in_game' && !currentStageData) {
             return <p style={{padding: "20px"}}>Detectando anomalía temporal...</p>;
@@ -753,7 +841,11 @@ const App = () => {
             
             case 'long_travel': {
                 const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
-                return <LongTravelPage nextDepartment={nextMission.department} onArrival={handleArrival} />;
+                return <LongTravelPage 
+                            nextDepartment={nextMission.department} 
+                            onArrival={handleArrival} 
+                            onFinishEarly={handleFinishEarly}
+                        />;
             }
             
             case 'on_the_road': {
@@ -762,7 +854,12 @@ const App = () => {
                     handleFinalComplete(0);
                     return <EndGamePage score={appState.score} finalTime={appState.finalTimeDisplay} teamName={appState.teamName} />;
                 }
-                return <EnRutaPage nextLocation={nextMission.location} department={nextMission.department} onArrival={handleArrival} />;
+                return <EnRutaPage 
+                            nextLocation={nextMission.location} 
+                            department={nextMission.department} 
+                            onArrival={handleArrival}
+                            onFinishEarly={handleFinishEarly}
+                        />;
             }
 
             case 'in_game': {
