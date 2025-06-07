@@ -1,5 +1,5 @@
 // --- CONFIGURACIÓN DEL BACKEND ---
-// Esta es la URL de tu aplicación web de Google Apps Script.
+// URL de la aplicación web de Google Apps Script.
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1ZFHimOa4v30i80tQOKVyBy-O7M8jpwqrC4x0VOts0WBb9bCa-0h0zeJ1DYvL2DOF/exec';
 
 // --- DATOS COMPLETOS DEL EVENTO ---
@@ -244,7 +244,6 @@ const eventData = [
         nextMissionId: null
     }
 ];
-
 // --- CÓDIGOS DE ESCUADRÓN VÁLIDOS ---
 const validSquadCodes = {
     "GUARDIAN01": "Los CronoExploradores",
@@ -255,39 +254,31 @@ const validSquadCodes = {
 
 // --- Función para enviar datos al Backend de Google Sheets ---
 async function sendResultsToBackend(data) {
-  // Verificamos que la URL no sea la de placeholder
-  if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'URL_QUE_COPIASTE_EN_EL_PASO_ANTERIOR') {
-    console.warn("URL del script no configurada. No se enviarán los datos.");
-    return;
-  }
-
-  // Creamos el paquete de datos (payload) que espera nuestro script
-  const payload = {
-    teamName: data.teamName,
-    totalTime: data.finalTimeDisplay,
-    totalScore: data.score,
-    missionResults: data.missionResults
-  };
-
-  // Usamos un bloque try/catch para manejar posibles errores de red
-  try {
-    console.log("Enviando datos al backend...", payload);
-    // Realizamos la petición POST. El modo 'no-cors' es un truco para que funcione con Google Scripts
-    // desde un entorno simple sin necesidad de una respuesta compleja (fire-and-forget).
-    const response = await fetch(GOOGLE_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors', 
-      cache: 'no-cache',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-      redirect: 'follow'
-    });
-    console.log("Solicitud de envío de datos completada.");
-  } catch (error) {
-    console.error("Error al enviar los datos al backend:", error);
-  }
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('URL_QUE_COPIASTE')) {
+        console.warn("URL del script no configurada. No se enviarán los datos.");
+        return;
+    }
+    const payload = {
+        teamName: data.teamName,
+        totalTime: data.finalTimeDisplay || 'En curso',
+        totalScore: data.score,
+        missionResults: data.missionResults
+    };
+    try {
+        console.log("Enviando actualización al backend...", payload);
+        // Google Scripts puede ser quisquilloso con CORS. Este método es más robusto.
+        // Creamos un formulario en memoria para enviar los datos.
+        const formData = new FormData();
+        formData.append('payload', JSON.stringify(payload));
+        
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: formData,
+        });
+        console.log("Actualización enviada con éxito.");
+    } catch (error) {
+        console.error("Error al enviar la actualización al backend:", error);
+    }
 }
 
 // --- COMPONENTES DE REACT ---
@@ -332,7 +323,6 @@ const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
             <label htmlFor="squadCode">Código de Escuadrón:</label>
             <input id="squadCode" type="text" placeholder="Ingresa tu código secreto" value={squadCode} onChange={(e) => setSquadCode(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleLoginInternal()} />
             <button className="primary-button" onClick={handleLoginInternal}>ACTIVAR GUÍA DEL TIEMPO</button>
-            
             <div className="sponsors-section">
                 <h2 className="sponsors-title">ASISTENTES DEL TIEMPO</h2>
                 <p className="sponsors-description">Recuerda visitar nuestros Asistentes del Tiempo, tendrán sorpresas y puntos bonus para vos.</p>
@@ -348,7 +338,6 @@ const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
                     <div className="sponsor-item"><img src="imagenes/cocacola.png" alt="Logo Coca-Cola" className="sponsor-logo" /></div>
                 </div>
             </div>
-
             <div className="organizers-section">
                 <h2 className="organizers-title">ORGANIZADORES</h2>
                 <p className="organizers-description">Estamos en cada punto de interés para acompañarte en este gran desafío.</p>
@@ -356,27 +345,26 @@ const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
                     <img src="imagenes/logoasv.jpg" alt="Logo ASV - Organizador" className="organizer-logo" />
                 </div>
             </div>
-
             {errorMessage && <p className="feedback error" style={{ marginTop: '15px' }}>{errorMessage}</p>}
         </div>
     );
 };
 
 const EnRutaPage = ({ nextLocation, onArrival, department }) => {
-     return(
-         <div className="en-ruta-container">
-              <img src="imagenes/VIAJANDO.png" alt="Portal Temporal Estilizado" className="portal-image" onError={(e) => { e.target.onerror = null; e.target.src='https://images.unsplash.com/photo-1520034475321-cbe63696469a?q=80&w=800&auto=format&fit=crop'; }} />
-              <h3>VIAJANDO A TRAVÉS DEL TIEMPO...</h3>
-              <p>Próxima Sincronización: <strong>{nextLocation}</strong></p>
-              <p>Departamento: <strong>{department}</strong></p>
-              <p>¡Mantén el rumbo, Guardián! Evita las 'distorsiones temporales' (¡y las multas de tránsito!).</p>
-              <button className="primary-button" onClick={onArrival}>LLEGADA CONFIRMADA</button>
-          </div>
-     );
- };
+    return(
+        <div className="en-ruta-container">
+            <img src="imagenes/VIAJANDO.png" alt="Portal Temporal Estilizado" className="portal-image" onError={(e) => { e.target.onerror = null; e.target.src='https://images.unsplash.com/photo-1520034475321-cbe63696469a?q=80&w=800&auto=format&fit=crop'; }} />
+            <h3>VIAJANDO A TRAVÉS DEL TIEMPO...</h3>
+            <p>Próxima Sincronización: <strong>{nextLocation}</strong></p>
+            <p>Departamento: <strong>{department}</strong></p>
+            <p>¡Mantén el rumbo, Guardián! Evita las 'distorsiones temporales' (¡y las multas de tránsito!).</p>
+            <button className="primary-button" onClick={onArrival}>LLEGADA CONFIRMADA</button>
+        </div>
+    );
+};
 
 const EndGamePage = ({ score, finalTime, teamName }) => {
-   return (
+    return (
        <div className="end-container">
            <img src="https://cdn-icons-png.flaticon.com/512/784/784408.png" alt="Medalla o Trofeo Guardián" className="medal-image"/>
            <h3>¡MISIÓN TEMPORAL COMPLETADA, {teamName}!</h3>
@@ -411,12 +399,10 @@ const TriviaSection = ({ stage, onComplete }) => {
         const finalTime = triviaTimer;
         const isCorrect = selectedOption.toUpperCase() === challenge.correctAnswer.toUpperCase();
         const pointsWon = isCorrect ? calculatePoints(finalTime) : 0;
-
         setFeedback({
             message: isCorrect ? `✔️ ¡Respuesta Correcta! Has recuperado ${pointsWon} Fragmentos.` : `❌ Respuesta Incorrecta. No se han recuperado Fragmentos.`,
             type: isCorrect ? 'success' : 'error'
         });
-        
         setTimeout(() => {
             onComplete({ points: pointsWon, time: finalTime });
         }, 2500);
@@ -525,21 +511,9 @@ const FinalSection = ({stage, onComplete}) => {
              {error && <p className="feedback error">{error}</p>}
          </div>
      );
-}
+};
 
-const getInitialState = () => ({
-    status: 'login',
-    squadCode: null,
-    teamName: '',
-    currentMissionId: eventData.length > 0 ? eventData[0].id : 1,
-    subStage: 'anchor',
-    score: 0,
-    mainTimer: 0,
-    finalTimeDisplay: '',
-    errorMessage: '',
-    missionResults: [],
-    pendingAnchorResult: null 
-});
+const getInitialState = () => ({ status: 'login', squadCode: null, teamName: '', currentMissionId: eventData.length > 0 ? eventData[0].id : 1, subStage: 'anchor', score: 0, mainTimer: 0, finalTimeDisplay: '', errorMessage: '', missionResults: [], pendingAnchorResult: null });
 
 const App = () => {
     const [appState, setAppState] = React.useState(() => {
@@ -573,33 +547,30 @@ const App = () => {
     const currentStageData = eventData.find(m => m.id === appState.currentMissionId);
 
     const handleLogin = (code, name) => {
-        setAppState({
-            ...getInitialState(),
+        const initialState = getInitialState();
+        const fullState = {
+            ...initialState,
             status: 'in_game',
             squadCode: code,
             teamName: name,
-        });
+        };
+        setAppState(fullState);
+        sendResultsToBackend(fullState);
     };
     
     const handleAnchorComplete = (anchorResult) => {
         if (!currentStageData) return;
         const newScore = appState.score + anchorResult.points;
-        setAppState(prev => ({ 
-            ...prev, 
-            score: newScore, 
-            subStage: 'trivia',
-            pendingAnchorResult: anchorResult
-        }));
+        setAppState(prev => ({ ...prev, score: newScore, subStage: 'trivia', pendingAnchorResult: anchorResult }));
     };
     
     const handleTriviaComplete = (triviaResult) => {
         if (!currentStageData || !appState.pendingAnchorResult) return;
-
+        
         const newScore = appState.score + triviaResult.points;
-
         const completeMissionRecord = {
             missionId: currentStageData.id,
-            missionName: currentStageData.anchor.missionName,
+            missionName: currentStageData.anchor.missionName.replace("Ancla: ", ""),
             anchorTime: appState.pendingAnchorResult.time,
             anchorPoints: appState.pendingAnchorResult.points,
             triviaTime: triviaResult.time,
@@ -612,36 +583,32 @@ const App = () => {
         const newState = {
             ...appState, 
             score: newScore, 
-            status: nextStatus,
             missionResults: [...appState.missionResults, completeMissionRecord],
             pendingAnchorResult: null
         };
         
+        setAppState(prev => ({...prev, ...newState, status: nextStatus}));
+
         if (nextStatus === 'finished') {
-             const totalSeconds = newState.mainTimer;
-             const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-             const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-             const seconds = String(totalSeconds % 60).padStart(2, '0');
-             newState.finalTimeDisplay = `${hours}:${minutes}:${seconds}`;
-             sendResultsToBackend(newState);
+             handleFinalComplete(0, newState);
+        } else {
+             sendResultsToBackend({...newState, status: nextStatus});
         }
-        
-        setAppState(newState);
     };
 
-    const handleFinalComplete = (bonusPoints) => {
-        const totalSeconds = appState.mainTimer;
+    const handleFinalComplete = (bonusPoints, stateBeforeFinal = appState) => {
+        const totalSeconds = stateBeforeFinal.mainTimer;
         const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
         const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
         const seconds = String(totalSeconds % 60).padStart(2, '0');
-
-        const finalScore = (appState.score || 0) + (bonusPoints || 0);
+        const finalTime = `${hours}:${minutes}:${seconds}`;
+        const finalScore = (stateBeforeFinal.score || 0) + (bonusPoints || 0);
         
         const finalState = {
-            ...appState,
+            ...stateBeforeFinal,
             score: finalScore, 
             status: 'finished', 
-            finalTimeDisplay: `${hours}:${minutes}:${seconds}`
+            finalTimeDisplay: finalTime
         };
         
         setAppState(finalState);
@@ -650,7 +617,6 @@ const App = () => {
 
     const handleArrival = () => {
         if (!currentStageData || typeof currentStageData.nextMissionId !== 'number') return;
-        
         const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
         if (nextMission) {
              setAppState(prev => ({ ...prev, currentMissionId: nextMission.id, status: 'in_game', subStage: 'anchor' }));
@@ -671,38 +637,23 @@ const App = () => {
         if (appState.status === 'login') {
             return <LoginPage onLogin={handleLogin} setErrorMessage={(msg) => setAppState(prev => ({ ...prev, errorMessage: msg }))} errorMessage={appState.errorMessage} />;
         }
-
         if (appState.status === 'on_the_road') {
             const nextMission = currentStageData ? eventData.find(m => m.id === currentStageData.nextMissionId) : null;
             if (!nextMission) {
                  handleFinalComplete(0);
                  return <EndGamePage score={appState.score} finalTime={appState.finalTimeDisplay} teamName={appState.teamName} />;
             }
-            const nextLocationDisplay = nextMission.location || "Nuevo Sector Temporal";
-            const nextDepartmentDisplay = nextMission.department || "Dimensión Desconocida";
-            return <EnRutaPage nextLocation={nextLocationDisplay} department={nextDepartmentDisplay} onArrival={handleArrival} />;
+            return <EnRutaPage nextLocation={nextMission.location} department={nextMission.department} onArrival={handleArrival} />;
         }
-
         if (appState.status === 'in_game') {
             if (!currentStageData) return <p style={{padding: "20px"}}>Detectando anomalía temporal...</p>;
-
-            if(currentStageData.type === 'final') {
-                return <FinalSection stage={currentStageData} onComplete={handleFinalComplete} />;
-            }
-
-            if (appState.subStage === 'anchor') {
-                return <AnchorSection stage={currentStageData} onComplete={handleAnchorComplete} />;
-            }
-            
-            if (appState.subStage === 'trivia') {
-                return <TriviaSection stage={currentStageData} onComplete={handleTriviaComplete} />;
-            }
+            if(currentStageData.type === 'final') return <FinalSection stage={currentStageData} onComplete={handleFinalComplete} />;
+            if (appState.subStage === 'anchor') return <AnchorSection stage={currentStageData} onComplete={handleAnchorComplete} />;
+            if (appState.subStage === 'trivia') return <TriviaSection stage={currentStageData} onComplete={handleTriviaComplete} />;
         }
-        
         if (appState.status === 'finished') {
             return <EndGamePage score={appState.score} finalTime={appState.finalTimeDisplay} teamName={appState.teamName} />;
         }
-
         return <p>Error: Estado desconocido.</p>;
     };
 
