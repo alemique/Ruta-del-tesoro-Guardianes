@@ -266,14 +266,15 @@ async function sendResultsToBackend(data) {
     };
     try {
         console.log("Enviando actualización al backend...", payload);
-        // Google Scripts puede ser quisquilloso con CORS. Este método es más robusto.
-        // Creamos un formulario en memoria para enviar los datos.
-        const formData = new FormData();
-        formData.append('payload', JSON.stringify(payload));
-        
         await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
-            body: formData,
+            mode: 'no-cors',
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+            redirect: 'follow',
         });
         console.log("Actualización enviada con éxito.");
     } catch (error) {
@@ -577,22 +578,24 @@ const App = () => {
             triviaPoints: triviaResult.points
         };
 
+        const updatedResults = [...appState.missionResults, completeMissionRecord];
         const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
         const nextStatus = nextMission ? 'on_the_road' : 'finished';
         
         const newState = {
             ...appState, 
             score: newScore, 
-            missionResults: [...appState.missionResults, completeMissionRecord],
-            pendingAnchorResult: null
+            missionResults: updatedResults,
+            pendingAnchorResult: null,
+            status: nextStatus,
         };
         
-        setAppState(prev => ({...prev, ...newState, status: nextStatus}));
+        setAppState(newState);
 
         if (nextStatus === 'finished') {
              handleFinalComplete(0, newState);
         } else {
-             sendResultsToBackend({...newState, status: nextStatus});
+             sendResultsToBackend(newState);
         }
     };
 
