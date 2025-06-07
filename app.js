@@ -256,20 +256,27 @@ const formatTime = (totalSeconds) => {
     return `${hours}:${minutes}:${seconds}`;
 };
 
-// <-- INICIO: NUEVA FUNCIÓN PARA PISTAS DINÁMICAS
 const generarPistaDinamica = (respuesta) => {
-    const respuestaComoArray = respuesta.split('');
+    const respuestaSinEspacios = respuesta.replace(/ /g, '');
+    const longitud = respuestaSinEspacios.length;
+    let cantidadARevelar;
+
+    if (longitud <= 4) {
+        cantidadARevelar = 1;
+    } else if (longitud <= 8) {
+        cantidadARevelar = 2;
+    } else if (longitud <= 12) {
+        cantidadARevelar = 3;
+    } else {
+        cantidadARevelar = 4;
+    }
+
     const indicesLetras = [];
-    
-    respuestaComoArray.forEach((char, index) => {
+    respuesta.split('').forEach((char, index) => {
         if (char !== ' ') {
             indicesLetras.push(index);
         }
     });
-
-    const maxLetrasARevelar = Math.min(indicesLetras.length, 5);
-    const minLetrasARevelar = Math.min(indicesLetras.length, 3);
-    const cantidadARevelar = Math.floor(Math.random() * (maxLetrasARevelar - minLetrasARevelar + 1)) + minLetrasARevelar;
 
     for (let i = indicesLetras.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -278,7 +285,7 @@ const generarPistaDinamica = (respuesta) => {
 
     const indicesARevelar = new Set(indicesLetras.slice(0, cantidadARevelar));
 
-    const pistaGenerada = respuestaComoArray.map((char, index) => {
+    const pistaGenerada = respuesta.split('').map((char, index) => {
         if (char === ' ') {
             return ' ';
         }
@@ -290,7 +297,7 @@ const generarPistaDinamica = (respuesta) => {
 
     return pistaGenerada;
 };
-// <-- FIN: NUEVA FUNCIÓN
+
 
 async function sendResultsToBackend(data) {
     if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('URL_QUE_COPIASTE')) {
@@ -304,7 +311,6 @@ async function sendResultsToBackend(data) {
         missionResults: data.missionResults
     };
     try {
-        console.log("Enviando actualización al backend...", payload);
         const formData = new FormData();
         formData.append('payload', JSON.stringify(payload));
         
@@ -312,7 +318,6 @@ async function sendResultsToBackend(data) {
             method: 'POST',
             body: formData,
         });
-        console.log("Actualización enviada con éxito.");
     } catch (error) {
         console.error("Error al enviar la actualización al backend:", error);
     }
@@ -481,7 +486,6 @@ const TriviaSection = ({ stage, onComplete }) => {
     );
 };
 
-// <-- INICIO: COMPONENTE ANCHORSECTION COMPLETAMENTE MODIFICADO
 const AnchorSection = ({ stage, onComplete, onHintRequest, score }) => {
     const { anchor } = stage;
     const [keyword, setKeyword] = React.useState('');
@@ -556,7 +560,7 @@ const AnchorSection = ({ stage, onComplete, onHintRequest, score }) => {
             {!pistaGenerada && (
                 <div className="hint-request-container">
                     <button
-                        className="hint-button"
+                        className="primary-button"
                         onClick={handleHintRequest}
                         disabled={score < 25 || isLocked}>
                         SOLICITAR PISTA (-25 Fragmentos)
@@ -580,7 +584,6 @@ const AnchorSection = ({ stage, onComplete, onHintRequest, score }) => {
         </div>
     );
 };
-// <-- FIN: COMPONENTE ANCHORSECTION COMPLETAMENTE MODIFICADO
 
 const FinalSection = ({stage, onComplete}) => {
     const [keyword, setKeyword] = React.useState('');
@@ -590,7 +593,7 @@ const FinalSection = ({stage, onComplete}) => {
     const handleUnlockInternal = () => {
         if (keyword.toUpperCase().trim() === stage.enablerKeyword.toUpperCase().trim()) {
             setGlowClass('success-glow');
-            onComplete(200); // Bonus por finalizar
+            onComplete(200);
         } else {
             setError('🚫 Código final incorrecto.');
             setGlowClass('error-glow');
@@ -666,14 +669,12 @@ const App = () => {
         setAppState(prev => ({ ...prev, score: newScore, subStage: 'trivia', pendingAnchorResult: anchorResult }));
     };
     
-    // <-- INICIO: NUEVA FUNCIÓN PARA MANEJAR EL COSTO DE LA PISTA
     const handleRequestHint = () => {
         setAppState(prev => ({
             ...prev,
             score: Math.max(0, prev.score - 25)
         }));
     };
-    // <-- FIN: NUEVA FUNCIÓN
     
     const handleTriviaComplete = (triviaResult) => {
         if (!currentStageData || !appState.pendingAnchorResult) return;
@@ -766,14 +767,12 @@ const App = () => {
             case 'in_game': {
                 if(currentStageData.type === 'final') return <FinalSection stage={currentStageData} onComplete={handleFinalComplete} />;
                 
-                // <-- INICIO: LLAMADA A ANCHORSECTION MODIFICADA
                 if (appState.subStage === 'anchor') return <AnchorSection 
                                                                 stage={currentStageData} 
                                                                 onComplete={handleAnchorComplete}
                                                                 onHintRequest={handleRequestHint}
                                                                 score={appState.score}
                                                             />;
-                // <-- FIN: LLAMADA MODIFICADA
                 
                 if (appState.subStage === 'trivia') return <TriviaSection stage={currentStageData} onComplete={handleTriviaComplete} />;
                 break;
