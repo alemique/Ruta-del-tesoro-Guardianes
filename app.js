@@ -292,23 +292,22 @@ const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
             <input id="squadCode" type="text" placeholder="Ingresa tu código secreto" value={squadCode} onChange={(e) => setSquadCode(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleLoginInternal()} />
             <button className="primary-button" onClick={handleLoginInternal}>ACTIVAR GUÍA DEL TIEMPO</button>
             
-            {/* --- INICIO DE LA NUEVA SECCIÓN DE ASISTENTES --- */}
             <div className="sponsors-section">
                 <h2 className="sponsors-title">ASISTENTES DEL TIEMPO</h2>
                 <p className="sponsors-description">Recuerda visitar nuestros Asistentes del Tiempo, tendrán sorpresas y puntos bonus para vos.</p>
                 <div className="sponsors-grid">
-                    <div className="sponsor-logo-placeholder"></div>
-                    <div className="sponsor-logo-placeholder"></div>
-                    <div className="sponsor-logo-placeholder"></div>
-                    <div className="sponsor-logo-placeholder"></div>
-                    <div className="sponsor-logo-placeholder"></div>
-                    <div className="sponsor-logo-placeholder"></div>
-                    <div className="sponsor-logo-placeholder"></div>
-                    <div className="sponsor-logo-placeholder"></div>
-                    <div className="sponsor-logo-placeholder"></div>
+                    {/* --- AQUI REEMPLAZAMOS LOS DIVS POR IMAGENES --- */}
+                    <div className="sponsor-item"><img src="imagenes/muni cap.png" alt="Logo Municipalidad de la Capital" className="sponsor-logo" /></div>
+                    <div className="sponsor-item"><img src="imagenes/muni riv.png" alt="Logo Municipalidad de Rivadavia" className="sponsor-logo" /></div>
+                    <div className="sponsor-item"><img src="imagenes/muni santa lucia.jpg" alt="Logo Municipalidad de Santa Lucía" className="sponsor-logo" /></div>
+                    <div className="sponsor-item"><img src="imagenes/portho.jpg" alt="Logo Portho Gelatto" className="sponsor-logo" /></div>
+                    <div className="sponsor-item"><img src="imagenes/paselib.png" alt="Logo Pase Libre" className="sponsor-logo" /></div>
+                    <div className="sponsor-item"><img src="imagenes/mandina.png" alt="Logo Mandina" className="sponsor-logo" /></div>
+                    <div className="sponsor-item"><img src="imagenes/lavene.png" alt="Logo La Vene" className="sponsor-logo" /></div>
+                    <div className="sponsor-item"><img src="imagenes/la profecia.jpg" alt="Logo La Profecía" className="sponsor-logo" /></div>
+                    <div className="sponsor-item"><img src="imagenes/cocacola.png" alt="Logo Coca-Cola" className="sponsor-logo" /></div>
                 </div>
             </div>
-            {/* --- FIN DE LA NUEVA SECCIÓN DE ASISTENTES --- */}
 
             {errorMessage && <p className="feedback error" style={{ marginTop: '15px' }}>{errorMessage}</p>}
         </div>

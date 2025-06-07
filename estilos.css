@@ -77,12 +77,12 @@ input:not(.login-container input)::placeholder { color: var(--color-text-seconda
     margin-top: 40px;
     padding-top: 25px;
     border-top: 2px solid var(--color-secondary);
-    opacity: 0.85; /* Le damos una opacidad sutil para diferenciarla */
+    opacity: 0.85;
     transition: opacity 0.3s ease;
 }
 
 .sponsors-section:hover {
-    opacity: 1; /* La sección se vuelve nítida al pasar el mouse */
+    opacity: 1;
 }
 
 .sponsors-title {
@@ -91,7 +91,7 @@ input:not(.login-container input)::placeholder { color: var(--color-text-seconda
     color: var(--color-primary);
     margin: 0 0 5px 0;
     padding: 0;
-    border-bottom: none; /* Quitamos el borde que tienen los h3 por defecto */
+    border-bottom: none;
     text-transform: uppercase;
 }
 
@@ -106,33 +106,33 @@ input:not(.login-container input)::placeholder { color: var(--color-text-seconda
 
 .sponsors-grid {
     display: grid;
-    /* Creamos 3 columnas de igual tamaño (1fr = 1 fracción) */
     grid-template-columns: repeat(3, 1fr);
-    gap: 15px; /* Espacio entre los logos */
+    gap: 15px;
 }
 
-.sponsor-logo-placeholder {
+/* Este es el contenedor de cada logo */
+.sponsor-item {
     background-color: var(--color-background-light);
-    border: 1px dashed var(--color-text-secondary-on-dark);
+    border: 1px solid var(--color-text-secondary-on-dark);
     border-radius: 8px;
-    min-height: 60px;
+    height: 70px; /* Le damos una altura fija al contenedor */
+    padding: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
 }
 
-.sponsor-logo-placeholder:hover {
+.sponsor-item:hover {
     border-color: var(--color-primary);
-    background-color: var(--color-background-medium);
+    background-color: #ffffff; /* Fondo blanco al pasar el mouse para resaltar el logo */
     transform: scale(1.05);
 }
 
-/* Pseudo-elemento para mostrar la palabra "Logo" dentro del recuadro */
-.sponsor-logo-placeholder::before {
-    content: 'Logo';
-    font-family: var(--font-secondary);
-    color: var(--color-text-secondary-on-dark);
-    font-size: 0.9rem;
-    opacity: 0.4;
+/* Este es el estilo para la imagen del logo en sí */
+.sponsor-logo {
+    max-width: 100%;
+    max-height: 100%;
+    /* 'contain' asegura que el logo se vea completo sin deformarse */
+    object-fit: contain; 
 }
