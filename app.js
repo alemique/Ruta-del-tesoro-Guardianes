@@ -7,8 +7,6 @@ const validUsers = [
     ...Array.from({ length: 50 }, (_, i) => `Guardian${String(i + 1).padStart(2, '0')}`)
 ];
 
-// --- YA NO NECESITAMOS LOS DATOS AQUÍ ---
-
 // --- FUNCIONES GLOBALES DE AYUDA ---
 const formatTime = (totalSeconds) => {
     const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
@@ -104,9 +102,7 @@ const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
     );
 };
 
-// --- COMPONENTE MODIFICADO: EnRutaPage con Barra de Progreso ---
 const EnRutaPage = ({ nextLocation, onArrival, department }) => {
-    // Lógica de viaje
     const [isTraveling, setIsTraveling] = React.useState(true);
 
     React.useEffect(() => {
@@ -122,7 +118,6 @@ const EnRutaPage = ({ nextLocation, onArrival, department }) => {
             <h3>VIAJANDO A TRAVÉS DEL TIEMPO...</h3>
             <p>Próxima Sincronización: <strong>{nextLocation}</strong> ({department})</p>
             
-            {/* --- BARRA DE PROGRESO --- */}
             <p className="progress-info">Sincronizando coordenadas temporales...</p>
             <div className="progress-bar-container">
                 <div className="progress-bar-filler"></div>
@@ -137,9 +132,7 @@ const EnRutaPage = ({ nextLocation, onArrival, department }) => {
     );
 };
 
-// --- COMPONENTE MODIFICADO: LongTravelPage con Barra de Progreso ---
 const LongTravelPage = ({ onArrival, nextDepartment }) => {
-    // Lógica de viaje
     const [isTraveling, setIsTraveling] = React.useState(true);
 
     React.useEffect(() => {
@@ -161,7 +154,6 @@ const LongTravelPage = ({ onArrival, nextDepartment }) => {
             <h3>HORA DE VIAJAR MÁS LEJOS</h3>
             <p>Rápido, debemos movernos a <strong>{nextDepartment}</strong>, han aparecido nuevos fragmentos de la historia que debemos recoger.</p>
             
-            {/* --- BARRA DE PROGRESO --- */}
             <p className="progress-info">Abriendo portal de largo alcance...</p>
             <div className="progress-bar-container">
                 <div className="progress-bar-filler"></div>
@@ -369,7 +361,6 @@ const getInitialState = (missions) => ({
 
 const App = () => {
     const [missions, setMissions] = React.useState([]);
-    const [isLoading, setIsLoading] = React.useState(true);
     const [appState, setAppState] = React.useState(null);
 
     React.useEffect(() => {
@@ -391,12 +382,10 @@ const App = () => {
                     localStorage.removeItem('guardianesAppState');
                     setAppState(getInitialState(data));
                 }
-
-                setIsLoading(false);
             })
             .catch(error => {
                 console.error("Error al cargar las misiones desde misiones.json:", error);
-                setIsLoading(false);
+                setAppState(getInitialState([])); // Inicializa la app incluso si falla la carga
             });
     }, []);
 
@@ -417,13 +406,11 @@ const App = () => {
         return () => clearInterval(interval);
     }, [appState]);
 
-
-    if (isLoading || !appState) {
-        return (
-            <div className="app-container" style={{ padding: '40px', textAlign: 'center' }}>
-                <p>INICIANDO GUÍA DEL TIEMPO...</p>
-            </div>
-        );
+    // --- MODIFICACIÓN: Se elimina el bloque "isLoading" de aquí. ---
+    // Si el estado de la app aún no se ha cargado (la primera fracción de segundo),
+    // no mostramos nada para evitar errores.
+    if (!appState) {
+        return null; 
     }
     
     const currentStageData = missions.find(m => m.id === appState.currentMissionId);
@@ -512,12 +499,16 @@ const App = () => {
                 return <LoginPage onLogin={handleLogin} setErrorMessage={(msg) => setAppState(prev => ({ ...prev, errorMessage: msg }))} errorMessage={appState.errorMessage} />;
             
             case 'long_travel': {
+                // Asegurarse de que currentStageData exista antes de buscar nextMission
+                if (!currentStageData) return null;
                 const nextMission = missions.find(m => m.id === currentStageData.nextMissionId);
+                if (!nextMission) return null; // salvaguarda
                 return <LongTravelPage nextDepartment={nextMission.department} onArrival={handleArrival} />;
             }
             
             case 'on_the_road': {
-                const nextMission = currentStageData ? missions.find(m => m.id === currentStageData.nextMissionId) : null;
+                if (!currentStageData) return null;
+                const nextMission = missions.find(m => m.id === currentStageData.nextMissionId);
                 if (!nextMission) {
                     handleFinalComplete(0);
                     return <EndGamePage score={appState.score} finalTime={appState.finalTimeDisplay} teamName={appState.teamName} />;
