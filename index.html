@@ -299,66 +299,51 @@
         const eventData = [
             // --- SANTA LUCÍA ---
             {
-                id: 1, type: 'anchor', department: "Santa Lucía", location: "Parroquia Santa Lucía - El Templo Ecléctico", missionName: "Ancla: Vestigios del Sismo",
-                enabler: "Consigna: Busquen el año del catastrófico terremoto que destruyó el 'hermoso templo colonial'.\nPista: Este evento marcó un antes y un después en la arquitectura de toda la provincia.",
-                enablerKeyword: "1944", transmission: "Guardián, hemos detectado una cicatriz profunda en la línea de tiempo de este lugar sagrado. Debes anclar el año del evento que lo cambió todo para estabilizarla.",
+                id: 1, department: "Santa Lucía", location: "Parroquia Santa Lucía",
+                anchor: { 
+                    missionName: "Ancla: Vestigios del Sismo",
+                    enabler: "Consigna: Busquen el año del catastrófico terremoto que destruyó el 'hermoso templo colonial'.\nPista: Este evento marcó un antes y un después en la arquitectura de toda la provincia.",
+                    enablerKeyword: "1944",
+                    transmission: "Guardián, hemos detectado una cicatriz profunda en la línea de tiempo de este lugar sagrado. Debes anclar el año del evento que lo cambió todo para estabilizarla."
+                },
+                trivia: { 
+                    missionName: "Trivia: El Templo de 1900",
+                    challenge: { question: "¿En qué año fue inaugurado el templo de estilo ecléctico que reemplazó a la primera capilla?", options: ["1894", "1900", "1944", "1964"], correctAnswer: "1900" }
+                },
                 nextMissionId: 2
             },
             {
-                id: 2, type: 'trivia', department: "Santa Lucía", location: "Parroquia Santa Lucía", missionName: "Trivia: El Templo de 1900",
-                challenge: { question: "¿En qué año fue inaugurado el templo de estilo ecléctico que reemplazó a la primera capilla?", options: ["1894", "1900", "1944", "1964"], correctAnswer: "1900" },
+                id: 2, department: "Santa Lucía", location: "Parroquia Santa Lucía",
+                anchor: {
+                    missionName: "Ancla: La Fe Reconstruida",
+                    enabler: "Consigna: Encuentren el año de inauguración de la iglesia moderna y actual, que reemplazó a la destruida por el gran sismo.\nPista: Se inauguró durante las fiestas patronales de diciembre.",
+                    enablerKeyword: "1964",
+                    transmission: "La fe de un pueblo se manifiesta en su capacidad de renacer. Encuentra el año en que este templo moderno abrió sus puertas para sellar esta memoria."
+                },
+                trivia: {
+                    missionName: "Trivia: Fervor Popular",
+                    challenge: { question: "¿Qué importante evento religioso, que congrega a miles de fieles, se celebra cada diciembre en la parroquia?", options: ["La Fiesta del Sol", "El aniversario del departamento", "La Fiesta Patronal de Santa Lucía", "La peregrinación a la Difunta Correa"], correctAnswer: "La Fiesta Patronal de Santa Lucía" }
+                },
                 nextMissionId: 3
             },
+            // ... (AQUÍ DEBEN IR TODAS LAS DEMÁS MISIONES CON ESTA MISMA ESTRUCTURA AGRUPADA)
             {
-                id: 3, type: 'anchor', department: "Santa Lucía", location: "Parroquia Santa Lucía - El Templo Moderno", missionName: "Ancla: La Fe Reconstruida",
-                enabler: "Consigna: Encuentren el año de inauguración de la iglesia moderna y actual, que reemplazó a la destruida por el gran sismo.\nPista: Se inauguró durante las fiestas patronales de diciembre.",
-                enablerKeyword: "1964", transmission: "La fe de un pueblo se manifiesta en su capacidad de renacer. Encuentra el año en que este templo moderno abrió sus puertas para sellar esta memoria.",
-                nextMissionId: 4
+                id: 31,
+                department: "Rivadavia", location: "Centro Ambiental Anchipurac",
+                anchor: {
+                    missionName: "Ancla: De la Basura a la Vanguardia",
+                    enabler: "Consigna: Encuentren el año de inauguración del moderno edificio de Anchipurac.\nPista: Su nombre simboliza energía y renovación.",
+                    enablerKeyword: "2018",
+                    transmission: "Donde hubo olvido, hoy hay futuro. Ancla el año en que este lugar renació como un símbolo de conciencia ambiental."
+                },
+                trivia: {
+                    missionName: "Trivia: Lengua Huarpe",
+                    challenge: { question: "¿Qué significa la palabra de origen huarpe 'Anchipurac'?", options: ["Tierra Limpia", "Agua Pura", "Montaña Sagrada", "Rayo"], correctAnswer: "Rayo" }
+                },
+                nextMissionId: 32
             },
             {
-                id: 4, type: 'trivia', department: "Santa Lucía", location: "Parroquia Santa Lucía", missionName: "Trivia: Fervor Popular",
-                challenge: { question: "¿Qué importante evento religioso, que congrega a miles de fieles, se celebra cada diciembre en la parroquia?", options: ["La Fiesta del Sol", "El aniversario del departamento", "La Fiesta Patronal de Santa Lucía", "La peregrinación a la Difunta Correa"], correctAnswer: "La Fiesta Patronal de Santa Lucía" },
-                nextMissionId: 5
-            },
-            {
-                id: 5, type: 'anchor', department: "Santa Lucía", location: "Monumento La Luz del Mundo - Orígenes", missionName: "Ancla: El Primer Destello",
-                enabler: "Consigna: Identifiquen el año en que los primeros pobladores se reunían en esta zona, fecha a la que rinde homenaje la farola monumentaria.\nPista: El lugar era conocido históricamente como 'La Legua'.",
-                enablerKeyword: "1869", transmission: "Detecto una débil señal de luz proveniente del pasado. Viaja al año de origen, cuando esta esquina se convirtió en un punto de encuentro vital para los pioneros.",
-                nextMissionId: 6
-            },
-            {
-                id: 6, type: 'trivia', department: "Santa Lucía", location: "Monumento La Luz del Mundo", missionName: "Trivia: La Lámpara Primitiva",
-                challenge: { question: "Según la tradición, ¿qué se utilizaba en el mangrullo para orientar a los viajeros antes de la lámpara de carburo?", options: ["Una fogata", "Una lámpara de aceite", "Antorchas", "Un farol eléctrico"], correctAnswer: "Una lámpara de aceite" },
-                nextMissionId: 7
-            },
-            {
-                id: 7, type: 'anchor', department: "Santa Lucía", location: "Monumento La Luz del Mundo - La 'Bichadora'", missionName: "Ancla: El Ojo del Pasado",
-                enabler: "Consigna: ¿Qué tipo de institución de seguridad, que contaba con una torre de vigilancia llamada 'bichadora', funcionó en esta esquina 'décadas atrás'?\nPista: Su función era velar por la seguridad de los viajeros.",
-                enablerKeyword: "Un puesto policial", transmission: "La seguridad de los viajeros era crucial. En esta esquina existió una institución protectora. Ancla su nombre para recordar su importante labor.",
-                nextMissionId: 8
-            },
-            {
-                id: 8, type: 'trivia', department: "Santa Lucía", location: "Monumento La Luz del Mundo", missionName: "Trivia: El Fin del Mundo Iluminado",
-                challenge: { question: "¿Qué apodo le daban los antiguos pobladores al lugar donde se encendía la luz, marcando el límite de la ciudad iluminada?", options: ["El faro de La Legua", "El portal de la ciudad", "Donde terminaba el mundo", "La esquina del viajero"], correctAnswer: "Donde terminaba el mundo" },
-                nextMissionId: 9
-            },
-            {
-                id: 9, type: 'anchor', department: "Santa Lucía", location: "Puente de Hierro - Hito de Ingeniería", missionName: "Ancla: El Nacimiento del Gigante de Hierro",
-                enabler: "Consigna: Encuentren el año de inauguración del puente, el más antiguo de su tipo en la provincia.\nPista: Su construcción fue una hazaña de la ingeniería para cruzar el caudaloso río.",
-                enablerKeyword: "1893", transmission: "Este gigante de metal fue una revolución para su época. Anclar su año de nacimiento es vital para preservar la memoria del progreso.",
-                nextMissionId: 10
-            },
-            {
-                id: 10, type: 'trivia', department: "Santa Lucía", location: "Puente de Hierro", missionName: "Trivia: El Propósito Original",
-                challenge: { question: "¿Para qué medio de transporte fue construido originalmente este puente metálico?", options: ["Peatones y carretas", "Tráfico carretero", "Ferrocarril", "Animales de carga"], correctAnswer: "Ferrocarril" },
-                nextMissionId: 11
-            },
-            // ... (AQUÍ IRÍAN TODAS LAS DEMÁS MISIONES, SIGUIENDO LA MISMA ESTRUCTURA)
-            {
-                id: 33, // Este ID debe ser el último antes del final
-                type: 'final',
-                department: "Rivadavia Ancestral",
-                location: "Parque de Rivadavia (Punto de Llegada)",
+                id: 32, type: 'final', department: "Rivadavia Ancestral", location: "Parque de Rivadavia (Punto de Llegada)",
                 missionName: "Misión: Sellar la Brecha Temporal",
                 enabler: "¡Guardián, has llegado al nexo! El 'Ancla Temporal Final' para estabilizar la línea del tiempo de San Juan te será revelada por el Guardián Mayor al completar tu informe en la 'Guía del Tiempo'. Ingresa la palabra 'LEGADO' para confirmar la restauración.",
                 enablerKeyword: "LEGADO",
@@ -449,8 +434,8 @@
            );
         };
 
-        const ChallengeSection = ({ stage, onComplete }) => {
-            const { challenge } = stage;
+        const TriviaSection = ({ stage, onComplete }) => {
+            const { challenge, missionName } = stage.trivia;
             const [selectedOption, setSelectedOption] = React.useState('');
             const [feedback, setFeedback] = React.useState({ message: '', type: ''});
             const [triviaTimer, setTriviaTimer] = React.useState(0);
@@ -476,7 +461,7 @@
                 const pointsWon = isCorrect ? calculatePoints(finalTime) : 0;
 
                 setFeedback({
-                    message: isCorrect ? `✔️ ¡Respuesta Correcta! Has recuperado ${pointsWon} Fragmentos en ${finalTime}s.` : `❌ Respuesta Incorrecta. No se han recuperado Fragmentos, ¡pero la misión continúa!`,
+                    message: isCorrect ? `✔️ ¡Respuesta Correcta! Has recuperado ${pointsWon} Fragmentos.` : `❌ Respuesta Incorrecta. No se han recuperado Fragmentos.`,
                     type: isCorrect ? 'success' : 'error'
                 });
                 
@@ -487,7 +472,7 @@
 
             return (
                 <div className="challenge-container">
-                    <h3>{`DESAFÍO: ${stage.missionName}`}</h3>
+                    <h3>{missionName || 'Desafío'}</h3>
                     <div className="challenge-timer">⏱️ {triviaTimer}s</div>
                     <p>{challenge.question}</p>
                     <ul className="trivia-options">
@@ -503,11 +488,13 @@
             );
         };
 
-        const AnchorStage = ({ stage, onComplete }) => {
+        const AnchorSection = ({ stage, onComplete }) => {
+            const { anchor } = stage;
             const [keyword, setKeyword] = React.useState('');
             const [error, setError] = React.useState('');
             const [anchorTimer, setAnchorTimer] = React.useState(0);
             const [isLocked, setIsLocked] = React.useState(false);
+            const [feedback, setFeedback] = React.useState({ message: '', type: ''});
 
             React.useEffect(() => {
                 const interval = setInterval(() => {
@@ -526,7 +513,7 @@
             };
 
             const handleUnlockInternal = () => {
-                if (keyword.toUpperCase().trim() === stage.enablerKeyword.toUpperCase().trim()) {
+                if (keyword.toUpperCase().trim() === anchor.enablerKeyword.toUpperCase().trim()) {
                     setIsLocked(true);
                     const points = calculateAnchorPoints(anchorTimer);
                     setError('');
@@ -544,15 +531,13 @@
                 setTimeout(() => onComplete(0), 2500);
             };
 
-            const [feedback, setFeedback] = React.useState({ message: '', type: ''});
-
             return (
                 <div className="stage-container">
-                    <h3>{`ANCLA: ${stage.missionName}`}</h3>
+                    <h3>{anchor.missionName}</h3>
                     <div className="challenge-timer">⏱️ {anchorTimer}s</div>
                     <p><strong>Departamento:</strong> {stage.department}</p>
-                    {stage.transmission && <div className="transmission-box"><p><strong>📡 Transmisión Interceptada:</strong> {stage.transmission}</p></div>}
-                    <p><strong>Objetivo de la Coordenada:</strong> {stage.enabler}</p>
+                    {anchor.transmission && <div className="transmission-box"><p><strong>📡 Transmisión Interceptada:</strong> {anchor.transmission}</p></div>}
+                    <p><strong>Objetivo de la Coordenada:</strong> {anchor.enabler}</p>
                     <input type="text" placeholder="Ingresa el 'Ancla Temporal'" value={keyword} onChange={(e) => setKeyword(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()}/>
                     <div className="button-group">
                         <button className="secondary-button" onClick={handleSkip} disabled={isLocked}>No sé</button>
@@ -564,7 +549,7 @@
             );
         };
         
-        const FinalStage = ({stage, onComplete}) => {
+        const FinalSection = ({stage, onComplete}) => {
              const [keyword, setKeyword] = React.useState('');
              const [error, setError] = React.useState('');
              
@@ -609,8 +594,7 @@
                     currentMissionId: eventData.length > 0 ? eventData[0].id : 1,
                     score: 0,
                     mainTimer: 0,
-                    finalTimeDisplay: '',
-                    errorMessage: ''
+                    finalTimeDisplay: ''
                 };
             });
 
@@ -632,7 +616,7 @@
 
             const handleLogin = (code, name) => {
                 setAppState({
-                    status: 'in_game',
+                    status: 'in_game_anchor',
                     squadCode: code,
                     teamName: name,
                     currentMissionId: eventData.length > 0 ? eventData[0].id : 1,
@@ -643,14 +627,25 @@
                 });
             };
             
-            const handleMissionComplete = (pointsEarned) => {
+            const handleAnchorComplete = (pointsEarned) => {
+                 if (!currentStageData) return;
+                const newScore = appState.score + pointsEarned;
+                // Si la misión tiene una trivia, pasa a la trivia. Si no (como la final), pasa a viajar.
+                if (currentStageData.trivia) {
+                    setAppState(prev => ({ ...prev, score: newScore, status: 'in_game_trivia' }));
+                } else {
+                    handleTriviaComplete(0); // Avanza sin puntos de trivia
+                }
+            };
+            
+            const handleTriviaComplete = (pointsEarned) => {
                 if (!currentStageData) return;
                 const newScore = appState.score + pointsEarned;
 
                 if (typeof currentStageData.nextMissionId === 'number') {
                     setAppState(prev => ({ ...prev, score: newScore, status: 'on_the_road' }));
                 } else {
-                     const totalSeconds = appState.mainTimer;
+                    const totalSeconds = appState.mainTimer;
                     const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
                     const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
                     const seconds = String(totalSeconds % 60).padStart(2, '0');
@@ -658,12 +653,21 @@
                 }
             };
             
+            const handleFinalComplete = (pointsEarned) => {
+                const newScore = appState.score + pointsEarned;
+                const totalSeconds = appState.mainTimer;
+                const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+                const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+                const seconds = String(totalSeconds % 60).padStart(2, '0');
+                setAppState(prev => ({ ...prev, score: newScore, status: 'finished', finalTimeDisplay: `${hours}:${minutes}:${seconds}` }));
+            };
+
             const handleArrival = () => {
                 if (!currentStageData) return;
                 if (typeof currentStageData.nextMissionId === 'number') {
                     const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
                     if (nextMission) {
-                         setAppState(prev => ({ ...prev, currentMissionId: nextMission.id, status: 'in_game' }));
+                         setAppState(prev => ({ ...prev, currentMissionId: nextMission.id, status: 'in_game_anchor' }));
                     } else {
                         console.error(`Error: No se encontró la misión con ID ${currentStageData.nextMissionId}. Finalizando.`);
                         setAppState(prev => ({ ...prev, status: 'finished' }));
@@ -681,7 +685,7 @@
             };
 
             const renderContent = () => {
-                if (appState.status === 'in_game' && (!eventData || eventData.length === 0)) {
+                if (appState.status !== 'login' && (!eventData || eventData.length === 0)) {
                     return <p style={{padding: "20px"}}>Esperando carga de misiones del Guardián Mayor...</p>;
                 }
                 
@@ -692,17 +696,11 @@
                 switch(appState.status) {
                     case 'login':
                         return <LoginPage onLogin={handleLogin} setErrorMessage={(msg) => setAppState(prev => ({ ...prev, errorMessage: msg }))} errorMessage={appState.errorMessage} />;
-                    case 'in_game':
-                        if (currentStageData.type === 'anchor') {
-                             return <AnchorStage stage={currentStageData} onComplete={handleMissionComplete} />;
-                        }
-                        if (currentStageData.type === 'trivia') {
-                             return <ChallengeSection stage={currentStageData} onComplete={handleMissionComplete} />;
-                        }
-                         if (currentStageData.type === 'final') {
-                             return <FinalStage stage={currentStageData} onComplete={handleMissionComplete} />;
-                        }
-                        return <p>Error de misión</p>;
+                    case 'in_game_anchor':
+                        if(currentStageData.type === 'final') return <FinalSection stage={currentStageData} onComplete={handleFinalComplete} />;
+                        return currentStageData ? <AnchorSection stage={currentStageData} onComplete={handleAnchorComplete} /> : <p>Cargando ancla...</p>;
+                    case 'in_game_trivia':
+                        return currentStageData ? <TriviaSection stage={currentStageData} onComplete={handleTriviaComplete} /> : <p>Cargando desafío...</p>;
                     case 'on_the_road':
                         const nextMission = currentStageData ? eventData.find(m => m.id === currentStageData.nextMissionId) : null;
                         const nextLocationDisplay = nextMission ? (nextMission.location || "Nuevo Sector Temporal") : "Destino Final";
