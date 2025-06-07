@@ -1,5 +1,6 @@
 // --- CONFIGURACIÓN DEL BACKEND ---
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1ZFHimOa4v30i80tQOKVyBy-O7M8jpwqrC4x0VOts0WBb9bCa-0h0zeJ1DYvL2DOF/exec';
+// NOTA: He actualizado esta URL con la última que me pasaste para el ranking.
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym5-onTOyzlqZn_G4O-5acxAZzReYjIOY5SF8tBh3TtT2jEFVw6IZ2MMMtkHGtRl0F/exec';
 
 // --- LISTA DE USUARIOS AUTORIZADOS (LÓGICA) ---
 const validUsers = [
@@ -589,7 +590,7 @@ const FinalSection = ({stage, onComplete}) => {
     const [keyword, setKeyword] = React.useState('');
     const [error, setError] = React.useState('');
     const [glowClass, setGlowClass] = React.useState('');
-      
+    
     const handleUnlockInternal = () => {
         if (keyword.toUpperCase().trim() === stage.enablerKeyword.toUpperCase().trim()) {
             setGlowClass('success-glow');
