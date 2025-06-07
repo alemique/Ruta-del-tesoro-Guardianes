@@ -7,8 +7,6 @@ const validUsers = [
     ...Array.from({ length: 50 }, (_, i) => `Guardian${String(i + 1).padStart(2, '0')}`)
 ];
 
-// --- YA NO NECESITAMOS LOS DATOS AQUÍ ---
-
 // --- FUNCIONES GLOBALES DE AYUDA ---
 const formatTime = (totalSeconds) => {
     const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
@@ -43,7 +41,7 @@ async function sendResultsToBackend(data) {
     }
 }
 
-// --- COMPONENTES DE REACT ---
+// --- COMPONENTES DE REACT (Sin cambios en estos componentes) ---
 const Header = ({ teamName, score, timer }) => (
     <div className="header">
         <div className="header-info">
@@ -104,33 +102,70 @@ const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
     );
 };
 
-const EnRutaPage = ({ nextLocation, onArrival, department }) => (
-    <div className="en-ruta-container">
-        <img src="imagenes/VIAJANDO.png" alt="Portal Temporal Estilizado" className="portal-image" onError={(e) => { e.target.onerror = null; e.target.src='https://images.unsplash.com/photo-1520034475321-cbe63696469a?q=80&w=800&auto=format&fit=crop'; }} />
-        <h3>VIAJANDO A TRAVÉS DEL TIEMPO...</h3>
-        <p>Próxima Sincronización: <strong>{nextLocation}</strong></p>
-        <p>Departamento: <strong>{department}</strong></p>
-        <p>¡Mantén el rumbo, Guardián! Evita las 'distorsiones temporales' (¡y las multas de tránsito!).</p>
-        <button className="primary-button" onClick={onArrival}>LLEGADA CONFIRMADA</button>
-    </div>
-);
+const EnRutaPage = ({ nextLocation, onArrival, department }) => {
+    const [isTraveling, setIsTraveling] = React.useState(true);
+
+    React.useEffect(() => {
+        const travelTimer = setTimeout(() => {
+            setIsTraveling(false);
+        }, 10000); // 10 segundos
+        return () => clearTimeout(travelTimer);
+    }, []);
+
+    return (
+        <div className="en-ruta-container">
+            <img src="imagenes/VIAJANDO.png" alt="Portal Temporal Estilizado" className="portal-image" onError={(e) => { e.target.onerror = null; e.target.src='https://images.unsplash.com/photo-1520034475321-cbe63696469a?q=80&w=800&auto=format&fit=crop'; }} />
+            <h3>VIAJANDO A TRAVÉS DEL TIEMPO...</h3>
+            <p>Próxima Sincronización: <strong>{nextLocation}</strong> ({department})</p>
+            
+            <p className="progress-info">Sincronizando coordenadas temporales...</p>
+            <div className="progress-bar-container">
+                <div className="progress-bar-filler"></div>
+            </div>
+
+            <p>¡Mantén el rumbo, Guardián! Evita las 'distorsiones temporales' (¡y las multas de tránsito!).</p>
+            
+            <button className="primary-button" onClick={onArrival} disabled={isTraveling}>
+                {isTraveling ? 'SINCRONIZANDO...' : 'LLEGADA CONFIRMADA'}
+            </button>
+        </div>
+    );
+};
 
 const LongTravelPage = ({ onArrival, nextDepartment }) => {
+    const [isTraveling, setIsTraveling] = React.useState(true);
+
+    React.useEffect(() => {
+        const travelTimer = setTimeout(() => {
+            setIsTraveling(false);
+        }, 10000); // 10 segundos
+        return () => clearTimeout(travelTimer);
+    }, []);
+
     const imageUrl = nextDepartment === 'Capital' 
         ? 'imagenes/VIAJANDO1.png' 
         : nextDepartment === 'Rivadavia' 
             ? 'imagenes/VIAJANDO2.png' 
-            : 'imagenes/VIAJANDO.png'; // Imagen por defecto
+            : 'imagenes/VIAJANDO.png';
 
     return (
         <div className="en-ruta-container">
             <img src={imageUrl} alt={`Viajando a ${nextDepartment}`} className="portal-image" />
             <h3>HORA DE VIAJAR MÁS LEJOS</h3>
             <p>Rápido, debemos movernos a <strong>{nextDepartment}</strong>, han aparecido nuevos fragmentos de la historia que debemos recoger.</p>
+            
+            <p className="progress-info">Abriendo portal de largo alcance...</p>
+            <div className="progress-bar-container">
+                <div className="progress-bar-filler"></div>
+            </div>
+
             <p style={{fontStyle: 'italic', fontSize: '0.9rem', opacity: 0.8}}>
                 Es importante que respetes las señales de tránsito, hay controles secretos que pueden restarte puntos.
             </p>
-            <button className="primary-button" onClick={onArrival}>HEMOS LLEGADO AL NUEVO DEPARTAMENTO</button>
+            
+            <button className="primary-button" onClick={onArrival} disabled={isTraveling}>
+                {isTraveling ? 'VIAJANDO...' : 'HEMOS LLEGADO'}
+            </button>
         </div>
     );
 };
@@ -308,13 +343,12 @@ const FinalSection = ({stage, onComplete}) => {
     );
 };
 
-
-// --- BLOQUE PRINCIPAL DE LA APP ---
-const getInitialState = (missions) => ({
+// --- ESTRUCTURA DE ESTADO INICIAL ---
+const getInitialAppState = (missionsData) => ({
     status: 'login',
     squadCode: null,
     teamName: '',
-    currentMissionId: missions.length > 0 ? missions[0].id : 1,
+    currentMissionId: missionsData.length > 0 ? missionsData[0].id : 1,
     subStage: 'anchor',
     score: 0,
     mainTimer: 0,
@@ -324,89 +358,105 @@ const getInitialState = (missions) => ({
     pendingAnchorResult: null
 });
 
+// --- COMPONENTE PRINCIPAL REESTRUCTURADO ---
 const App = () => {
-    // --- NUEVO: ESTADO PARA GUARDAR LAS MISIONES CARGADAS ---
-    const [missions, setMissions] = React.useState([]);
-    const [isLoading, setIsLoading] = React.useState(true); // Para saber si estamos cargando datos
-    const [appState, setAppState] = React.useState(null);
+    // Un único estado para manejar todo: el estado de carga y el estado del juego
+    const [gameState, setGameState] = React.useState({
+        loadingStatus: 'loading', // 'loading', 'ready', 'error'
+        missions: [],
+        appState: null,
+        loadingError: null
+    });
 
-    // --- NUEVO: EFECTO PARA CARGAR MISIONES DESDE misiones.json ---
+    // Efecto para cargar los datos una sola vez al inicio
     React.useEffect(() => {
         fetch('./misiones.json')
-            .then(response => response.json())
-            .then(data => {
-                setMissions(data);
-                
-                // Una vez cargados los datos, inicializamos el estado del juego
-                const savedState = localStorage.getItem('guardianesAppState');
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error de red: No se pudo encontrar misiones.json (código ${response.status})`);
+                }
+                return response.json();
+            })
+            .then(missionsData => {
+                const savedAppState = localStorage.getItem('guardianesAppState');
+                let initialAppState;
                 try {
-                    const parsedState = savedState ? JSON.parse(savedState) : null;
-                    if (parsedState && typeof parsedState.status === 'string' && parsedState.status !== 'login') {
-                        setAppState(parsedState);
+                    const parsedState = savedAppState ? JSON.parse(savedAppState) : null;
+                    if (parsedState && typeof parsedState.status === 'string') {
+                        initialAppState = parsedState;
                     } else {
-                        setAppState(getInitialState(data));
+                        initialAppState = getInitialAppState(missionsData);
                     }
                 } catch (e) {
-                    console.error("Error al parsear localStorage, usando estado inicial.", e);
-                    localStorage.removeItem('guardianesAppState');
-                    setAppState(getInitialState(data));
+                    initialAppState = getInitialAppState(missionsData);
                 }
-
-                setIsLoading(false); // Terminamos de cargar
+                
+                setGameState({
+                    loadingStatus: 'ready',
+                    missions: missionsData,
+                    appState: initialAppState,
+                    loadingError: null
+                });
             })
             .catch(error => {
-                console.error("Error al cargar las misiones desde misiones.json:", error);
-                setIsLoading(false); // Dejamos de cargar incluso si hay error
-                // Opcional: mostrar un mensaje de error en la UI
+                console.error("FALLO CRÍTICO al cargar misiones.json:", error);
+                setGameState(prevState => ({
+                    ...prevState,
+                    loadingStatus: 'error',
+                    loadingError: error.message
+                }));
             });
     }, []); // El array vacío [] asegura que esto se ejecute solo una vez
 
-
+    // Efecto para guardar el estado del juego en localStorage cada vez que cambia
     React.useEffect(() => {
-        if (appState) {
-            localStorage.setItem('guardianesAppState', JSON.stringify(appState));
+        if (gameState.loadingStatus === 'ready') {
+            localStorage.setItem('guardianesAppState', JSON.stringify(gameState.appState));
         }
-    }, [appState]);
+    }, [gameState.appState, gameState.loadingStatus]);
 
+    // Efecto para el cronómetro principal del juego
     React.useEffect(() => {
         let interval;
-        if (appState && appState.status !== 'login' && appState.status !== 'finished') {
+        if (gameState.appState && gameState.appState.status !== 'login' && gameState.appState.status !== 'finished') {
             interval = setInterval(() => {
-                setAppState(prev => ({ ...prev, mainTimer: prev.mainTimer + 1 }));
+                setGameState(prev => ({
+                    ...prev,
+                    appState: { ...prev.appState, mainTimer: prev.appState.mainTimer + 1 }
+                }));
             }, 1000);
         }
         return () => clearInterval(interval);
-    }, [appState]);
+    }, [gameState.appState]);
 
-
-    // Si estamos cargando o no tenemos estado, mostramos un mensaje
-    if (isLoading || !appState) {
-        return (
-            <div className="app-container" style={{ padding: '40px', textAlign: 'center' }}>
-                <p>INICIANDO GUÍA DEL TIEMPO...</p>
-            </div>
-        );
-    }
+    // --- MANEJADORES DE LÓGICA (Ahora usan setGameState) ---
     
-    // El resto de la lógica ahora usa 'missions' en lugar de 'eventData'
-    const currentStageData = missions.find(m => m.id === appState.currentMissionId);
+    const updateAppState = (newAppState) => {
+        setGameState(prev => ({ ...prev, appState: newAppState }));
+    };
 
     const handleLogin = (code, name) => {
-        const initialState = getInitialState(missions);
+        const initialState = getInitialAppState(gameState.missions);
         const fullState = { ...initialState, status: 'in_game', squadCode: code, teamName: name };
-        setAppState(fullState);
+        updateAppState(fullState);
         sendResultsToBackend(fullState);
     };
-    
+
     const handleAnchorComplete = (anchorResult) => {
-        if (!currentStageData) return;
-        const newScore = appState.score + anchorResult.points;
-        setAppState(prev => ({ ...prev, score: newScore, subStage: 'trivia', pendingAnchorResult: anchorResult }));
+        const newScore = gameState.appState.score + anchorResult.points;
+        updateAppState({
+            ...gameState.appState,
+            score: newScore,
+            subStage: 'trivia',
+            pendingAnchorResult: anchorResult
+        });
     };
-    
+
     const handleTriviaComplete = (triviaResult) => {
-        if (!currentStageData || !appState.pendingAnchorResult) return;
+        const { appState, missions } = gameState;
+        if (!appState.pendingAnchorResult) return;
         
+        const currentStageData = missions.find(m => m.id === appState.currentMissionId);
         const newScore = appState.score + triviaResult.points;
         const completeMissionRecord = {
             missionId: currentStageData.id,
@@ -437,26 +487,27 @@ const App = () => {
             status: nextStatus,
         };
         
-        setAppState(newState);
+        updateAppState(newState);
         sendResultsToBackend(newState);
     };
 
-    const handleFinalComplete = (bonusPoints, stateBeforeFinal = appState) => {
-        const totalSeconds = stateBeforeFinal.mainTimer;
+    const handleFinalComplete = (bonusPoints) => {
+        const totalSeconds = gameState.appState.mainTimer;
         const finalTime = formatTime(totalSeconds);
-        const finalScore = (stateBeforeFinal.score || 0) + (bonusPoints || 0);
+        const finalScore = (gameState.appState.score || 0) + (bonusPoints || 0);
         
-        const finalState = { ...stateBeforeFinal, score: finalScore, status: 'finished', finalTimeDisplay: finalTime };
+        const finalState = { ...gameState.appState, score: finalScore, status: 'finished', finalTimeDisplay: finalTime };
         
-        setAppState(finalState);
+        updateAppState(finalState);
         sendResultsToBackend(finalState);
     };
 
     const handleArrival = () => {
-        if (!currentStageData || typeof currentStageData.nextMissionId !== 'number') return;
+        const { appState, missions } = gameState;
+        const currentStageData = missions.find(m => m.id === appState.currentMissionId);
         const nextMission = missions.find(m => m.id === currentStageData.nextMissionId);
         if (nextMission) {
-            setAppState(prev => ({ ...prev, currentMissionId: nextMission.id, status: 'in_game', subStage: 'anchor' }));
+            updateAppState({ ...appState, currentMissionId: nextMission.id, status: 'in_game', subStage: 'anchor' });
         } else {
             handleFinalComplete(0);
         }
@@ -465,14 +516,43 @@ const App = () => {
     const handleResetDevelopment = () => {
         if (window.confirm("¿Seguro que quieres reiniciar toda la misión y borrar los datos guardados? (Solo para desarrollo)")) {
             localStorage.removeItem('guardianesAppState');
-            setAppState(getInitialState(missions));
+            updateAppState(getInitialAppState(gameState.missions));
         }
     };
 
+    // --- LÓGICA DE RENDERIZADO ---
+
+    if (gameState.loadingStatus === 'loading') {
+        return null; // Muestra una pantalla en blanco mientras carga
+    }
+
+    if (gameState.loadingStatus === 'error') {
+        return (
+            <div className="app-container" style={{ padding: '20px', backgroundColor: '#5e3a3a' }}>
+                <div className="stage-container" style={{borderColor: '#e74c3c'}}>
+                    <h3 style={{color: '#e74c3c'}}>Error Crítico de Carga</h3>
+                    <p>La Guía del Tiempo no pudo iniciarse.</p>
+                    <p><strong>Causa probable:</strong> El archivo <code>misiones.json</code> no se encuentra o no es accesible.</p>
+                    <p><strong>Solución:</strong> Asegúrate de que el archivo <code>misiones.json</code> existe y está en la misma carpeta que <code>index.html</code>.</p>
+                    <p><i>Mensaje de error técnico: {gameState.loadingError}</i></p>
+                </div>
+            </div>
+        );
+    }
+    
+    // Si llegamos aquí, loadingStatus es 'ready'
+    const { missions, appState } = gameState;
+    const currentStageData = missions.find(m => m.id === appState.currentMissionId);
+
     const renderContent = () => {
+        if (appState.status === 'in_game' && !currentStageData) {
+            // Este mensaje ahora solo debería aparecer en un caso muy raro e inesperado
+            return <p style={{padding: "20px"}}>Detectando anomalía temporal...</p>;
+        }
+
         switch (appState.status) {
             case 'login':
-                return <LoginPage onLogin={handleLogin} setErrorMessage={(msg) => setAppState(prev => ({ ...prev, errorMessage: msg }))} errorMessage={appState.errorMessage} />;
+                return <LoginPage onLogin={handleLogin} setErrorMessage={(msg) => updateAppState({ ...appState, errorMessage: msg })} errorMessage={appState.errorMessage} />;
             
             case 'long_travel': {
                 const nextMission = missions.find(m => m.id === currentStageData.nextMissionId);
@@ -480,7 +560,7 @@ const App = () => {
             }
             
             case 'on_the_road': {
-                const nextMission = currentStageData ? missions.find(m => m.id === currentStageData.nextMissionId) : null;
+                const nextMission = missions.find(m => m.id === currentStageData.nextMissionId);
                 if (!nextMission) {
                     handleFinalComplete(0);
                     return <EndGamePage score={appState.score} finalTime={appState.finalTimeDisplay} teamName={appState.teamName} />;
@@ -489,7 +569,6 @@ const App = () => {
             }
 
             case 'in_game': {
-                if (!currentStageData) return <p style={{padding: "20px"}}>Detectando anomalía temporal...</p>;
                 if(currentStageData.type === 'final') return <FinalSection stage={currentStageData} onComplete={handleFinalComplete} />;
                 if (appState.subStage === 'anchor') return <AnchorSection stage={currentStageData} onComplete={handleAnchorComplete} />;
                 if (appState.subStage === 'trivia') return <TriviaSection stage={currentStageData} onComplete={handleTriviaComplete} />;
