@@ -393,6 +393,8 @@ const TriviaSection = ({ stage, onComplete }) => {
     const [selectedOption, setSelectedOption] = React.useState('');
     const [feedback, setFeedback] = React.useState({ message: '', type: ''});
     const [triviaTimer, setTriviaTimer] = React.useState(0);
+    // --- MODIFICACIÓN: Añadimos estado para el resplandor
+    const [glowClass, setGlowClass] = React.useState('');
 
     React.useEffect(() => {
         const interval = setInterval(() => setTriviaTimer(prev => prev + 1), 1000);
@@ -410,6 +412,10 @@ const TriviaSection = ({ stage, onComplete }) => {
         const finalTime = triviaTimer;
         const isCorrect = selectedOption.toUpperCase() === challenge.correctAnswer.toUpperCase();
         const pointsWon = isCorrect ? calculatePoints(finalTime) : 0;
+        
+        // --- MODIFICACIÓN: Activamos el resplandor correspondiente
+        setGlowClass(isCorrect ? 'success-glow' : 'error-glow');
+
         setFeedback({
             message: isCorrect ? `✔️ ¡Respuesta Correcta! Has recuperado ${pointsWon} Fragmentos.` : `❌ Respuesta Incorrecta. No se han recuperado Fragmentos.`,
             type: isCorrect ? 'success' : 'error'
@@ -420,7 +426,8 @@ const TriviaSection = ({ stage, onComplete }) => {
     };
 
     return (
-        <div className="challenge-container">
+        // --- MODIFICACIÓN: Aplicamos la clase de resplandor al contenedor
+        <div className={`challenge-container ${glowClass}`}>
             <h3>{missionName}</h3>
             <div className="challenge-timer">⏱️ {triviaTimer}s</div>
             <p>{challenge.question}</p>
@@ -444,6 +451,8 @@ const AnchorSection = ({ stage, onComplete }) => {
     const [anchorTimer, setAnchorTimer] = React.useState(0);
     const [isLocked, setIsLocked] = React.useState(false);
     const [feedback, setFeedback] = React.useState({ message: '', type: ''});
+    // --- MODIFICACIÓN: Añadimos estado para el resplandor
+    const [glowClass, setGlowClass] = React.useState('');
 
     React.useEffect(() => {
         const interval = setInterval(() => {
@@ -466,28 +475,45 @@ const AnchorSection = ({ stage, onComplete }) => {
             setIsLocked(true);
             const points = calculateAnchorPoints(anchorTimer);
             setError('');
+            // --- MODIFICACIÓN: Activamos el resplandor de éxito
+            setGlowClass('success-glow');
             setFeedback({ message: `✔️ ¡Ancla estabilizada! Has recuperado ${points} Fragmentos.`, type: 'success' });
             setTimeout(() => onComplete({ points: points, time: anchorTimer }), 2500);
         } else {
             setError('🚫 Ancla Temporal incorrecta. ¡La distorsión persiste!');
+            // --- MODIFICACIÓN: Activamos el resplandor de error y lo reiniciamos
+            setGlowClass('error-glow');
+            setTimeout(() => setGlowClass(''), 1500);
         }
     };
     
     const handleSkip = () => {
         setIsLocked(true);
         setError('');
+        // --- MODIFICACIÓN: Activamos el resplandor de error
+        setGlowClass('error-glow');
         setFeedback({ message: `Misión de anclaje omitida. No se han recuperado Fragmentos.`, type: 'error' });
         setTimeout(() => onComplete({ points: 0, time: anchorTimer }), 2500);
     };
 
+    // --- MEJORA DE UX AÑADIDA ---
+    const handleInputChange = (e) => {
+        // Limpia el error y el resplandor en cuanto el usuario empieza a corregir
+        if (error) setError('');
+        if (glowClass) setGlowClass('');
+        setKeyword(e.target.value);
+    };
+
     return (
-        <div className="stage-container">
+        // --- MODIFICACIÓN: Aplicamos la clase de resplandor al contenedor
+        <div className={`stage-container ${glowClass}`}>
             <h3>{anchor.missionName}</h3>
             <div className="challenge-timer">⏱️ {anchorTimer}s</div>
             <p><strong>Departamento:</strong> {stage.department}</p>
             {anchor.transmission && <div className="transmission-box"><p><strong>📡 Transmisión Interceptada:</strong> {anchor.transmission}</p></div>}
             <p><strong>Objetivo de la Coordenada:</strong> {anchor.enabler}</p>
-            <input type="text" placeholder="Ingresa el 'Ancla Temporal'" value={keyword} onChange={(e) => setKeyword(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()}/>
+            {/* --- MODIFICACIÓN: Usamos el nuevo manejador de input --- */}
+            <input type="text" placeholder="Ingresa el 'Ancla Temporal'" value={keyword} onChange={handleInputChange} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()}/>
             <div className="button-group">
                 <button className="secondary-button" onClick={handleSkip} disabled={isLocked}>No sé</button>
                 <button className="primary-button" onClick={handleUnlockInternal} disabled={isLocked}>🗝️ ANCLAR RECUERDO</button>
@@ -499,31 +525,47 @@ const AnchorSection = ({ stage, onComplete }) => {
 };
 
 const FinalSection = ({stage, onComplete}) => {
-     const [keyword, setKeyword] = React.useState('');
-     const [error, setError] = React.useState('');
-     
-     const handleUnlockInternal = () => {
-         if (keyword.toUpperCase().trim() === stage.enablerKeyword.toUpperCase().trim()) {
-             onComplete(200); // Bonus por finalizar
-         } else {
-             setError('🚫 Código final incorrecto.');
-         }
-     };
+    const [keyword, setKeyword] = React.useState('');
+    const [error, setError] = React.useState('');
+    // --- MODIFICACIÓN: Añadimos estado para el resplandor
+    const [glowClass, setGlowClass] = React.useState('');
+      
+    const handleUnlockInternal = () => {
+        if (keyword.toUpperCase().trim() === stage.enablerKeyword.toUpperCase().trim()) {
+            // --- MODIFICACIÓN: Activamos el resplandor de éxito
+            setGlowClass('success-glow');
+            onComplete(200); // Bonus por finalizar
+        } else {
+            setError('🚫 Código final incorrecto.');
+            // --- MODIFICACIÓN: Activamos el resplandor de error y lo reiniciamos
+            setGlowClass('error-glow');
+            setTimeout(() => setGlowClass(''), 1500);
+        }
+    };
+
+    const handleInputChange = (e) => {
+        if (error) setError('');
+        if (glowClass) setGlowClass('');
+        setKeyword(e.target.value);
+    };
     
-     return (
-         <div className="stage-container">
-             <h3>{stage.missionName}</h3>
-             {stage.transmission && <div className="transmission-box"><p><strong>📡 Transmisión Prioritaria:</strong> {stage.transmission}</p></div>}
-             <p><strong>Misión de Sellado:</strong> {stage.enabler}</p>
-             <input type="text" placeholder="Ingresa el Ancla Temporal Final" value={keyword} onChange={(e) => setKeyword(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()}/>
-             <div className="button-group">
-                  <button className="primary-button" onClick={handleUnlockInternal}>✨ SELLAR BRECHA TEMPORAL ✨</button>
-             </div>
-             {error && <p className="feedback error">{error}</p>}
-         </div>
-     );
+    return (
+        // --- MODIFICACIÓN: Aplicamos la clase de resplandor al contenedor
+        <div className={`stage-container ${glowClass}`}>
+            <h3>{stage.missionName}</h3>
+            {stage.transmission && <div className="transmission-box"><p><strong>📡 Transmisión Prioritaria:</strong> {stage.transmission}</p></div>}
+            <p><strong>Misión de Sellado:</strong> {stage.enabler}</p>
+            <input type="text" placeholder="Ingresa el Ancla Temporal Final" value={keyword} onChange={handleInputChange} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()}/>
+            <div className="button-group">
+                <button className="primary-button" onClick={handleUnlockInternal}>✨ SELLAR BRECHA TEMPORAL ✨</button>
+            </div>
+            {error && <p className="feedback error">{error}</p>}
+        </div>
+    );
 };
 
+
+// --- BLOQUE PRINCIPAL DE LA APP ---
 const getInitialState = () => ({ status: 'login', squadCode: null, teamName: '', currentMissionId: eventData.length > 0 ? eventData[0].id : 1, subStage: 'anchor', score: 0, mainTimer: 0, finalTimeDisplay: '', errorMessage: '', missionResults: [], pendingAnchorResult: null });
 
 const App = () => {
@@ -587,8 +629,9 @@ const App = () => {
         const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
         
         let nextStatus;
-        if (!nextMission) {
-            nextStatus = 'finished';
+        if (currentStageData.type === 'final' || !nextMission) {
+            // This case is now handled by FinalSection/EndGamePage logic
+            return;
         } else if (nextMission.department !== currentStageData.department) {
             nextStatus = 'long_travel';
         } else {
@@ -604,12 +647,7 @@ const App = () => {
         };
         
         setAppState(newState);
-
-        if (nextStatus === 'finished') {
-             handleFinalComplete(0, newState);
-        } else {
-             sendResultsToBackend(newState);
-        }
+        sendResultsToBackend(newState);
     };
 
     const handleFinalComplete = (bonusPoints, stateBeforeFinal = appState) => {
@@ -627,9 +665,10 @@ const App = () => {
         if (!currentStageData || typeof currentStageData.nextMissionId !== 'number') return;
         const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
         if (nextMission) {
-             setAppState(prev => ({ ...prev, currentMissionId: nextMission.id, status: 'in_game', subStage: 'anchor' }));
+            setAppState(prev => ({ ...prev, currentMissionId: nextMission.id, status: 'in_game', subStage: 'anchor' }));
         } else {
-             handleFinalComplete(0);
+             // Fallback if something goes wrong, but completion should be handled by components
+            handleFinalComplete(0);
         }
     };
 
@@ -653,7 +692,7 @@ const App = () => {
             case 'on_the_road': {
                 const nextMission = currentStageData ? eventData.find(m => m.id === currentStageData.nextMissionId) : null;
                 if (!nextMission) {
-                    handleFinalComplete(0);
+                    handleFinalComplete(0); // Safeguard
                     return <EndGamePage score={appState.score} finalTime={appState.finalTimeDisplay} teamName={appState.teamName} />;
                 }
                 return <EnRutaPage nextLocation={nextMission.location} department={nextMission.department} onArrival={handleArrival} />;
