@@ -97,7 +97,7 @@ const eventData = [
     },
     {
         id: 15, department: "Capital", location: "Casa Natal de Sarmiento",
-        anchor: { missionName: "Ancla: El Nacimiento del Prócer", enabler: "Consigna: Descubran el año en que nació en esta humilde vivienda il futuro presidente de la Nación.\nPista: Es conocido como el 'padre de la educación argentina'.", enablerKeyword: "1811", transmission: "En esta casa de adobe comenzó todo. Ancla el año de nacimiento del hombre que cambiaría la educación del país." },
+        anchor: { missionName: "Ancla: El Nacimiento del Prócer", enabler: "Consigna: Descubran il año en que nació en esta humilde vivienda il futuro presidente de la Nación.\nPista: Es conocido como el 'padre de la educación argentina'.", enablerKeyword: "1811", transmission: "En esta casa de adobe comenzó todo. Ancla el año de nacimiento del hombre que cambiaría la educación del país." },
         trivia: { missionName: "Trivia: La Higuera Histórica", challenge: { question: "¿Bajo la sombra de qué árbol hilaba doña Paula Albarracín mientras supervisaba la construcción de la casa?", options: ["Un algarrobo", "Una higuera", "Un olivo", "Un naranjo"], correctAnswer: "Una higuera" } },
         nextMissionId: 16
     },
@@ -253,8 +253,8 @@ const eventData = [
 const distortionEventsData = [
     {
         id: 'distorsion_1',
-        trigger: { onMissionComplete: 3 }, // Se activa al completar la misión con id 3
-        visual: { type: 'image', src: 'imagenes/AMENAZA1.png', duration: 4000 }, // 4 segundos
+        trigger: { onMissionComplete: 3 }, 
+        visual: { type: 'image', src: 'imagenes/AMENAZA1.png', duration: 4000 },
         challenge: {
             type: 'corrupt_transmission',
             title: "¡Transmisión Corrupta!",
@@ -268,17 +268,27 @@ const distortionEventsData = [
     },
     {
         id: 'distorsion_2',
-        trigger: { onMissionComplete: 8 }, // Se activa al completar la misión 8 (última de Santa Lucía)
+        trigger: { onMissionComplete: 8 }, 
         visual: { type: 'video', src: 'imagenes/AMENAZA.mp4' },
         challenge: {
-            type: 'narrative_echo', 
+            type: 'multiple_choice',
             title: "Estática Temporal",
-            message: "No creas que un simple viaje te mantendrá a salvo. Siento tu presencia moviéndose por mis dominios. Cada paso que das... lo escucho."
+            message: "No creas que un simple viaje te mantendrá a salvo. Siento tu presencia moviéndose por mis dominios. Cada paso que das... lo escucho. Pero seguro olvidaste esto:",
+            question: "¿Con qué motivo se dispuso la creación del Parque de Mayo mediante la ley provincial sancionada el 17 de mayo de 1910?",
+            options: [
+                "Honrar al presidente Domingo F. Sarmiento",
+                "Conmemorar el Centenario de la Revolución de Mayo",
+                "Celebrar la fundación de la ciudad de San Juan",
+                "Establecer la sede de la Feria Nacional del Vino"
+            ],
+            correctAnswer: "Conmemorar el Centenario de la Revolución de Mayo",
+            bonusPoints: 30,
+            penaltyPoints: 0
         }
     },
     {
         id: 'distorsion_3',
-        trigger: { onMissionComplete: 26 }, // Se activa al completar la misión 26 (última de Capital)
+        trigger: { onMissionComplete: 26 },
         visual: { type: 'video', src: 'imagenes/amenaza1.mp4' },
         challenge: {
             type: 'narrative_echo',
@@ -398,6 +408,7 @@ const DistortionEventPage = ({ event, onComplete }) => {
         const [feedback, setFeedback] = React.useState({ message: '', type: '' });
         const [isLocked, setIsLocked] = React.useState(false);
         const [answer, setAnswer] = React.useState('');
+        const [selectedOption, setSelectedOption] = React.useState('');
         const [timer, setTimer] = React.useState(challenge.timeLimit || 0);
 
         React.useEffect(() => {
@@ -423,6 +434,19 @@ const DistortionEventPage = ({ event, onComplete }) => {
             setFeedback({ message, type: isCorrect ? 'success' : 'error' });
             setTimeout(() => onComplete({ points }), 3000);
         };
+        
+        const handleMultipleChoiceSubmit = () => {
+            if (isLocked || !selectedOption) return;
+            setIsLocked(true);
+            const isCorrect = selectedOption === challenge.correctAnswer;
+            const points = isCorrect ? challenge.bonusPoints : challenge.penaltyPoints;
+            const message = isCorrect 
+                ? `✔️ ¡Memoria intacta! Recuperas ${points} Fragmentos.` 
+                : `❌ Respuesta incorrecta. No has recuperado fragmentos.`;
+            
+            setFeedback({ message, type: isCorrect ? 'success' : 'error' });
+            setTimeout(() => onComplete({ points }), 3000);
+        };
 
         const handleNarrativeContinue = () => {
              if (isLocked) return;
@@ -440,6 +464,29 @@ const DistortionEventPage = ({ event, onComplete }) => {
                         <p className="distortion-challenge-text">{challenge.question}</p>
                         <input type="text" placeholder="Último dígito" value={answer} onChange={(e) => setAnswer(e.target.value)} disabled={isLocked} />
                         <button className="primary-button" onClick={() => handleSubmit(false)} disabled={isLocked}>RESPONDER</button>
+                        {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
+                    </div>
+                );
+            case 'multiple_choice':
+                return (
+                    <div className="distortion-container">
+                        <h3>{challenge.title}</h3>
+                        <p>{challenge.message}</p>
+                        <p className="distortion-challenge-text">{challenge.question}</p>
+                        <ul className="trivia-options">
+                            {challenge.options.map(option => (
+                                <li 
+                                    key={option} 
+                                    className={selectedOption === option ? 'selected' : ''} 
+                                    onClick={() => !isLocked && setSelectedOption(option)}
+                                >
+                                    {option}
+                                </li>
+                            ))}
+                        </ul>
+                        <button className="primary-button" onClick={handleMultipleChoiceSubmit} disabled={isLocked || !selectedOption}>
+                            VERIFICAR
+                        </button>
                         {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
                     </div>
                 );
@@ -900,7 +947,8 @@ const getInitialState = () => ({
     errorMessage: '', 
     missionResults: [], 
     pendingAnchorResult: null,
-    postDistortionStatus: null
+    activeDistortionEventId: null,
+    postDistortionStatus: null,
 });
 
 const App = () => {
@@ -985,7 +1033,7 @@ const App = () => {
             setAppState({
                 ...newState,
                 status: 'distortion_event',
-                activeDistortionEventId: triggeredEvent.id, // Guardamos solo el ID
+                activeDistortionEventId: triggeredEvent.id, 
                 postDistortionStatus: nextStatus, 
             });
         } else {
@@ -1003,8 +1051,8 @@ const App = () => {
         const newState = {
             ...appState,
             score: newScore,
-            activeDistortionEventId: null, // Limpiamos el evento
-            status: appState.postDistortionStatus, // Vuelve al estado que guardamos
+            activeDistortionEventId: null, 
+            status: appState.postDistortionStatus, 
             postDistortionStatus: null,
         };
         setAppState(newState);
