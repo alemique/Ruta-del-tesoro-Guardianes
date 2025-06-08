@@ -97,7 +97,7 @@ const eventData = [
     },
     {
         id: 15, department: "Capital", location: "Casa Natal de Sarmiento",
-        anchor: { missionName: "Ancla: El Nacimiento del Prócer", enabler: "Consigna: Descubran il año en que nació en esta humilde vivienda il futuro presidente de la Nación.\nPista: Es conocido como el 'padre de la educación argentina'.", enablerKeyword: "1811", transmission: "En esta casa de adobe comenzó todo. Ancla el año de nacimiento del hombre que cambiaría la educación del país." },
+        anchor: { missionName: "Ancla: El Nacimiento del Prócer", enabler: "Consigna: Descubran el año en que nació en esta humilde vivienda il futuro presidente de la Nación.\nPista: Es conocido como el 'padre de la educación argentina'.", enablerKeyword: "1811", transmission: "En esta casa de adobe comenzó todo. Ancla el año de nacimiento del hombre que cambiaría la educación del país." },
         trivia: { missionName: "Trivia: La Higuera Histórica", challenge: { question: "¿Bajo la sombra de qué árbol hilaba doña Paula Albarracín mientras supervisaba la construcción de la casa?", options: ["Un algarrobo", "Una higuera", "Un olivo", "Un naranjo"], correctAnswer: "Una higuera" } },
         nextMissionId: 16
     },
@@ -268,7 +268,7 @@ const distortionEventsData = [
     },
     {
         id: 'distorsion_2',
-        trigger: { onLongTravel: { from: 'Santa Lucía', to: 'Capital' } },
+        trigger: { onMissionComplete: 8 }, // Se activa al completar la misión 8 (última de Santa Lucía)
         visual: { type: 'video', src: 'imagenes/AMENAZA.mp4' },
         challenge: {
             type: 'narrative_echo', 
@@ -278,7 +278,7 @@ const distortionEventsData = [
     },
     {
         id: 'distorsion_3',
-        trigger: { onLongTravel: { from: 'Capital', to: 'Rivadavia' } },
+        trigger: { onMissionComplete: 26 }, // Se activa al completar la misión 26 (última de Capital)
         visual: { type: 'video', src: 'imagenes/amenaza1.mp4' },
         challenge: {
             type: 'narrative_echo',
@@ -287,6 +287,7 @@ const distortionEventsData = [
         }
     }
 ];
+
 
 // --- FUNCIONES GLOBALES DE AYUDA ---
 const formatTime = (totalSeconds) => {
@@ -554,28 +555,18 @@ const EnRutaPage = ({ nextLocation, onArrival, department, onFinishEarly }) => {
     );
 };
 
-const LongTravelPage = ({ onArrival, nextDepartment, onFinishEarly, onTriggerEvent, resumeFromDistortion }) => {
-    const [isTraveling, setIsTraveling] = React.useState(!resumeFromDistortion);
+const LongTravelPage = ({ onArrival, nextDepartment, onFinishEarly }) => {
+    const [isTraveling, setIsTraveling] = React.useState(true);
     
     React.useEffect(() => {
-        if (resumeFromDistortion) return;
-
         const travelTimer = setTimeout(() => {
             setIsTraveling(false);
         }, 10000);
 
-        let eventTimer;
-        if (onTriggerEvent) {
-            eventTimer = setTimeout(() => {
-                onTriggerEvent();
-            }, 5000);
-        }
-
         return () => {
             clearTimeout(travelTimer);
-            if(eventTimer) clearTimeout(eventTimer);
         }
-    }, [onTriggerEvent, resumeFromDistortion]);
+    }, []);
     
     const imageUrl = nextDepartment === 'Capital' ? 'imagenes/VIAJANDO1.png' : nextDepartment === 'Rivadavia' ? 'imagenes/VIAJANDO2.png' : 'imagenes/VIAJANDO.png';
     return (
@@ -909,9 +900,7 @@ const getInitialState = () => ({
     errorMessage: '', 
     missionResults: [], 
     pendingAnchorResult: null,
-    activeDistortionEvent: null,
-    postDistortionStatus: null,
-    resumeFromDistortion: false
+    postDistortionStatus: null
 });
 
 const App = () => {
@@ -943,14 +932,8 @@ const App = () => {
         return () => clearInterval(interval);
     }, [appState.status]);
 
-    React.useEffect(() => {
-        // Limpiamos la bandera de resumir después de que se haya usado en un render
-        if (appState.resumeFromDistortion) {
-            setAppState(prev => ({ ...prev, resumeFromDistortion: false }));
-        }
-    }, [appState.resumeFromDistortion]);
-
     const currentStageData = eventData.find(m => m.id === appState.currentMissionId);
+    const activeDistortionEvent = distortionEventsData.find(e => e.id === appState.activeDistortionEventId);
 
     const handleLogin = (code, name) => {
         const initialState = getInitialState();
@@ -1002,7 +985,7 @@ const App = () => {
             setAppState({
                 ...newState,
                 status: 'distortion_event',
-                activeDistortionEvent: triggeredEvent,
+                activeDistortionEventId: triggeredEvent.id, // Guardamos solo el ID
                 postDistortionStatus: nextStatus, 
             });
         } else {
@@ -1020,11 +1003,9 @@ const App = () => {
         const newState = {
             ...appState,
             score: newScore,
-            activeDistortionEvent: null,
+            activeDistortionEventId: null, // Limpiamos el evento
             status: appState.postDistortionStatus, // Vuelve al estado que guardamos
             postDistortionStatus: null,
-            // Marcamos que el próximo viaje largo debe reanudarse, no empezar de cero
-            resumeFromDistortion: appState.postDistortionStatus === 'long_travel'
         };
         setAppState(newState);
         sendResultsToBackend(newState);
@@ -1058,7 +1039,7 @@ const App = () => {
                 status: 'in_game',
                 subStage: 'anchor',
                 currentMissionId: 8,
-                activeDistortionEvent: null,
+                activeDistortionEventId: null,
                 postDistortionStatus: null
             }));
         }
@@ -1071,7 +1052,7 @@ const App = () => {
                 status: 'in_game',
                 subStage: 'anchor',
                 currentMissionId: 26,
-                activeDistortionEvent: null,
+                activeDistortionEventId: null,
                 postDistortionStatus: null
             }));
         }
@@ -1103,8 +1084,8 @@ const App = () => {
     };
 
     const renderContent = () => {
-        if (appState.status === 'distortion_event') {
-            return <DistortionEventPage event={appState.activeDistortionEvent} onComplete={handleDistortionComplete} />;
+        if (appState.status === 'distortion_event' && activeDistortionEvent) {
+            return <DistortionEventPage event={activeDistortionEvent} onComplete={handleDistortionComplete} />;
         }
         
         if (appState.status === 'in_game' && !currentStageData) {
@@ -1117,21 +1098,14 @@ const App = () => {
             
             case 'long_travel': {
                 if (!currentStageData.nextMissionId) return null;
-                const fromDept = currentStageData.department;
                 const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
                 if (!nextMission) { handleFinalComplete(0); return null; }
                 const toDept = nextMission.department;
 
-                const travelEvent = distortionEventsData.find(e => 
-                    e.trigger?.onLongTravel?.from === fromDept && e.trigger?.onLongTravel?.to === toDept
-                );
-                
                 return <LongTravelPage 
                             nextDepartment={toDept} 
                             onArrival={handleArrival} 
                             onFinishEarly={handleFinishEarly}
-                            onTriggerEvent={travelEvent ? () => setAppState(prev => ({...prev, status: 'distortion_event', activeDistortionEvent: travelEvent, postDistortionStatus: 'long_travel'})) : null}
-                            resumeFromDistortion={appState.resumeFromDistortion}
                         />;
             }
             
