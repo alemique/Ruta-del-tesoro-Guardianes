@@ -3,10 +3,7 @@
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym5-onTOyzlqZn_G4O-5acxAZzReYjIOY5SF8tBh3TtT2jEFVw6IZ2MMMtkHGtRl0F/exec';
 
 // --- LISTA DE USUARIOS AUTORIZADOS (LÓGICA) ---
-const validUsers = [
-    'ADMIN',
-    ...Array.from({ length: 50 }, (_, i) => `Guardian${String(i + 1).padStart(2, '0')}`)
-];
+// La constante 'validUsers' ha sido eliminada. La validación ahora es responsabilidad del backend.
 
 // --- DATOS COMPLETOS DEL EVENTO (DATOS) ---
 const eventData = [
@@ -367,7 +364,7 @@ async function sendResultsToBackend(data) {
         const formData = new FormData();
         formData.append('payload', JSON.stringify(payload));
         
-        await fetch(GOOGLE_SCRIPT_URL, {
+        await fetch(`${GOOGLE_SCRIPT_URL}?action=saveResults`, {
             method: 'POST',
             body: formData,
         });
@@ -492,7 +489,7 @@ const DistortionEventPage = ({ event, onComplete }) => {
                 );
             case 'narrative_echo':
                  return (
-                    <div className="distortion-container">
+                     <div className="distortion-container">
                          <h3>{challenge.title}</h3>
                          <p className="distortion-narrative-text">{challenge.message}</p>
                          <button className="primary-button" onClick={handleNarrativeContinue} disabled={isLocked}>CONTINUAR MISIÓN...</button>
@@ -535,24 +532,60 @@ const Header = ({ teamName, score, timer }) => (
 
 const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
     const [squadCode, setSquadCode] = React.useState('');
+    const [isLoading, setIsLoading] = React.useState(false);
     const logoUrl = "imagenes/LOGO 3 (1).png";
-    const handleLoginInternal = () => {
-        const enteredCode = squadCode.trim();
-        if (validUsers.includes(enteredCode)) {
-            onLogin(enteredCode, enteredCode);
-            if (typeof setErrorMessage === 'function') setErrorMessage('');
-        } else {
-            if (typeof setErrorMessage === 'function') setErrorMessage('⚠️ Código de Guardián no válido. Verifica tus credenciales.');
+
+    const handleLoginInternal = async () => {
+        const enteredCode = squadCode.trim().toUpperCase();
+        if (!enteredCode || isLoading) return;
+
+        setIsLoading(true);
+        setErrorMessage('');
+
+        try {
+            const validationUrl = `${GOOGLE_SCRIPT_URL}?action=validateUser&squadCode=${enteredCode}`;
+            
+            const response = await fetch(validationUrl, { method: 'POST' });
+            if (!response.ok) {
+                 throw new Error('Error en la respuesta del servidor.');
+            }
+            const data = await response.json();
+
+            if (data.valid) {
+                onLogin(enteredCode, enteredCode);
+            } else {
+                setErrorMessage('⚠️ Código de Guardián no válido. Verifica tus credenciales.');
+            }
+        } catch (error) {
+            console.error("Error de conexión al validar:", error);
+            setErrorMessage('❌ Error de conexión. No se pudo verificar el código.');
+        } finally {
+            setIsLoading(false);
         }
     };
+
     return (
         <div className="login-container">
             <img src={logoUrl} alt="Logo Guardianes del Tiempo" className="logo" onError={(e) => { e.target.onerror = null; e.target.src="https://i.imgur.com/ZKiX1mO.png"; }} />
             <h1>RUTA DEL TESORO:<br/>GUARDIANES DEL TIEMPO</h1>
             <p className="lema">"¡El legado de San Juan te necesita! ¿Aceptas la misión?"</p>
             <label htmlFor="squadCode">Código de Guardián:</label>
-            <input id="squadCode" type="text" placeholder="Ingresa tu código de Guardián" value={squadCode} onChange={(e) => setSquadCode(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleLoginInternal()} />
-            <button className="primary-button" onClick={handleLoginInternal}>ACTIVAR GUÍA DEL TIEMPO</button>
+            <input 
+                id="squadCode" 
+                type="text" 
+                placeholder="Ingresa tu código de Guardián" 
+                value={squadCode} 
+                onChange={(e) => setSquadCode(e.target.value)} 
+                onKeyPress={(e) => e.key === 'Enter' && handleLoginInternal()} 
+                disabled={isLoading}
+            />
+            <button 
+                className="primary-button" 
+                onClick={handleLoginInternal} 
+                disabled={isLoading}
+            >
+                {isLoading ? 'VERIFICANDO...' : 'ACTIVAR GUÍA DEL TIEMPO'}
+            </button>
             <div className="sponsors-section">
                 <h2 className="sponsors-title">ASISTENTES DEL TIEMPO</h2>
                 <p className="sponsors-description">Recuerda visitar nuestros Asistentes del Tiempo, tendrán sorpresas y puntos bonus para vos.</p>
