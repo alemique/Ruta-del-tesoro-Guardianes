@@ -251,7 +251,9 @@ const distortionEventsData = [
     {
         id: 'distorsion_1',
         trigger: { onMissionComplete: 3 }, 
-        visual: { type: 'image', src: 'imagenes/AMENAZA1.png', duration: 4000 },
+        // --- INICIO DE LA MODIFICACIÓN ---
+        visual: { type: 'video', src: 'imagenes/AMENAZA2.mp4' },
+        // --- FIN DE LA MODIFICACIÓN ---
         challenge: {
             type: 'corrupt_transmission',
             title: "¡Transmisión Corrupta!",
