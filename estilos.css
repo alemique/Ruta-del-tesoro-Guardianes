@@ -740,3 +740,104 @@ input:not(.login-container input)::placeholder {
     border-color: var(--color-feedback-error);
     transform: scale(1.05);
 }
+
+/* ... (Todo tu CSS anterior va aquí, no lo borres) ... */
+
+/* --- INICIO: NUEVOS ESTILOS PARA MODAL DE AMENAZA Y VISUALES --- */
+
+.amenaza-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeInOverlay 0.5s ease-in-out;
+}
+
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.amenaza-modal-content {
+    width: 90%;
+    max-width: 600px; /* Un poco más grande para videos */
+    animation: zoomInContent 0.5s ease-in-out;
+}
+
+@keyframes zoomInContent {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.amenaza-visual {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    border: 3px solid var(--color-feedback-error);
+    box-shadow: 0 0 40px rgba(231, 76, 60, 0.7);
+}
+
+.distortion-container {
+    border: 2px solid var(--color-feedback-error);
+    border-radius: 10px;
+    padding: 25px;
+    background: var(--color-background-light);
+    color: var(--color-text-primary-on-dark);
+    margin: 0; /* El modal se encarga del centrado */
+    text-align: center;
+}
+
+.distortion-container h3 {
+    color: var(--color-feedback-error);
+    font-size: 2.2rem;
+    border-bottom-color: var(--color-feedback-error);
+}
+
+.distortion-timer {
+    font-family: var(--font-primary);
+    font-size: 2.8rem;
+    color: var(--color-feedback-error);
+    margin: 15px 0;
+    animation: pulseTemporal 1.2s infinite;
+}
+
+.distortion-challenge-text {
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--color-text-secondary-on-dark);
+    margin: 15px 0;
+}
+
+.distortion-narrative-text {
+    font-size: 1.2rem;
+    font-style: italic;
+    color: var(--color-text-primary-on-dark);
+    margin: 20px 5px;
+    line-height: 1.7;
+}
+
+.distortion-container input {
+    font-family: var(--font-secondary);
+    width: calc(100% - 24px);
+    padding: 12px;
+    font-size: 1.1rem;
+    border: 2px solid var(--color-feedback-error);
+    border-radius: 5px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    background-color: var(--color-background-medium);
+    color: var(--color-text-primary-on-dark);
+    text-align: center;
+}
+
+.distortion-container .feedback.neutral {
+    color: var(--color-text-secondary-on-dark);
+}
+
+/* --- FIN: NUEVOS ESTILOS --- */
