@@ -97,7 +97,7 @@ const eventData = [
     },
     {
         id: 15, department: "Capital", location: "Casa Natal de Sarmiento",
-        anchor: { missionName: "Ancla: El Nacimiento del Prócer", enabler: "Consigna: Descubran el año en que nació en esta humilde vivienda el futuro presidente de la Nación.\nPista: Es conocido como el 'padre de la educación argentina'.", enablerKeyword: "1811", transmission: "En esta casa de adobe comenzó todo. Ancla el año de nacimiento del hombre que cambiaría la educación del país." },
+        anchor: { missionName: "Ancla: El Nacimiento del Prócer", enabler: "Consigna: Descubran el año en que nació en esta humilde vivienda il futuro presidente de la Nación.\nPista: Es conocido como el 'padre de la educación argentina'.", enablerKeyword: "1811", transmission: "En esta casa de adobe comenzó todo. Ancla el año de nacimiento del hombre que cambiaría la educación del país." },
         trivia: { missionName: "Trivia: La Higuera Histórica", challenge: { question: "¿Bajo la sombra de qué árbol hilaba doña Paula Albarracín mientras supervisaba la construcción de la casa?", options: ["Un algarrobo", "Una higuera", "Un olivo", "Un naranjo"], correctAnswer: "Una higuera" } },
         nextMissionId: 16
     },
@@ -175,7 +175,7 @@ const eventData = [
     },
     {
         id: 28, department: "Rivadavia", location: "Jardín de los Poetas",
-        anchor: { missionName: "Ancla: El Parque Original", enabler: "Consigna: ¿Cómo se conocía antiguamente el gran espacio verde del que forma parte este jardín?\nPista: Hoy se lo conoce como Parque Provincial Rivadavia.", enablerKeyword: "Parque Bernardino Rivadavia", transmission: "Antes de ser el parque provincial, este gran pulmón verde tenía otro nombre. Ancla su denominación original." },
+        anchor: { missionName: "Ancla: El Parque Original", enabler: "Consigna: ¿Cómo se conocía antiguamente il gran espacio verde del que forma parte este jardín?\nPista: Hoy se lo conoce como Parque Provincial Rivadavia.", enablerKeyword: "Parque Bernardino Rivadavia", transmission: "Antes de ser el parque provincial, este gran pulmón verde tenía otro nombre. Ancla su denominación original." },
         trivia: { missionName: "Trivia: Homenaje en Piedra", challenge: { question: "¿A quiénes están dedicados los bustos y esculturas que se encuentran entre los senderos del jardín?", options: ["A los héroes de la independencia", "A los gobernadores de San Juan", "A los grandes poetas argentinos", "A los científicos más destacados"], correctAnswer: "A los grandes poetas argentinos" } },
         nextMissionId: 29
     },
@@ -287,7 +287,6 @@ const distortionEventsData = [
         }
     }
 ];
-
 
 // --- FUNCIONES GLOBALES DE AYUDA ---
 const formatTime = (totalSeconds) => {
@@ -986,17 +985,16 @@ const App = () => {
         };
         
         const triggeredEvent = distortionEventsData.find(e => e.trigger?.onMissionComplete === currentStageData.id);
+        const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
         
         if (triggeredEvent) {
-            const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
-            const nextStatus = nextMission.department !== currentStageData.department ? 'on_the_road' : 'long_travel';
+            const nextStatus = nextMission.department !== currentStageData.department ? 'long_travel' : 'on_the_road';
             setAppState({
                 ...newState,
                 activeModalEvent: triggeredEvent,
                 postModalStatus: nextStatus, // Guardamos a dónde ir después del modal
             });
         } else {
-            const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
             if (!nextMission) { handleFinalComplete(0); return; }
             const nextStatus = nextMission.department !== currentStageData.department ? 'long_travel' : 'on_the_road';
             const finalNewState = {...newState, status: nextStatus };
@@ -1039,6 +1037,32 @@ const App = () => {
             handleFinalComplete(0);
         }
     };
+    
+    const handleJumpToSantaLuciaEnd = () => {
+        if (window.confirm("¿Saltar al último desafío de Santa Lucía? (DEV)")) {
+            setAppState(prev => ({
+                ...prev,
+                status: 'in_game',
+                subStage: 'anchor',
+                currentMissionId: 8,
+                activeModalEvent: null,
+                postModalStatus: null
+            }));
+        }
+    };
+
+    const handleJumpToCapitalEnd = () => {
+        if (window.confirm("¿Saltar al último desafío de Capital? (DEV)")) {
+            setAppState(prev => ({
+                ...prev,
+                status: 'in_game',
+                subStage: 'anchor',
+                currentMissionId: 26,
+                activeModalEvent: null,
+                postModalStatus: null
+            }));
+        }
+    };
 
     const handleResetDevelopment = () => {
         if (window.confirm("¿Seguro que quieres reiniciar toda la misión y borrar los datos guardados? (Solo para desarrollo)")) {
@@ -1075,7 +1099,7 @@ const App = () => {
                 return <LoginPage onLogin={handleLogin} setErrorMessage={(msg) => setAppState(prev => ({ ...prev, errorMessage: msg }))} errorMessage={appState.errorMessage} />;
             
             case 'long_travel': {
-                if (!currentStageData.nextMissionId) return null; // Safety check
+                if (!currentStageData.nextMissionId) return null;
                 const fromDept = currentStageData.department;
                 const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
                 if (!nextMission) { handleFinalComplete(0); return null; }
@@ -1140,7 +1164,22 @@ const App = () => {
             <div className="dashboard-content">
                 {renderContent()}
             </div>
-            {appState.status !== 'login' && <button className="dev-reset-button" onClick={handleResetDevelopment}>RESET (DEV)</button>}
+            
+            <div className="dev-controls-container">
+                {appState.status !== 'login' && (
+                    <>
+                        <button className="dev-reset-button dev-jump-sl" onClick={handleJumpToSantaLuciaEnd}>
+                            Fin Sta. Lucía
+                        </button>
+                        <button className="dev-reset-button dev-jump-cpt" onClick={handleJumpToCapitalEnd}>
+                            Fin Capital
+                        </button>
+                        <button className="dev-reset-button dev-reset" onClick={handleResetDevelopment}>
+                            RESET
+                        </button>
+                    </>
+                )}
+            </div>
         </div>
     );
 };
