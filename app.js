@@ -114,7 +114,6 @@ const distortionEventsData = [
     }
 ];
 
-
 // --- FUNCIONES GLOBALES DE AYUDA ---
 const formatTime = (totalSeconds) => {
     const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
@@ -196,43 +195,48 @@ async function sendResultsToBackend(data) {
 
 // --- COMPONENTE MODAL PARA LAS INTERRUPCIONES DE LA AMENAZA ---
 const AmenazaModal = ({ event, onComplete }) => {
-    const [view, setView] = React.useState('visual'); // 'visual' | 'challenge'
+    const [view, setView] = React.useState('visual');
     const videoRef = React.useRef(null);
 
     React.useEffect(() => {
+        if (view !== 'visual') return;
+
         if (event.visual.type === 'video' && videoRef.current) {
-            videoRef.current.play().catch(e => console.error("Error al reproducir video:", e));
+            videoRef.current.play().catch(e => {
+                console.error("Error al auto-reproducir video:", e);
+                setView('challenge'); // Si falla la reproducción, saltar al desafío
+            });
         } else if (event.visual.type === 'image') {
             const timer = setTimeout(() => {
                 setView('challenge');
             }, event.visual.duration);
             return () => clearTimeout(timer);
         }
-    }, [event]);
+    }, [event, view]);
 
     const handleVisualEnd = () => {
         setView('challenge');
     };
 
-    const renderChallenge = () => {
+    const ChallengeRenderer = () => {
+        const { challenge } = event;
         const [feedback, setFeedback] = React.useState({ message: '', type: '' });
         const [isLocked, setIsLocked] = React.useState(false);
         const [answer, setAnswer] = React.useState('');
-        const [timer, setTimer] = React.useState(event.challenge.timeLimit || 0);
+        const [timer, setTimer] = React.useState(challenge.timeLimit || 0);
 
         React.useEffect(() => {
-            if (event.challenge.type !== 'corrupt_transmission' || isLocked || view !== 'challenge') return;
+            if (challenge.type !== 'corrupt_transmission' || isLocked) return;
             if (timer <= 0) {
                 handleSubmit(true); return;
             }
-            const interval = setInterval(() => setTimer(t => t - 1), 1000);
+            const interval = setInterval(() => setTimer(t => t > 0 ? t - 1 : 0), 1000);
             return () => clearInterval(interval);
-        }, [timer, isLocked, view]);
+        }, [timer, isLocked]);
 
         const handleSubmit = (isTimeout = false) => {
             if (isLocked) return;
             setIsLocked(true);
-            const { challenge } = event;
             const isCorrect = !isTimeout && answer.trim() === challenge.correctAnswer;
             const points = isCorrect ? challenge.bonusPoints : (isTimeout ? challenge.penaltyPoints : 0);
             const message = isCorrect
@@ -251,14 +255,14 @@ const AmenazaModal = ({ event, onComplete }) => {
              onComplete({ points: 0 });
         }
 
-        switch (event.challenge.type) {
+        switch (challenge.type) {
             case 'corrupt_transmission':
                 return (
                     <div className="distortion-container">
-                        <h3>{event.challenge.title}</h3>
-                        <p>{event.challenge.message}</p>
+                        <h3>{challenge.title}</h3>
+                        <p>{challenge.message}</p>
                         <div className="distortion-timer">⏳ {timer}s</div>
-                        <p className="distortion-challenge-text">{event.challenge.question}</p>
+                        <p className="distortion-challenge-text">{challenge.question}</p>
                         <input type="text" placeholder="Último dígito" value={answer} onChange={(e) => setAnswer(e.target.value)} disabled={isLocked} />
                         <button className="primary-button" onClick={() => handleSubmit(false)} disabled={isLocked}>RESPONDER</button>
                         {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
@@ -267,12 +271,14 @@ const AmenazaModal = ({ event, onComplete }) => {
             case 'narrative_echo':
                  return (
                     <div className="distortion-container">
-                         <h3>{event.challenge.title}</h3>
-                         <p className="distortion-narrative-text">{event.challenge.message}</p>
+                         <h3>{challenge.title}</h3>
+                         <p className="distortion-narrative-text">{challenge.message}</p>
                          <button className="primary-button" onClick={handleNarrativeContinue} disabled={isLocked}>CONTINUAR MISIÓN...</button>
                     </div>
                  );
-            default: return null;
+            default:
+                onComplete({ points: 0 }); // Falla segura si el tipo de desafío no es válido
+                return null;
         }
     };
 
@@ -285,11 +291,12 @@ const AmenazaModal = ({ event, onComplete }) => {
                 {view === 'visual' && event.visual.type === 'image' && (
                     <img className="amenaza-visual" src={event.visual.src} alt="Interrupción de la Amenaza" />
                 )}
-                {view === 'challenge' && renderChallenge()}
+                {view === 'challenge' && <ChallengeRenderer />}
             </div>
         </div>
     );
 };
+
 
 const Header = ({ teamName, score, timer }) => (
     <div className="header">
@@ -381,17 +388,17 @@ const LongTravelPage = ({ onArrival, nextDepartment, onFinishEarly, onTriggerEve
             setIsTraveling(false);
         }, 10000);
 
+        let eventTimer;
         if (onTriggerEvent) {
-            const eventTimer = setTimeout(() => {
+            eventTimer = setTimeout(() => {
                 onTriggerEvent();
             }, 5000);
-             return () => {
-                clearTimeout(travelTimer);
-                clearTimeout(eventTimer);
-             }
         }
 
-        return () => clearTimeout(travelTimer);
+        return () => {
+            clearTimeout(travelTimer);
+            if(eventTimer) clearTimeout(eventTimer);
+        }
     }, [onTriggerEvent]);
     
     const imageUrl = nextDepartment === 'Capital' ? 'imagenes/VIAJANDO1.png' : nextDepartment === 'Rivadavia' ? 'imagenes/VIAJANDO2.png' : 'imagenes/VIAJANDO.png';
@@ -726,7 +733,8 @@ const getInitialState = () => ({
     errorMessage: '', 
     missionResults: [], 
     pendingAnchorResult: null,
-    activeModalEvent: null
+    activeModalEvent: null,
+    postModalStatus: null
 });
 
 const App = () => {
@@ -794,8 +802,7 @@ const App = () => {
         };
 
         const updatedResults = [...appState.missionResults, completeMissionRecord];
-        
-        const triggeredEvent = distortionEventsData.find(e => e.trigger?.onMissionComplete === currentStageData.id);
+        const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
 
         const newState = {
             ...appState,
@@ -804,32 +811,33 @@ const App = () => {
             pendingAnchorResult: null,
         };
         
+        const triggeredEvent = distortionEventsData.find(e => e.trigger?.onMissionComplete === currentStageData.id);
+        
         if (triggeredEvent) {
-             setAppState({
+            const nextStatus = nextMission.department !== currentStageData.department ? 'long_travel' : 'on_the_road';
+            setAppState({
                 ...newState,
                 activeModalEvent: triggeredEvent,
+                postModalStatus: nextStatus, // Guardamos a dónde ir después del modal
             });
         } else {
-            const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
             if (!nextMission) { handleFinalComplete(0); return; }
-            
             const nextStatus = nextMission.department !== currentStageData.department ? 'long_travel' : 'on_the_road';
-            setAppState({...newState, status: nextStatus });
-            sendResultsToBackend({...newState, status: nextStatus });
+            const finalNewState = {...newState, status: nextStatus };
+            setAppState(finalNewState);
+            sendResultsToBackend(finalNewState);
         }
     };
 
     const handleModalComplete = (result) => {
         const newScore = Math.max(0, appState.score + (result.points || 0));
         
-        const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
-        const nextStatus = nextMission.department !== currentStageData.department ? 'long_travel' : 'on_the_road';
-
         const newState = {
             ...appState,
             score: newScore,
-            activeModalEvent: null,
-            status: nextStatus
+            activeModalEvent: null, // Cerramos el modal
+            status: appState.postModalStatus || appState.status, // Volvemos al flujo guardado, o continuamos si estábamos en un viaje
+            postModalStatus: null,
         };
         setAppState(newState);
         sendResultsToBackend(newState);
