@@ -97,7 +97,7 @@ const eventData = [
     },
     {
         id: 15, department: "Capital", location: "Casa Natal de Sarmiento",
-        anchor: { missionName: "Ancla: El Nacimiento del Prócer", enabler: "Consigna: Descubran el año en que nació en esta humilde vivienda il futuro presidente de la Nación.\nPista: Es conocido como el 'padre de la educación argentina'.", enablerKeyword: "1811", transmission: "En esta casa de adobe comenzó todo. Ancla el año de nacimiento del hombre que cambiaría la educación del país." },
+        anchor: { missionName: "Ancla: El Nacimiento del Prócer", enabler: "Consigna: Descubran il año en que nació en esta humilde vivienda il futuro presidente de la Nación.\nPista: Es conocido como el 'padre de la educación argentina'.", enablerKeyword: "1811", transmission: "En esta casa de adobe comenzó todo. Ancla el año de nacimiento del hombre que cambiaría la educación del país." },
         trivia: { missionName: "Trivia: La Higuera Histórica", challenge: { question: "¿Bajo la sombra de qué árbol hilaba doña Paula Albarracín mientras supervisaba la construcción de la casa?", options: ["Un algarrobo", "Una higuera", "Un olivo", "Un naranjo"], correctAnswer: "Una higuera" } },
         nextMissionId: 16
     },
@@ -367,7 +367,7 @@ async function sendResultsToBackend(data) {
 
 // --- COMPONENTES DE REACT ---
 
-// --- COMPONENTE PARA EVENTOS DE DISTORSIÓN (MODAL) ---
+// --- COMPONENTE PARA EVENTOS DE DISTORSIÓN (PANTALLA COMPLETA) ---
 const DistortionEventPage = ({ event, onComplete }) => {
     const [view, setView] = React.useState('visual');
     const videoRef = React.useRef(null);
@@ -378,7 +378,7 @@ const DistortionEventPage = ({ event, onComplete }) => {
         if (event.visual.type === 'video' && videoRef.current) {
             videoRef.current.play().catch(e => {
                 console.error("Error al auto-reproducir video:", e);
-                setView('challenge'); // Si falla la reproducción, saltar al desafío
+                setView('challenge'); 
             });
         } else if (event.visual.type === 'image') {
             const timer = setTimeout(() => {
@@ -554,10 +554,12 @@ const EnRutaPage = ({ nextLocation, onArrival, department, onFinishEarly }) => {
     );
 };
 
-const LongTravelPage = ({ onArrival, nextDepartment, onFinishEarly, onTriggerEvent }) => {
-    const [isTraveling, setIsTraveling] = React.useState(true);
+const LongTravelPage = ({ onArrival, nextDepartment, onFinishEarly, onTriggerEvent, resumeFromDistortion }) => {
+    const [isTraveling, setIsTraveling] = React.useState(!resumeFromDistortion);
     
     React.useEffect(() => {
+        if (resumeFromDistortion) return;
+
         const travelTimer = setTimeout(() => {
             setIsTraveling(false);
         }, 10000);
@@ -573,7 +575,7 @@ const LongTravelPage = ({ onArrival, nextDepartment, onFinishEarly, onTriggerEve
             clearTimeout(travelTimer);
             if(eventTimer) clearTimeout(eventTimer);
         }
-    }, [onTriggerEvent]);
+    }, [onTriggerEvent, resumeFromDistortion]);
     
     const imageUrl = nextDepartment === 'Capital' ? 'imagenes/VIAJANDO1.png' : nextDepartment === 'Rivadavia' ? 'imagenes/VIAJANDO2.png' : 'imagenes/VIAJANDO.png';
     return (
@@ -908,7 +910,8 @@ const getInitialState = () => ({
     missionResults: [], 
     pendingAnchorResult: null,
     activeDistortionEvent: null,
-    postDistortionStatus: null
+    postDistortionStatus: null,
+    resumeFromDistortion: false
 });
 
 const App = () => {
@@ -939,6 +942,13 @@ const App = () => {
         }
         return () => clearInterval(interval);
     }, [appState.status]);
+
+    React.useEffect(() => {
+        // Limpiamos la bandera de resumir después de que se haya usado en un render
+        if (appState.resumeFromDistortion) {
+            setAppState(prev => ({ ...prev, resumeFromDistortion: false }));
+        }
+    }, [appState.resumeFromDistortion]);
 
     const currentStageData = eventData.find(m => m.id === appState.currentMissionId);
 
@@ -1013,6 +1023,8 @@ const App = () => {
             activeDistortionEvent: null,
             status: appState.postDistortionStatus, // Vuelve al estado que guardamos
             postDistortionStatus: null,
+            // Marcamos que el próximo viaje largo debe reanudarse, no empezar de cero
+            resumeFromDistortion: appState.postDistortionStatus === 'long_travel'
         };
         setAppState(newState);
         sendResultsToBackend(newState);
@@ -1119,6 +1131,7 @@ const App = () => {
                             onArrival={handleArrival} 
                             onFinishEarly={handleFinishEarly}
                             onTriggerEvent={travelEvent ? () => setAppState(prev => ({...prev, status: 'distortion_event', activeDistortionEvent: travelEvent, postDistortionStatus: 'long_travel'})) : null}
+                            resumeFromDistortion={appState.resumeFromDistortion}
                         />;
             }
             
