@@ -367,8 +367,8 @@ async function sendResultsToBackend(data) {
 
 // --- COMPONENTES DE REACT ---
 
-// --- COMPONENTE MODAL PARA LAS INTERRUPCIONES DE LA AMENAZA ---
-const AmenazaModal = ({ event, onComplete }) => {
+// --- COMPONENTE PARA EVENTOS DE DISTORSIÓN (MODAL) ---
+const DistortionEventPage = ({ event, onComplete }) => {
     const [view, setView] = React.useState('visual');
     const videoRef = React.useRef(null);
 
@@ -907,8 +907,8 @@ const getInitialState = () => ({
     errorMessage: '', 
     missionResults: [], 
     pendingAnchorResult: null,
-    activeModalEvent: null,
-    postModalStatus: null
+    activeDistortionEvent: null,
+    postDistortionStatus: null
 });
 
 const App = () => {
@@ -932,13 +932,13 @@ const App = () => {
 
     React.useEffect(() => {
         let interval;
-        if (appState.status !== 'login' && appState.status !== 'finished' && appState.status !== 'aborted' && !appState.activeModalEvent) {
+        if (appState.status !== 'login' && appState.status !== 'finished' && appState.status !== 'aborted' && appState.status !== 'distortion_event') {
             interval = setInterval(() => {
                 setAppState(prev => ({ ...prev, mainTimer: prev.mainTimer + 1 }));
             }, 1000);
         }
         return () => clearInterval(interval);
-    }, [appState.status, appState.activeModalEvent]);
+    }, [appState.status]);
 
     const currentStageData = eventData.find(m => m.id === appState.currentMissionId);
 
@@ -987,12 +987,13 @@ const App = () => {
         const triggeredEvent = distortionEventsData.find(e => e.trigger?.onMissionComplete === currentStageData.id);
         const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
         
-        if (triggeredEvent) {
+        if (triggeredEvent && nextMission) {
             const nextStatus = nextMission.department !== currentStageData.department ? 'long_travel' : 'on_the_road';
             setAppState({
                 ...newState,
-                activeModalEvent: triggeredEvent,
-                postModalStatus: nextStatus, // Guardamos a dónde ir después del modal
+                status: 'distortion_event',
+                activeDistortionEvent: triggeredEvent,
+                postDistortionStatus: nextStatus, 
             });
         } else {
             if (!nextMission) { handleFinalComplete(0); return; }
@@ -1003,15 +1004,15 @@ const App = () => {
         }
     };
 
-    const handleModalComplete = (result) => {
+    const handleDistortionComplete = (result) => {
         const newScore = Math.max(0, appState.score + (result.points || 0));
         
         const newState = {
             ...appState,
             score: newScore,
-            activeModalEvent: null,
-            status: appState.postModalStatus || appState.status,
-            postModalStatus: null,
+            activeDistortionEvent: null,
+            status: appState.postDistortionStatus, // Vuelve al estado que guardamos
+            postDistortionStatus: null,
         };
         setAppState(newState);
         sendResultsToBackend(newState);
@@ -1045,8 +1046,8 @@ const App = () => {
                 status: 'in_game',
                 subStage: 'anchor',
                 currentMissionId: 8,
-                activeModalEvent: null,
-                postModalStatus: null
+                activeDistortionEvent: null,
+                postDistortionStatus: null
             }));
         }
     };
@@ -1058,8 +1059,8 @@ const App = () => {
                 status: 'in_game',
                 subStage: 'anchor',
                 currentMissionId: 26,
-                activeModalEvent: null,
-                postModalStatus: null
+                activeDistortionEvent: null,
+                postDistortionStatus: null
             }));
         }
     };
@@ -1090,6 +1091,10 @@ const App = () => {
     };
 
     const renderContent = () => {
+        if (appState.status === 'distortion_event') {
+            return <DistortionEventPage event={appState.activeDistortionEvent} onComplete={handleDistortionComplete} />;
+        }
+        
         if (appState.status === 'in_game' && !currentStageData) {
             return <p style={{padding: "20px"}}>Detectando anomalía temporal...</p>;
         }
@@ -1113,7 +1118,7 @@ const App = () => {
                             nextDepartment={toDept} 
                             onArrival={handleArrival} 
                             onFinishEarly={handleFinishEarly}
-                            onTriggerEvent={travelEvent ? () => setAppState(prev => ({...prev, activeModalEvent: travelEvent, postModalStatus: null})) : null}
+                            onTriggerEvent={travelEvent ? () => setAppState(prev => ({...prev, status: 'distortion_event', activeDistortionEvent: travelEvent, postDistortionStatus: 'long_travel'})) : null}
                         />;
             }
             
@@ -1158,8 +1163,6 @@ const App = () => {
 
     return (
         <div className="app-container">
-            {appState.activeModalEvent && <AmenazaModal event={appState.activeModalEvent} onComplete={handleModalComplete} />}
-
             {appState.status !== 'login' && <Header teamName={appState.teamName} score={appState.score} timer={appState.mainTimer} />}
             <div className="dashboard-content">
                 {renderContent()}
