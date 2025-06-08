@@ -521,6 +521,9 @@ const AnchorSection = ({ stage, onComplete, onHintRequest, score }) => {
     const [feedback, setFeedback] = React.useState({ message: '', type: '' });
     const [glowClass, setGlowClass] = React.useState('');
     const [pistaGenerada, setPistaGenerada] = React.useState(null);
+    // INICIO DE CAMBIOS: Añadimos un estado para contar los intentos incorrectos
+    const [incorrectAttempts, setIncorrectAttempts] = React.useState(0);
+    // FIN DE CAMBIOS
 
     React.useEffect(() => {
         const interval = setInterval(() => {
@@ -546,7 +549,10 @@ const AnchorSection = ({ stage, onComplete, onHintRequest, score }) => {
         return 0;
     };
 
+    // INICIO DE CAMBIOS: Modificamos la función principal para manejar los intentos
     const handleUnlockInternal = () => {
+        if (isLocked) return;
+
         if (keyword.toUpperCase().trim() === anchor.enablerKeyword.toUpperCase().trim()) {
             setIsLocked(true);
             const points = calculateAnchorPoints(anchorTimer);
@@ -555,13 +561,28 @@ const AnchorSection = ({ stage, onComplete, onHintRequest, score }) => {
             setFeedback({ message: `✔️ ¡Ancla estabilizada! Has recuperado ${points} Fragmentos.`, type: 'success' });
             setTimeout(() => onComplete({ points: points, time: anchorTimer }), 2500);
         } else {
-            setError('🚫 Ancla Temporal incorrecta. ¡La distorsión persiste!');
+            const newAttemptCount = incorrectAttempts + 1;
+            setIncorrectAttempts(newAttemptCount);
             setGlowClass('error-glow');
             setTimeout(() => setGlowClass(''), 1500);
+
+            if (newAttemptCount >= 3) {
+                // Se acabaron los intentos
+                setError(''); // Limpiamos el error específico para mostrar el feedback general
+                setIsLocked(true);
+                setFeedback({ message: `❌ ¡Se agotaron los intentos! La distorsión se consolida. Avanzando...`, type: 'error' });
+                setTimeout(() => onComplete({ points: 0, time: anchorTimer }), 2500);
+            } else {
+                // Todavía quedan intentos
+                const attemptsLeft = 3 - newAttemptCount;
+                setError(`🚫 Ancla Temporal incorrecta. Quedan ${attemptsLeft} ${attemptsLeft === 1 ? 'intento' : 'intentos'}.`);
+            }
         }
     };
+    // FIN DE CAMBIOS
 
     const handleSkip = () => {
+        if (isLocked) return; // Prevenir doble click
         setIsLocked(true);
         setError('');
         setGlowClass('error-glow');
@@ -583,6 +604,10 @@ const AnchorSection = ({ stage, onComplete, onHintRequest, score }) => {
             {anchor.transmission && <div className="transmission-box"><p><strong>📡 Transmisión Interceptada:</strong> {anchor.transmission}</p></div>}
             <p><strong>Objetivo de la Coordenada:</strong> {anchor.enabler}</p>
 
+            {/* INICIO DE CAMBIOS: Mostramos los intentos restantes si hay un error */}
+            {error && <p className="feedback error">{error}</p>}
+            {/* FIN DE CAMBIOS */}
+            
             {!pistaGenerada && (
                 <div className="hint-request-container">
                     <button
@@ -600,16 +625,22 @@ const AnchorSection = ({ stage, onComplete, onHintRequest, score }) => {
                 </div>
             )}
 
-            <input type="text" placeholder="Ingresa el 'Ancla Temporal'" value={keyword} onChange={handleInputChange} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()} />
+            {/* INICIO DE CAMBIOS: Deshabilitamos el input cuando está bloqueado */}
+            <input type="text" placeholder="Ingresa el 'Ancla Temporal'" value={keyword} onChange={handleInputChange} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()} disabled={isLocked} />
+            {/* FIN DE CAMBIOS */}
+            
             <div className="button-group">
                 <button className="secondary-button" onClick={handleSkip} disabled={isLocked}>No sé</button>
                 <button className="primary-button" onClick={handleUnlockInternal} disabled={isLocked}>🗝️ ANCLAR RECUERDO</button>
             </div>
-            {error && <p className="feedback error">{error}</p>}
+            
+            {/* INICIO DE CAMBIOS: Movimos el error arriba, pero dejamos el feedback de éxito/final aquí */}
             {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
+            {/* FIN DE CAMBIOS */}
         </div>
     );
 };
+
 
 const FinalSection = ({stage, onComplete}) => {
     const [keyword, setKeyword] = React.useState('');
