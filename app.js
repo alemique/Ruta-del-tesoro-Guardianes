@@ -1,5 +1,9 @@
 // --- CONFIGURACIÓN DEL BACKEND ---
+// URL actualizada para incluir la función del ranking.
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym5-onTOyzlqZn_G4O-5acxAZzReYjIOY5SF8tBh3TtT2jEFVw6IZ2MMMtkHGtRl0F/exec';
+
+// --- LISTA DE USUARIOS AUTORIZADOS (LÓGICA) ---
+// La constante 'validUsers' ha sido eliminada. La validación ahora es responsabilidad del backend.
 
 // --- DATOS COMPLETOS DEL EVENTO (DATOS) ---
 const eventData = [
@@ -244,986 +248,1014 @@ const eventData = [
 
 // --- POOL DE EVENTOS DE DISTORSIÓN CON DISPARADORES ESPECÍFICOS ---
 const distortionEventsData = [
-    {
-        id: 'distorsion_1',
-        trigger: { onMissionComplete: 3 }, 
-        visual: { type: 'video', src: 'imagenes/AMENAZA2.mp4' },
-        challenge: {
-            type: 'corrupt_transmission',
-            title: "¡Transmisión Corrupta!",
-            message: "La Amenaza del Olvido intercepta tu señal. Responde rápido o la conexión se perderá...",
-            question: "Mis espías dicen que el Libertador se alojó en la celda del convento en 181... ¿Cuál es el último dígito? ¡Rápido!",
-            correctAnswer: "5",
-            timeLimit: 15,
-            bonusPoints: 30,
-            penaltyPoints: -10
-        }
-    },
-    {
-        id: 'distorsion_2',
-        trigger: { onMissionComplete: 8 }, 
-        visual: { type: 'video', src: 'imagenes/AMENAZA.mp4' },
-        challenge: {
-            type: 'multiple_choice',
-            title: "Estática Temporal",
-            message: "No creas que un simple viaje te mantendrá a salvo. Siento tu presencia moviéndose por mis dominios. Cada paso que das... lo escucho. Pero seguro olvidaste esto:",
-            question: "¿Con qué motivo se dispuso la creación del Parque de Mayo mediante la ley provincial sancionada el 17 de mayo de 1910?",
-            options: [
-                "Honrar al presidente Domingo F. Sarmiento",
-                "Conmemorar el Centenario de la Revolución de Mayo",
-                "Celebrar la fundación de la ciudad de San Juan",
-                "Establecer la sede de la Feria Nacional del Vino"
-            ],
-            correctAnswer: "Conmemorar el Centenario de la Revolución de Mayo",
-            bonusPoints: 30,
-            penaltyPoints: 0
-        }
-    },
-    {
-        id: 'distorsion_3',
-        trigger: { onMissionComplete: 26 },
-        visual: { type: 'video', src: 'imagenes/amenaza1.mp4' },
-        challenge: {
-            type: 'narrative_echo',
-            title: "Eco del Olvido...",
-            message: "Te acercas a un lugar de poder. Un lugar que me pertenece. Ten cuidado, Guardián, o te convertirás en otro recuerdo olvidado."
-        }
-    }
+    {
+        id: 'distorsion_1',
+        trigger: { onMissionComplete: 3 }, 
+        // --- INICIO DE LA MODIFICACIÓN ---
+        visual: { type: 'video', src: 'imagenes/AMENAZA2.mp4' },
+        // --- FIN DE LA MODIFICACIÓN ---
+        challenge: {
+            type: 'corrupt_transmission',
+            title: "¡Transmisión Corrupta!",
+            message: "La Amenaza del Olvido intercepta tu señal. Responde rápido o la conexión se perderá...",
+            question: "Mis espías dicen que el Libertador se alojó en la celda del convento en 181... ¿Cuál es el último dígito? ¡Rápido!",
+            correctAnswer: "5",
+            timeLimit: 15,
+            bonusPoints: 30,
+            penaltyPoints: -10
+        }
+    },
+    {
+        id: 'distorsion_2',
+        trigger: { onMissionComplete: 8 }, 
+        visual: { type: 'video', src: 'imagenes/AMENAZA.mp4' },
+        challenge: {
+            type: 'multiple_choice',
+            title: "Estática Temporal",
+            message: "No creas que un simple viaje te mantendrá a salvo. Siento tu presencia moviéndose por mis dominios. Cada paso que das... lo escucho. Pero seguro olvidaste esto:",
+            question: "¿Con qué motivo se dispuso la creación del Parque de Mayo mediante la ley provincial sancionada el 17 de mayo de 1910?",
+            options: [
+                "Honrar al presidente Domingo F. Sarmiento",
+                "Conmemorar el Centenario de la Revolución de Mayo",
+                "Celebrar la fundación de la ciudad de San Juan",
+                "Establecer la sede de la Feria Nacional del Vino"
+            ],
+            correctAnswer: "Conmemorar el Centenario de la Revolución de Mayo",
+            bonusPoints: 30,
+            penaltyPoints: 0
+        }
+    },
+    {
+        id: 'distorsion_3',
+        trigger: { onMissionComplete: 26 },
+        visual: { type: 'video', src: 'imagenes/amenaza1.mp4' },
+        challenge: {
+            type: 'narrative_echo',
+            title: "Eco del Olvido...",
+            message: "Te acercas a un lugar de poder. Un lugar que me pertenece. Ten cuidado, Guardián, o te convertirás en otro recuerdo olvidado."
+        }
+    }
 ];
 
 
 // --- FUNCIONES GLOBALES DE AYUDA ---
 const formatTime = (totalSeconds) => {
-    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-    const seconds = String(totalSeconds % 60).padStart(2, '0');
-    return `${hours}:${minutes}:${seconds}`;
+    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+    const seconds = String(totalSeconds % 60).padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
 };
 
 const generarPistaDinamica = (respuesta) => {
-    const respuestaSinEspacios = respuesta.replace(/ /g, '');
-    const longitud = respuestaSinEspacios.length;
-    let cantidadARevelar;
+    const respuestaSinEspacios = respuesta.replace(/ /g, '');
+    const longitud = respuestaSinEspacios.length;
+    let cantidadARevelar;
 
-    if (longitud <= 4) {
-        cantidadARevelar = 1;
-    } else if (longitud <= 8) {
-        cantidadARevelar = 2;
-    } else if (longitud <= 12) {
-        cantidadARevelar = 3;
-    } else {
-        cantidadARevelar = 4;
-    }
+    if (longitud <= 4) {
+        cantidadARevelar = 1;
+    } else if (longitud <= 8) {
+        cantidadARevelar = 2;
+    } else if (longitud <= 12) {
+        cantidadARevelar = 3;
+    } else {
+        cantidadARevelar = 4;
+    }
 
-    const indicesLetras = [];
-    respuesta.split('').forEach((char, index) => {
-        if (char !== ' ') {
-            indicesLetras.push(index);
-        }
-    });
+    const indicesLetras = [];
+    respuesta.split('').forEach((char, index) => {
+        if (char !== ' ') {
+            indicesLetras.push(index);
+        }
+    });
 
-    for (let i = indicesLetras.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [indicesLetras[i], indicesLetras[j]] = [indicesLetras[j], indicesLetras[i]];
-    }
+    for (let i = indicesLetras.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indicesLetras[i], indicesLetras[j]] = [indicesLetras[j], indicesLetras[i]];
+    }
 
-    const indicesARevelar = new Set(indicesLetras.slice(0, cantidadARevelar));
+    const indicesARevelar = new Set(indicesLetras.slice(0, cantidadARevelar));
 
-    const pistaGenerada = respuesta.split('').map((char, index) => {
-        if (char === ' ') {
-            return ' ';
-        }
-        if (indicesARevelar.has(index)) {
-            return char;
-        }
-        return '_';
-    }).join('');
+    const pistaGenerada = respuesta.split('').map((char, index) => {
+        if (char === ' ') {
+            return ' ';
+        }
+        if (indicesARevelar.has(index)) {
+            return char;
+        }
+        return '_';
+    }).join('');
 
-    return pistaGenerada;
+    return pistaGenerada;
 };
 
 
 async function sendResultsToBackend(data) {
-    const timeToSend = data.finalTimeDisplay || formatTime(data.mainTimer);
+    const timeToSend = data.finalTimeDisplay || formatTime(data.mainTimer);
 
-    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('URL_QUE_COPIASTE')) {
-        console.warn("URL del script no configurada. No se enviarán los datos.");
-        return;
-    }
-    const payload = {
-        teamName: data.teamName,
-        totalTime: timeToSend,
-        totalScore: data.score,
-        missionResults: data.missionResults
-    };
-    try {
-        const formData = new FormData();
-        formData.append('payload', JSON.stringify(payload));
-        
-        await fetch(`${GOOGLE_SCRIPT_URL}?action=saveResults`, {
-            method: 'POST',
-            body: formData,
-        });
-    } catch (error) {
-        console.error("Error al enviar la actualización al backend:", error);
-    }
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('URL_QUE_COPIASTE')) {
+        console.warn("URL del script no configurada. No se enviarán los datos.");
+        return;
+    }
+    const payload = {
+        teamName: data.teamName,
+        totalTime: timeToSend,
+        totalScore: data.score,
+        missionResults: data.missionResults
+    };
+    try {
+        const formData = new FormData();
+        formData.append('payload', JSON.stringify(payload));
+        
+        await fetch(`${GOOGLE_SCRIPT_URL}?action=saveResults`, {
+            method: 'POST',
+            body: formData,
+        });
+    } catch (error) {
+        console.error("Error al enviar la actualización al backend:", error);
+    }
 }
 
 // --- COMPONENTES DE REACT ---
 
 // --- COMPONENTE PARA EVENTOS DE DISTORSIÓN (PANTALLA COMPLETA) ---
 const DistortionEventPage = ({ event, onComplete }) => {
-    const [view, setView] = React.useState('visual');
-    const videoRef = React.useRef(null);
+    const [view, setView] = React.useState('visual');
+    const videoRef = React.useRef(null);
 
-    React.useEffect(() => {
-        if (view !== 'visual') return;
+    React.useEffect(() => {
+        if (view !== 'visual') return;
 
-        if (event.visual.type === 'video' && videoRef.current) {
-            videoRef.current.play().catch(e => {
-                console.error("Error al auto-reproducir video:", e);
-                setView('challenge'); 
-            });
-        } else if (event.visual.type === 'image') {
-            const timer = setTimeout(() => {
-                setView('challenge');
-            }, event.visual.duration);
-            return () => clearTimeout(timer);
-        }
-    }, [event, view]);
+        if (event.visual.type === 'video' && videoRef.current) {
+            videoRef.current.play().catch(e => {
+                console.error("Error al auto-reproducir video:", e);
+                setView('challenge'); 
+            });
+        } else if (event.visual.type === 'image') {
+            const timer = setTimeout(() => {
+                setView('challenge');
+            }, event.visual.duration);
+            return () => clearTimeout(timer);
+        }
+    }, [event, view]);
 
-    const handleVisualEnd = () => {
-        setView('challenge');
-    };
+    const handleVisualEnd = () => {
+        setView('challenge');
+    };
 
-    const ChallengeRenderer = () => {
-        const { challenge } = event;
-        const [feedback, setFeedback] = React.useState({ message: '', type: '' });
-        const [isLocked, setIsLocked] = React.useState(false);
-        const [answer, setAnswer] = React.useState('');
-        const [selectedOption, setSelectedOption] = React.useState('');
-        const [timer, setTimer] = React.useState(challenge.timeLimit || 0);
+    const ChallengeRenderer = () => {
+        const { challenge } = event;
+        const [feedback, setFeedback] = React.useState({ message: '', type: '' });
+        const [isLocked, setIsLocked] = React.useState(false);
+        const [answer, setAnswer] = React.useState('');
+        const [selectedOption, setSelectedOption] = React.useState('');
+        const [timer, setTimer] = React.useState(challenge.timeLimit || 0);
 
-        React.useEffect(() => {
-            if (challenge.type !== 'corrupt_transmission' || isLocked) return;
-            if (timer <= 0) {
-                handleSubmit(true); return;
-            }
-            const interval = setInterval(() => setTimer(t => t > 0 ? t - 1 : 0), 1000);
-            return () => clearInterval(interval);
-        }, [timer, isLocked]);
+        React.useEffect(() => {
+            if (challenge.type !== 'corrupt_transmission' || isLocked) return;
+            if (timer <= 0) {
+                handleSubmit(true); return;
+            }
+            const interval = setInterval(() => setTimer(t => t > 0 ? t - 1 : 0), 1000);
+            return () => clearInterval(interval);
+        }, [timer, isLocked]);
 
-        const handleSubmit = (isTimeout = false) => {
-            if (isLocked) return;
-            setIsLocked(true);
-            const isCorrect = !isTimeout && answer.trim() === challenge.correctAnswer;
-            const points = isCorrect ? challenge.bonusPoints : (isTimeout ? challenge.penaltyPoints : 0);
-            const message = isCorrect
-                ? `✔️ Señal recuperada. ¡Has ganado ${points} Fragmentos extra!`
-                : (isTimeout
-                    ? `❌ ¡Tiempo agotado! La Amenaza te ha costado ${Math.abs(points)} Fragmentos.`
-                    : '❌ Respuesta incorrecta. La conexión se perdió.');
+        const handleSubmit = (isTimeout = false) => {
+            if (isLocked) return;
+            setIsLocked(true);
+            const isCorrect = !isTimeout && answer.trim() === challenge.correctAnswer;
+            const points = isCorrect ? challenge.bonusPoints : (isTimeout ? challenge.penaltyPoints : 0);
+            const message = isCorrect
+                ? `✔️ Señal recuperada. ¡Has ganado ${points} Fragmentos extra!`
+                : (isTimeout
+                    ? `❌ ¡Tiempo agotado! La Amenaza te ha costado ${Math.abs(points)} Fragmentos.`
+                    : '❌ Respuesta incorrecta. La conexión se perdió.');
 
-            setFeedback({ message, type: isCorrect ? 'success' : 'error' });
-            setTimeout(() => onComplete({ points }), 3000);
-        };
-        
-        const handleMultipleChoiceSubmit = () => {
-            if (isLocked || !selectedOption) return;
-            setIsLocked(true);
-            const isCorrect = selectedOption === challenge.correctAnswer;
-            const points = isCorrect ? challenge.bonusPoints : challenge.penaltyPoints;
-            const message = isCorrect 
-                ? `✔️ ¡Memoria intacta! Recuperas ${points} Fragmentos.` 
-                : `❌ Respuesta incorrecta. No has recuperado fragmentos.`;
-            
-            setFeedback({ message, type: isCorrect ? 'success' : 'error' });
-            setTimeout(() => onComplete({ points }), 3000);
-        };
+            setFeedback({ message, type: isCorrect ? 'success' : 'error' });
+            setTimeout(() => onComplete({ points }), 3000);
+        };
+        
+        const handleMultipleChoiceSubmit = () => {
+            if (isLocked || !selectedOption) return;
+            setIsLocked(true);
+            const isCorrect = selectedOption === challenge.correctAnswer;
+            const points = isCorrect ? challenge.bonusPoints : challenge.penaltyPoints;
+            const message = isCorrect 
+                ? `✔️ ¡Memoria intacta! Recuperas ${points} Fragmentos.` 
+                : `❌ Respuesta incorrecta. No has recuperado fragmentos.`;
+            
+            setFeedback({ message, type: isCorrect ? 'success' : 'error' });
+            setTimeout(() => onComplete({ points }), 3000);
+        };
 
-        const handleNarrativeContinue = () => {
-             if (isLocked) return;
-             setIsLocked(true);
-             onComplete({ points: 0 });
-        }
+        const handleNarrativeContinue = () => {
+             if (isLocked) return;
+             setIsLocked(true);
+             onComplete({ points: 0 });
+        }
 
-        switch (challenge.type) {
-            case 'corrupt_transmission':
-                return (
-                    <div className="distortion-container">
-                        <h3>{challenge.title}</h3>
-                        <p>{challenge.message}</p>
-                        <div className="distortion-timer">⏳ {timer}s</div>
-                        <p className="distortion-challenge-text">{challenge.question}</p>
-                        <input type="text" placeholder="Último dígito" value={answer} onChange={(e) => setAnswer(e.target.value)} disabled={isLocked} />
-                        <button className="primary-button" onClick={() => handleSubmit(false)} disabled={isLocked}>RESPONDER</button>
-                        {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
-                    </div>
-                );
-            case 'multiple_choice':
-                return (
-                    <div className="distortion-container">
-                        <h3>{challenge.title}</h3>
-                        <p>{challenge.message}</p>
-                        <p className="distortion-challenge-text">{challenge.question}</p>
-                        <ul className="trivia-options">
-                            {challenge.options.map(option => (
-                                <li 
-                                    key={option} 
-                                    className={selectedOption === option ? 'selected' : ''} 
-                                    onClick={() => !isLocked && setSelectedOption(option)}
-                                >
-                                    {option}
-                                </li>
-                            ))}
-                        </ul>
-                        <button className="primary-button" onClick={handleMultipleChoiceSubmit} disabled={isLocked || !selectedOption}>
-                            VERIFICAR
-                        </button>
-                        {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
-                    </div>
-                );
-            case 'narrative_echo':
-                 return (
-                    <div className="distortion-container">
-                         <h3>{challenge.title}</h3>
-                         <p className="distortion-narrative-text">{challenge.message}</p>
-                         <button className="primary-button" onClick={handleNarrativeContinue} disabled={isLocked}>CONTINUAR MISIÓN...</button>
-                    </div>
-                 );
-            default:
-                onComplete({ points: 0 });
-                return null;
-        }
-    };
+        switch (challenge.type) {
+            case 'corrupt_transmission':
+                return (
+                    <div className="distortion-container">
+                        <h3>{challenge.title}</h3>
+                        <p>{challenge.message}</p>
+                        <div className="distortion-timer">⏳ {timer}s</div>
+                        <p className="distortion-challenge-text">{challenge.question}</p>
+                        <input type="text" placeholder="Último dígito" value={answer} onChange={(e) => setAnswer(e.target.value)} disabled={isLocked} />
+                        <button className="primary-button" onClick={() => handleSubmit(false)} disabled={isLocked}>RESPONDER</button>
+                        {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
+                    </div>
+                );
+            case 'multiple_choice':
+                return (
+                    <div className="distortion-container">
+                        <h3>{challenge.title}</h3>
+                        <p>{challenge.message}</p>
+                        <p className="distortion-challenge-text">{challenge.question}</p>
+                        <ul className="trivia-options">
+                            {challenge.options.map(option => (
+                                <li 
+                                    key={option} 
+                                    className={selectedOption === option ? 'selected' : ''} 
+                                    onClick={() => !isLocked && setSelectedOption(option)}
+                                >
+                                    {option}
+                                </li>
+                            ))}
+                        </ul>
+                        <button className="primary-button" onClick={handleMultipleChoiceSubmit} disabled={isLocked || !selectedOption}>
+                            VERIFICAR
+                        </button>
+                        {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
+                    </div>
+                );
+            case 'narrative_echo':
+                 return (
+                     <div className="distortion-container">
+                         <h3>{challenge.title}</h3>
+                         <p className="distortion-narrative-text">{challenge.message}</p>
+                         <button className="primary-button" onClick={handleNarrativeContinue} disabled={isLocked}>CONTINUAR MISIÓN...</button>
+                    </div>
+                 );
+            default:
+                onComplete({ points: 0 });
+                return null;
+        }
+    };
 
-    return (
-        <div className="amenaza-modal-overlay">
-            <div className="amenaza-modal-content">
-                {view === 'visual' && event.visual.type === 'video' && (
-                    <video ref={videoRef} className="amenaza-visual" src={event.visual.src} onEnded={handleVisualEnd} muted playsInline />
-                )}
-                {view === 'visual' && event.visual.type === 'image' && (
-                    <img className="amenaza-visual" src={event.visual.src} alt="Interrupción de la Amenaza" />
-                )}
-                {view === 'challenge' && <ChallengeRenderer />}
-            </div>
-        </div>
-    );
+    return (
+        <div className="amenaza-modal-overlay">
+            <div className="amenaza-modal-content">
+                {view === 'visual' && event.visual.type === 'video' && (
+                    <video ref={videoRef} className="amenaza-visual" src={event.visual.src} onEnded={handleVisualEnd} muted playsInline />
+                )}
+                {view === 'visual' && event.visual.type === 'image' && (
+                    <img className="amenaza-visual" src={event.visual.src} alt="Interrupción de la Amenaza" />
+                )}
+                {view === 'challenge' && <ChallengeRenderer />}
+            </div>
+        </div>
+    );
 };
 
 
 const Header = ({ teamName, score, timer }) => (
-    <div className="header">
-        <div className="header-info">
-            <span className="team-name">{teamName || "Escuadrón Desconocido"}</span>
-            <span className="team-title">GUARDIANES DEL TIEMPO</span>
-        </div>
-        <div className="header-score">
-            <span className="score">{score} FRAGMENTOS</span>
-            <span className="timer">⏳ {formatTime(timer)}</span>
-        </div>
-    </div>
+    <div className="header">
+        <div className="header-info">
+            <span className="team-name">{teamName || "Escuadrón Desconocido"}</span>
+            <span className="team-title">GUARDIANES DEL TIEMPO</span>
+        </div>
+        <div className="header-score">
+            <span className="score">{score} FRAGMENTOS</span>
+            <span className="timer">⏳ {formatTime(timer)}</span>
+        </div>
+    </div>
 );
 
 const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
-    const [squadCode, setSquadCode] = React.useState('');
-    const [isLoading, setIsLoading] = React.useState(false);
-    const logoUrl = "imagenes/LOGO 3 (1).png";
+    const [squadCode, setSquadCode] = React.useState('');
+    const [isLoading, setIsLoading] = React.useState(false);
+    const logoUrl = "imagenes/LOGO 3 (1).png";
 
-    const handleLoginInternal = async () => {
-        const enteredCode = squadCode.trim().toUpperCase();
-        if (!enteredCode || isLoading) return;
+    const handleLoginInternal = async () => {
+        const enteredCode = squadCode.trim().toUpperCase();
+        if (!enteredCode || isLoading) return;
 
-        setIsLoading(true);
-        setErrorMessage('');
+        setIsLoading(true);
+        setErrorMessage('');
 
-        try {
-            const validationUrl = `${GOOGLE_SCRIPT_URL}?action=validateUser&squadCode=${enteredCode}`;
-            
-            const response = await fetch(validationUrl, { method: 'POST' });
-            if (!response.ok) {
-                 throw new Error('Error en la respuesta del servidor.');
-            }
-            const data = await response.json();
+        try {
+            const validationUrl = `${GOOGLE_SCRIPT_URL}?action=validateUser&squadCode=${enteredCode}`;
+            
+            const response = await fetch(validationUrl, { method: 'POST' });
+            if (!response.ok) {
+                 throw new Error('Error en la respuesta del servidor.');
+            }
+            const data = await response.json();
 
-            if (data.valid) {
-                onLogin(enteredCode, enteredCode);
-            } else {
-                setErrorMessage('⚠️ Código de Guardián no válido. Verifica tus credenciales.');
-            }
-        } catch (error) {
-            console.error("Error de conexión al validar:", error);
-            setErrorMessage('❌ Error de conexión. No se pudo verificar el código.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+            if (data.valid) {
+                onLogin(enteredCode, enteredCode);
+            } else {
+                setErrorMessage('⚠️ Código de Guardián no válido. Verifica tus credenciales.');
+            }
+        } catch (error) {
+            console.error("Error de conexión al validar:", error);
+            setErrorMessage('❌ Error de conexión. No se pudo verificar el código.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-    return (
-        <div className="login-container">
-            <img src={logoUrl} alt="Logo Guardianes del Tiempo" className="logo" onError={(e) => { e.target.onerror = null; e.target.src="https://i.imgur.com/ZKiX1mO.png"; }} />
-            <h1>RUTA DEL TESORO:<br/>GUARDIANES DEL TIEMPO</h1>
-            <p className="lema">"¡El legado de San Juan te necesita! ¿Aceptas la misión?"</p>
-            <label htmlFor="squadCode">Código de Guardián:</label>
-            <input 
-                id="squadCode" 
-                type="text" 
-                placeholder="Ingresa tu código de Guardián" 
-                value={squadCode} 
-                onChange={(e) => setSquadCode(e.target.value)} 
-                onKeyPress={(e) => e.key === 'Enter' && handleLoginInternal()} 
-                disabled={isLoading}
-            />
-            <button 
-                className="primary-button" 
-                onClick={handleLoginInternal} 
-                disabled={isLoading}
-            >
-                {isLoading ? 'VERIFICANDO...' : 'ACTIVAR GUÍA DEL TIEMPO'}
-            </button>
-            <div className="sponsors-section">
-                <h2 className="sponsors-title">ASISTENTES DEL TIEMPO</h2>
-                <p className="sponsors-description">Recuerda visitar nuestros Asistentes del Tiempo, tendrán sorpresas y puntos bonus para vos.</p>
-                <div className="sponsors-grid">
-                    <div className="sponsor-item"><img src="imagenes/muni cap.png" alt="Logo Municipalidad de la Capital" className="sponsor-logo" /></div>
-                    <div className="sponsor-item"><img src="imagenes/muni riv.png" alt="Logo Municipalidad de Rivadavia" className="sponsor-logo" /></div>
-                    <div className="sponsor-item"><img src="imagenes/muni santa lucia.jpg" alt="Logo Municipalidad de Santa Lucía" className="sponsor-logo" /></div>
-                    <div className="sponsor-item"><img src="imagenes/portho.jpg" alt="Logo Portho Gelatto" className="sponsor-logo" /></div>
-                    <div className="sponsor-item"><img src="imagenes/paseolib.png" alt="Logo Paseo Libre" className="sponsor-logo" /></div>
-                    <div className="sponsor-item"><img src="imagenes/mandina.png" alt="Logo Mandina" className="sponsor-logo" /></div>
-                    <div className="sponsor-item"><img src="imagenes/lavene.png" alt="Logo La Vene" className="sponsor-logo" /></div>
-                    <div className="sponsor-item"><img src="imagenes/la profecia.jpg" alt="Logo La Profecía" className="sponsor-logo" /></div>
-                    <div className="sponsor-item"><img src="imagenes/cocacola.png" alt="Logo Coca-Cola" className="sponsor-logo" /></div>
-                </div>
-            </div>
-            <div className="organizers-section">
-                <h2 className="organizers-title">ORGANIZADORES</h2>
-                <p className="organizers-description">Estamos en cada punto de interés para acompañarte en este gran desafío.</p>
-                <div className="organizer-logo-container">
-                    <img src="imagenes/logoasv.jpg" alt="Logo ASV - Organizador" className="organizer-logo" />
-                </div>
-            </div>
-            {errorMessage && <p className="feedback error" style={{ marginTop: '15px' }}>{errorMessage}</p>}
-        </div>
-    );
+    return (
+        <div className="login-container">
+            <img src={logoUrl} alt="Logo Guardianes del Tiempo" className="logo" onError={(e) => { e.target.onerror = null; e.target.src="https://i.imgur.com/ZKiX1mO.png"; }} />
+            <h1>RUTA DEL TESORO:<br/>GUARDIANES DEL TIEMPO</h1>
+            <p className="lema">"¡El legado de San Juan te necesita! ¿Aceptas la misión?"</p>
+            <label htmlFor="squadCode">Código de Guardián:</label>
+            <input 
+                id="squadCode" 
+                type="text" 
+                placeholder="Ingresa tu código de Guardián" 
+                value={squadCode} 
+                onChange={(e) => setSquadCode(e.target.value)} 
+                onKeyPress={(e) => e.key === 'Enter' && handleLoginInternal()} 
+                disabled={isLoading}
+            />
+            <button 
+                className="primary-button" 
+                onClick={handleLoginInternal} 
+                disabled={isLoading}
+            >
+                {isLoading ? 'VERIFICANDO...' : 'ACTIVAR GUÍA DEL TIEMPO'}
+            </button>
+            <div className="sponsors-section">
+                <h2 className="sponsors-title">ASISTENTES DEL TIEMPO</h2>
+                <p className="sponsors-description">Recuerda visitar nuestros Asistentes del Tiempo, tendrán sorpresas y puntos bonus para vos.</p>
+                <div className="sponsors-grid">
+                    <div className="sponsor-item"><img src="imagenes/muni cap.png" alt="Logo Municipalidad de la Capital" className="sponsor-logo" /></div>
+                    <div className="sponsor-item"><img src="imagenes/muni riv.png" alt="Logo Municipalidad de Rivadavia" className="sponsor-logo" /></div>
+                    <div className="sponsor-item"><img src="imagenes/muni santa lucia.jpg" alt="Logo Municipalidad de Santa Lucía" className="sponsor-logo" /></div>
+                    <div className="sponsor-item"><img src="imagenes/portho.jpg" alt="Logo Portho Gelatto" className="sponsor-logo" /></div>
+                    <div className="sponsor-item"><img src="imagenes/paseolib.png" alt="Logo Paseo Libre" className="sponsor-logo" /></div>
+                    <div className="sponsor-item"><img src="imagenes/mandina.png" alt="Logo Mandina" className="sponsor-logo" /></div>
+                    <div className="sponsor-item"><img src="imagenes/lavene.png" alt="Logo La Vene" className="sponsor-logo" /></div>
+                    <div className="sponsor-item"><img src="imagenes/la profecia.jpg" alt="Logo La Profecía" className="sponsor-logo" /></div>
+                    <div className="sponsor-item"><img src="imagenes/cocacola.png" alt="Logo Coca-Cola" className="sponsor-logo" /></div>
+                </div>
+            </div>
+            <div className="organizers-section">
+                <h2 className="organizers-title">ORGANIZADORES</h2>
+                <p className="organizers-description">Estamos en cada punto de interés para acompañarte en este gran desafío.</p>
+                <div className="organizer-logo-container">
+                    <img src="imagenes/logoasv.jpg" alt="Logo ASV - Organizador" className="organizer-logo" />
+                </div>
+            </div>
+            {errorMessage && <p className="feedback error" style={{ marginTop: '15px' }}>{errorMessage}</p>}
+        </div>
+    );
 };
 
 const EnRutaPage = ({ nextLocation, onArrival, department, onFinishEarly }) => {
-    const [isTraveling, setIsTraveling] = React.useState(true);
-    React.useEffect(() => {
-        const travelTimer = setTimeout(() => {
-            setIsTraveling(false);
-        }, 10000); 
-        return () => clearTimeout(travelTimer);
-    }, []);
-    return (
-        <div className="en-ruta-container">
-            <img src="imagenes/VIAJANDO.png" alt="Portal Temporal Estilizado" className="portal-image" onError={(e) => { e.target.onerror = null; e.target.src='https://images.unsplash.com/photo-1520034475321-cbe63696469a?q=80&w=800&auto=format&fit=crop'; }} />
-            <h3>VIAJANDO A TRAVÉS DEL TIEMPO...</h3>
-            <p>Próxima Sincronización: <strong>{nextLocation}</strong> ({department})</p>
-            <p className="progress-info">Sincronizando coordenadas temporales...</p>
-            <div className="progress-bar-container"><div className="progress-bar-filler"></div></div>
-            <p>¡Mantén el rumbo, Guardián! Evita las 'distorsiones temporales' (¡y las multas de tránsito!).</p>
-            <button className="primary-button" onClick={onArrival} disabled={isTraveling}>{isTraveling ? 'SINCRONIZANDO...' : 'LLEGADA CONFIRMADA'}</button>
-            <button className="finish-early-button" onClick={onFinishEarly}>Terminar Aquí</button>
-        </div>
-    );
+    const [isTraveling, setIsTraveling] = React.useState(true);
+    React.useEffect(() => {
+        const travelTimer = setTimeout(() => {
+            setIsTraveling(false);
+        }, 10000); 
+        return () => clearTimeout(travelTimer);
+    }, []);
+    return (
+        <div className="en-ruta-container">
+            <img src="imagenes/VIAJANDO.png" alt="Portal Temporal Estilizado" className="portal-image" onError={(e) => { e.target.onerror = null; e.target.src='https://images.unsplash.com/photo-1520034475321-cbe63696469a?q=80&w=800&auto=format&fit=crop'; }} />
+            <h3>VIAJANDO A TRAVÉS DEL TIEMPO...</h3>
+            <p>Próxima Sincronización: <strong>{nextLocation}</strong> ({department})</p>
+            <p className="progress-info">Sincronizando coordenadas temporales...</p>
+            <div className="progress-bar-container"><div className="progress-bar-filler"></div></div>
+            <p>¡Mantén el rumbo, Guardián! Evita las 'distorsiones temporales' (¡y las multas de tránsito!).</p>
+            <button className="primary-button" onClick={onArrival} disabled={isTraveling}>{isTraveling ? 'SINCRONIZANDO...' : 'LLEGADA CONFIRMADA'}</button>
+            <button className="finish-early-button" onClick={onFinishEarly}>Terminar Aquí</button>
+        </div>
+    );
 };
 
 const LongTravelPage = ({ onArrival, nextDepartment, onFinishEarly }) => {
-    const [isTraveling, setIsTraveling] = React.useState(true);
-    
-    React.useEffect(() => {
-        const travelTimer = setTimeout(() => {
-            setIsTraveling(false);
-        }, 10000);
+    const [isTraveling, setIsTraveling] = React.useState(true);
+    
+    React.useEffect(() => {
+        const travelTimer = setTimeout(() => {
+            setIsTraveling(false);
+        }, 10000);
 
-        return () => {
-            clearTimeout(travelTimer);
-        }
-    }, []);
-    
-    const imageUrl = nextDepartment === 'Capital' ? 'imagenes/VIAJANDO1.png' : nextDepartment === 'Rivadavia' ? 'imagenes/VIAJANDO2.png' : 'imagenes/VIAJANDO.png';
-    return (
-        <div className="en-ruta-container">
-            <img src={imageUrl} alt={`Viajando a ${nextDepartment}`} className="portal-image" />
-            <h3>HORA DE VIAJAR MÁS LEJOS</h3>
-            <p>Rápido, debemos movernos a <strong>{nextDepartment}</strong>, han aparecido nuevos fragmentos de la historia que debemos recoger.</p>
-            <p className="progress-info">Abriendo portal de largo alcance...</p>
-            <div className="progress-bar-container"><div className="progress-bar-filler"></div></div>
-            <p style={{fontStyle: 'italic', fontSize: '0.9rem', opacity: 0.8}}>Es importante que respetes las señales de tránsito, hay controles secretos que pueden restarte puntos.</p>
-            <button className="primary-button" onClick={onArrival} disabled={isTraveling}>{isTraveling ? 'VIAJANDO...' : 'HEMOS LLEGADO'}</button>
-            <button className="finish-early-button" onClick={onFinishEarly}>Terminar Aquí</button>
-        </div>
-    );
+        return () => {
+            clearTimeout(travelTimer);
+        }
+    }, []);
+    
+    const imageUrl = nextDepartment === 'Capital' ? 'imagenes/VIAJANDO1.png' : nextDepartment === 'Rivadavia' ? 'imagenes/VIAJANDO2.png' : 'imagenes/VIAJANDO.png';
+    return (
+        <div className="en-ruta-container">
+            <img src={imageUrl} alt={`Viajando a ${nextDepartment}`} className="portal-image" />
+            <h3>HORA DE VIAJAR MÁS LEJOS</h3>
+            <p>Rápido, debemos movernos a <strong>{nextDepartment}</strong>, han aparecido nuevos fragmentos de la historia que debemos recoger.</p>
+            <p className="progress-info">Abriendo portal de largo alcance...</p>
+            <div className="progress-bar-container"><div className="progress-bar-filler"></div></div>
+            <p style={{fontStyle: 'italic', fontSize: '0.9rem', opacity: 0.8}}>Es importante que respetes las señales de tránsito, hay controles secretos que pueden restarte puntos.</p>
+            <button className="primary-button" onClick={onArrival} disabled={isTraveling}>{isTraveling ? 'VIAJANDO...' : 'HEMOS LLEGADO'}</button>
+            <button className="finish-early-button" onClick={onFinishEarly}>Terminar Aquí</button>
+        </div>
+    );
 };
 
 const EndGamePage = ({ score, finalTime, teamName }) => (
-    <div className="end-container">
-        <img src="https://cdn-icons-png.flaticon.com/512/784/784408.png" alt="Medalla o Trofeo Guardián" className="medal-image"/>
-        <h3>¡MISIÓN TEMPORAL COMPLETADA, {teamName}!</h3>
-        <p>Has estabilizado la línea del tiempo de San Juan. ¡La 'Amenaza del Olvido' ha sido contenida gracias a tu escuadrón!</p>
-        <p><strong>Fragmentos de Historia Restaurados: {score}</strong></p>
-        <p><strong>Tiempo Total de la Misión: {finalTime}</strong></p>
-        <p>¡Has ganado tu Medalla "Guardián del Tiempo"! 🏅 Los "Custodios Mayores" y otros reconocimientos serán anunciados en el Concilio de Guardianes.</p>
-        <p style={{fontSize: "0.9rem", marginTop: "20px"}}><em>No olvides compartir tu hazaña y prepararte para la celebración.</em></p>
-        
-        <Leaderboard />
-    </div>
+    <div className="end-container">
+        <img src="https://cdn-icons-png.flaticon.com/512/784/784408.png" alt="Medalla o Trofeo Guardián" className="medal-image"/>
+        <h3>¡MISIÓN TEMPORAL COMPLETADA, {teamName}!</h3>
+        <p>Has estabilizado la línea del tiempo de San Juan. ¡La 'Amenaza del Olvido' ha sido contenida gracias a tu escuadrón!</p>
+        <p><strong>Fragmentos de Historia Restaurados: {score}</strong></p>
+        <p><strong>Tiempo Total de la Misión: {finalTime}</strong></p>
+        <p>¡Has ganado tu Medalla "Guardián del Tiempo"! 🏅 Los "Custodios Mayores" y otros reconocimientos serán anunciados en el Concilio de Guardianes.</p>
+        <p style={{fontSize: "0.9rem", marginTop: "20px"}}><em>No olvides compartir tu hazaña y prepararte para la celebración.</em></p>
+        
+        <Leaderboard />
+    </div>
 );
 
 const AbortedGamePage = ({ score, finalTime, teamName }) => (
-    <div className="end-container">
-        <img src="https://cdn-icons-png.flaticon.com/512/784/784408.png" alt="Medalla o Trofeo Guardián" className="medal-image"/>
-        <h3>MISION TEMPORAL DETENIDA</h3>
-        <p><strong>{teamName}</strong></p>
-        <p>Has estabilizado sólo una parte del tiempo de San Juan. ¡La ´Amenaza del Olvido´ ha logrado avanzar en la línea del tiempo.</p>
-        
-        <p><strong>Fragmentos de Historia Restaurados: {score}</strong></p>
-        <p><strong>Tiempo Total de la Misión: {finalTime}</strong></p>
-        
-        <p>¡Has hecho un gran esfuerzo, tu Medalla de "Guardián del Tiempo"! 🏅 Los "Custodios Mayores" y otros reconocimientos serán anunciados en el Concilio de Guardianes.</p>
-        <p style={{fontSize: "0.9rem", marginTop: "20px"}}><em>No olvides compartir tu hazaña y prepararte para la celebración.</em></p>
-        
-        <Leaderboard />
-    </div>
+    <div className="end-container">
+        <img src="https://cdn-icons-png.flaticon.com/512/784/784408.png" alt="Medalla o Trofeo Guardián" className="medal-image"/>
+        <h3>MISION TEMPORAL DETENIDA</h3>
+        <p><strong>{teamName}</strong></p>
+        <p>Has estabilizado sólo una parte del tiempo de San Juan. ¡La ´Amenaza del Olvido´ ha logrado avanzar en la línea del tiempo.</p>
+        
+        <p><strong>Fragmentos de Historia Restaurados: {score}</strong></p>
+        <p><strong>Tiempo Total de la Misión: {finalTime}</strong></p>
+        
+        <p>¡Has hecho un gran esfuerzo, tu Medalla de "Guardián del Tiempo"! 🏅 Los "Custodios Mayores" y otros reconocimientos serán anunciados en el Concilio de Guardianes.</p>
+        <p style={{fontSize: "0.9rem", marginTop: "20px"}}><em>No olvides compartir tu hazaña y prepararte para la celebración.</em></p>
+        
+        <Leaderboard />
+    </div>
 );
 
 const TriviaSection = ({ stage, onComplete }) => {
-    const { challenge, missionName } = stage.trivia;
-    const [selectedOption, setSelectedOption] = React.useState('');
-    const [feedback, setFeedback] = React.useState({ message: '', type: ''});
-    const [triviaTimer, setTriviaTimer] = React.useState(0);
-    const [glowClass, setGlowClass] = React.useState('');
-    React.useEffect(() => {
-        const interval = setInterval(() => setTriviaTimer(prev => prev + 1), 1000);
-        return () => clearInterval(interval);
-    }, []);
-    const calculatePoints = (timeInSeconds) => {
-        if (timeInSeconds <= 30) return 50;
-        if (timeInSeconds <= 60) return 35;
-        if (timeInSeconds <= 90) return 20;
-        return 10;
-    };
-    const handleSubmit = () => {
-        const finalTime = triviaTimer;
-        const isCorrect = selectedOption.toUpperCase() === challenge.correctAnswer.toUpperCase();
-        const pointsWon = isCorrect ? calculatePoints(finalTime) : 0;
-        setGlowClass(isCorrect ? 'success-glow' : 'error-glow');
-        setFeedback({
-            message: isCorrect ? `✔️ ¡Respuesta Correcta! Has recuperado ${pointsWon} Fragmentos.` : `❌ Respuesta Incorrecta. No se han recuperado Fragmentos.`,
-            type: isCorrect ? 'success' : 'error'
-        });
-        setTimeout(() => {
-            onComplete({ points: pointsWon, time: finalTime });
-        }, 2500);
-    };
-    return (
-        <div className={`challenge-container ${glowClass}`}>
-            <h3>{missionName}</h3>
-            <div className="challenge-timer">⏱️ {triviaTimer}s</div>
-            <p>{challenge.question}</p>
-            <ul className="trivia-options">
-                {challenge.options.map(option => (
-                    <li key={option} className={selectedOption === option ? 'selected' : ''} onClick={() => !feedback.message && setSelectedOption(option)}>
-                        {option}
-                    </li>
-                ))}
-            </ul>
-            <button className="primary-button" onClick={handleSubmit} disabled={!selectedOption || feedback.message}>VERIFICAR TRANSMISIÓN</button>
-            {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
-        </div>
-    );
+    const { challenge, missionName } = stage.trivia;
+    const [selectedOption, setSelectedOption] = React.useState('');
+    const [feedback, setFeedback] = React.useState({ message: '', type: ''});
+    const [triviaTimer, setTriviaTimer] = React.useState(0);
+    const [glowClass, setGlowClass] = React.useState('');
+    React.useEffect(() => {
+        const interval = setInterval(() => setTriviaTimer(prev => prev + 1), 1000);
+        return () => clearInterval(interval);
+    }, []);
+    const calculatePoints = (timeInSeconds) => {
+        if (timeInSeconds <= 30) return 50;
+        if (timeInSeconds <= 60) return 35;
+        if (timeInSeconds <= 90) return 20;
+        return 10;
+    };
+    const handleSubmit = () => {
+        const finalTime = triviaTimer;
+        const isCorrect = selectedOption.toUpperCase() === challenge.correctAnswer.toUpperCase();
+        const pointsWon = isCorrect ? calculatePoints(finalTime) : 0;
+        setGlowClass(isCorrect ? 'success-glow' : 'error-glow');
+        setFeedback({
+            message: isCorrect ? `✔️ ¡Respuesta Correcta! Has recuperado ${pointsWon} Fragmentos.` : `❌ Respuesta Incorrecta. No se han recuperado Fragmentos.`,
+            type: isCorrect ? 'success' : 'error'
+        });
+        setTimeout(() => {
+            onComplete({ points: pointsWon, time: finalTime });
+        }, 2500);
+    };
+    return (
+        <div className={`challenge-container ${glowClass}`}>
+            <h3>{missionName}</h3>
+            <div className="challenge-timer">⏱️ {triviaTimer}s</div>
+            <p>{challenge.question}</p>
+            <ul className="trivia-options">
+                {challenge.options.map(option => (
+                    <li key={option} className={selectedOption === option ? 'selected' : ''} onClick={() => !feedback.message && setSelectedOption(option)}>
+                        {option}
+                    </li>
+                ))}
+            </ul>
+            <button className="primary-button" onClick={handleSubmit} disabled={!selectedOption || feedback.message}>VERIFICAR TRANSMISIÓN</button>
+            {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
+        </div>
+    );
 };
 
 const AnchorSection = ({ stage, onComplete, onHintRequest, score }) => {
-    const { anchor } = stage;
-    const [keyword, setKeyword] = React.useState('');
-    const [error, setError] = React.useState('');
-    const [anchorTimer, setAnchorTimer] = React.useState(0);
-    const [isLocked, setIsLocked] = React.useState(false);
-    const [feedback, setFeedback] = React.useState({ message: '', type: '' });
-    const [glowClass, setGlowClass] = React.useState('');
-    const [pistaGenerada, setPistaGenerada] = React.useState(null);
-    const [incorrectAttempts, setIncorrectAttempts] = React.useState(0);
+    const { anchor } = stage;
+    const [keyword, setKeyword] = React.useState('');
+    const [error, setError] = React.useState('');
+    const [anchorTimer, setAnchorTimer] = React.useState(0);
+    const [isLocked, setIsLocked] = React.useState(false);
+    const [feedback, setFeedback] = React.useState({ message: '', type: '' });
+    const [glowClass, setGlowClass] = React.useState('');
+    const [pistaGenerada, setPistaGenerada] = React.useState(null);
+    const [incorrectAttempts, setIncorrectAttempts] = React.useState(0);
 
-    React.useEffect(() => {
-        const interval = setInterval(() => {
-            if (!isLocked) setAnchorTimer(prev => prev + 1);
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [isLocked]);
-    
-    const handleHintRequest = () => {
-        if (score >= 25 && !pistaGenerada) {
-            onHintRequest();
-            const pista = generarPistaDinamica(anchor.enablerKeyword);
-            setPistaGenerada(pista);
-        }
-    };
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            if (!isLocked) setAnchorTimer(prev => prev + 1);
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [isLocked]);
+    
+    const handleHintRequest = () => {
+        if (score >= 25 && !pistaGenerada) {
+            onHintRequest();
+            const pista = generarPistaDinamica(anchor.enablerKeyword);
+            setPistaGenerada(pista);
+        }
+    };
 
-    const calculateAnchorPoints = (timeInSeconds) => {
-        if (timeInSeconds <= 60) return 100;
-        if (timeInSeconds <= 120) return 80;
-        if (timeInSeconds <= 180) return 60;
-        if (timeInSeconds <= 240) return 40;
-        if (timeInSeconds <= 300) return 20;
-        return 0;
-    };
+    const calculateAnchorPoints = (timeInSeconds) => {
+        if (timeInSeconds <= 60) return 100;
+        if (timeInSeconds <= 120) return 80;
+        if (timeInSeconds <= 180) return 60;
+        if (timeInSeconds <= 240) return 40;
+        if (timeInSeconds <= 300) return 20;
+        return 0;
+    };
 
-    const handleUnlockInternal = () => {
-        if (isLocked) return;
+    const handleUnlockInternal = () => {
+        if (isLocked) return;
 
-        if (keyword.toUpperCase().trim() === anchor.enablerKeyword.toUpperCase().trim()) {
-            setIsLocked(true);
-            const points = calculateAnchorPoints(anchorTimer);
-            setError('');
-            setGlowClass('success-glow');
-            setFeedback({ message: `✔️ ¡Ancla estabilizada! Has recuperado ${points} Fragmentos.`, type: 'success' });
-            setTimeout(() => onComplete({ points: points, time: anchorTimer }), 2500);
-        } else {
-            const newAttemptCount = incorrectAttempts + 1;
-            setIncorrectAttempts(newAttemptCount);
-            setGlowClass('error-glow');
-            setTimeout(() => setGlowClass(''), 1500);
+        if (keyword.toUpperCase().trim() === anchor.enablerKeyword.toUpperCase().trim()) {
+            setIsLocked(true);
+            const points = calculateAnchorPoints(anchorTimer);
+            setError('');
+            setGlowClass('success-glow');
+            setFeedback({ message: `✔️ ¡Ancla estabilizada! Has recuperado ${points} Fragmentos.`, type: 'success' });
+            setTimeout(() => onComplete({ points: points, time: anchorTimer }), 2500);
+        } else {
+            const newAttemptCount = incorrectAttempts + 1;
+            setIncorrectAttempts(newAttemptCount);
+            setGlowClass('error-glow');
+            setTimeout(() => setGlowClass(''), 1500);
 
-            if (newAttemptCount >= 3) {
-                setError('');
-                setIsLocked(true);
-                setFeedback({ message: `❌ ¡Se agotaron los intentos! La distorsión se consolida. Avanzando...`, type: 'error' });
-                setTimeout(() => onComplete({ points: 0, time: anchorTimer }), 2500);
-            } else {
-                const attemptsLeft = 3 - newAttemptCount;
-                setError(`🚫 Ancla Temporal incorrecta. Quedan ${attemptsLeft} ${attemptsLeft === 1 ? 'intento' : 'intentos'}.`);
-            }
-        }
-    };
+            if (newAttemptCount >= 3) {
+                setError('');
+                setIsLocked(true);
+                setFeedback({ message: `❌ ¡Se agotaron los intentos! La distorsión se consolida. Avanzando...`, type: 'error' });
+                setTimeout(() => onComplete({ points: 0, time: anchorTimer }), 2500);
+            } else {
+                const attemptsLeft = 3 - newAttemptCount;
+                setError(`🚫 Ancla Temporal incorrecta. Quedan ${attemptsLeft} ${attemptsLeft === 1 ? 'intento' : 'intentos'}.`);
+            }
+        }
+    };
 
-    const handleSkip = () => {
-        if (isLocked) return;
-        setIsLocked(true);
-        setError('');
-        setGlowClass('error-glow');
-        setFeedback({ message: `Misión de anclaje omitida. No se han recuperado Fragmentos.`, type: 'error' });
-        setTimeout(() => onComplete({ points: 0, time: anchorTimer }), 2500);
-    };
+    const handleSkip = () => {
+        if (isLocked) return;
+        setIsLocked(true);
+        setError('');
+        setGlowClass('error-glow');
+        setFeedback({ message: `Misión de anclaje omitida. No se han recuperado Fragmentos.`, type: 'error' });
+        setTimeout(() => onComplete({ points: 0, time: anchorTimer }), 2500);
+    };
 
-    const handleInputChange = (e) => {
-        if (error) setError('');
-        if (glowClass) setGlowClass('');
-        setKeyword(e.target.value);
-    };
+    const handleInputChange = (e) => {
+        if (error) setError('');
+        if (glowClass) setGlowClass('');
+        setKeyword(e.target.value);
+    };
 
-    return (
-        <div className={`stage-container ${glowClass}`}>
-            <h3>{anchor.missionName}</h3>
-            <div className="challenge-timer">⏱️ {anchorTimer}s</div>
-            <p><strong>Departamento:</strong> {stage.department}</p>
-            {anchor.transmission && <div className="transmission-box"><p><strong>📡 Transmisión Interceptada:</strong> {anchor.transmission}</p></div>}
-            <p><strong>Objetivo de la Coordenada:</strong> {anchor.enabler}</p>
+    return (
+        <div className={`stage-container ${glowClass}`}>
+            <h3>{anchor.missionName}</h3>
+            <div className="challenge-timer">⏱️ {anchorTimer}s</div>
+            <p><strong>Departamento:</strong> {stage.department}</p>
+            {anchor.transmission && <div className="transmission-box"><p><strong>📡 Transmisión Interceptada:</strong> {anchor.transmission}</p></div>}
+            <p><strong>Objetivo de la Coordenada:</strong> {anchor.enabler}</p>
 
-            {error && <p className="feedback error">{error}</p>}
-            
-            {!pistaGenerada && (
-                <div className="hint-request-container">
-                    <button
-                        className="primary-button"
-                        onClick={handleHintRequest}
-                        disabled={score < 25 || isLocked}>
-                        SOLICITAR PISTA (-25 Fragmentos)
-                    </button>
-                </div>
-            )}
-            
-            {pistaGenerada && (
-                <div className="hint-box hint-dynamic">
-                    <p><strong>💡 Pista Recuperada:</strong> {pistaGenerada}</p>
-                </div>
-            )}
+            {error && <p className="feedback error">{error}</p>}
+            
+            {!pistaGenerada && (
+                <div className="hint-request-container">
+                    <button
+                        className="primary-button"
+                        onClick={handleHintRequest}
+                        disabled={score < 25 || isLocked}>
+                        SOLICITAR PISTA (-25 Fragmentos)
+                    </button>
+                </div>
+            )}
+            
+            {pistaGenerada && (
+                <div className="hint-box hint-dynamic">
+                    <p><strong>💡 Pista Recuperada:</strong> {pistaGenerada}</p>
+                </div>
+            )}
 
-            <input type="text" placeholder="Ingresa el 'Ancla Temporal'" value={keyword} onChange={handleInputChange} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()} disabled={isLocked} />
-            
-            <div className="button-group">
-                <button className="secondary-button" onClick={handleSkip} disabled={isLocked}>No sé</button>
-                <button className="primary-button" onClick={handleUnlockInternal} disabled={isLocked}>🗝️ ANCLAR RECUERDO</button>
-            </div>
-            
-            {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
-        </div>
-    );
+            <input type="text" placeholder="Ingresa el 'Ancla Temporal'" value={keyword} onChange={handleInputChange} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()} disabled={isLocked} />
+            
+            <div className="button-group">
+                <button className="secondary-button" onClick={handleSkip} disabled={isLocked}>No sé</button>
+                <button className="primary-button" onClick={handleUnlockInternal} disabled={isLocked}>🗝️ ANCLAR RECUERDO</button>
+            </div>
+            
+            {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
+        </div>
+    );
 };
 
 
 const FinalSection = ({stage, onComplete}) => {
-    const [keyword, setKeyword] = React.useState('');
-    const [error, setError] = React.useState('');
-    const [glowClass, setGlowClass] = React.useState('');
-    
-    const handleUnlockInternal = () => {
-        if (keyword.toUpperCase().trim() === stage.enablerKeyword.toUpperCase().trim()) {
-            setGlowClass('success-glow');
-            onComplete(200);
-        } else {
-            setError('🚫 Código final incorrecto.');
-            setGlowClass('error-glow');
-            setTimeout(() => setGlowClass(''), 1500);
-        }
-    };
+    const [keyword, setKeyword] = React.useState('');
+    const [error, setError] = React.useState('');
+    const [glowClass, setGlowClass] = React.useState('');
+    
+    const handleUnlockInternal = () => {
+        if (keyword.toUpperCase().trim() === stage.enablerKeyword.toUpperCase().trim()) {
+            setGlowClass('success-glow');
+            onComplete(200);
+        } else {
+            setError('🚫 Código final incorrecto.');
+            setGlowClass('error-glow');
+            setTimeout(() => setGlowClass(''), 1500);
+        }
+    };
 
-    const handleInputChange = (e) => {
-        if (error) setError('');
-        if (glowClass) setGlowClass('');
-        setKeyword(e.target.value);
-    };
-    
-    return (
-        <div className={`stage-container ${glowClass}`}>
-            <h3>{stage.missionName}</h3>
-            {stage.transmission && <div className="transmission-box"><p><strong>📡 Transmisión Prioritaria:</strong> {stage.transmission}</p></div>}
-            <p><strong>Misión de Sellado:</strong> {stage.enabler}</p>
-            <input type="text" placeholder="Ingresa el Ancla Temporal Final" value={keyword} onChange={handleInputChange} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()}/>
-            <div className="button-group">
-                <button className="primary-button" onClick={handleUnlockInternal}>✨ SELLAR BRECHA TEMPORAL ✨</button>
-            </div>
-            {error && <p className="feedback error">{error}</p>}
-        </div>
-    );
+    const handleInputChange = (e) => {
+        if (error) setError('');
+        if (glowClass) setGlowClass('');
+        setKeyword(e.target.value);
+    };
+    
+    return (
+        <div className={`stage-container ${glowClass}`}>
+            <h3>{stage.missionName}</h3>
+            {stage.transmission && <div className="transmission-box"><p><strong>📡 Transmisión Prioritaria:</strong> {stage.transmission}</p></div>}
+            <p><strong>Misión de Sellado:</strong> {stage.enabler}</p>
+            <input type="text" placeholder="Ingresa el Ancla Temporal Final" value={keyword} onChange={handleInputChange} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()}/>
+            <div className="button-group">
+                <button className="primary-button" onClick={handleUnlockInternal}>✨ SELLAR BRECHA TEMPORAL ✨</button>
+            </div>
+            {error && <p className="feedback error">{error}</p>}
+        </div>
+    );
 };
 
 const Leaderboard = () => {
-  const LEADERBOARD_URL = 'https://script.google.com/macros/s/AKfycbym5-onTOyzlqZn_G4O-5acxAZzReYjIOY5SF8tBh3TtT2jEFVw6IZ2MMMtkHGtRl0F/exec'; 
+  const LEADERBOARD_URL = 'https://script.google.com/macros/s/AKfycbym5-onTOyzlqZn_G4O-5acxAZzReYjIOY5SF8tBh3TtT2jEFVw6IZ2MMMtkHGtRl0F/exec'; 
 
-  const [ranking, setRanking] = React.useState([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
+  const [ranking, setRanking] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
 
-  React.useEffect(() => {
-    const fetchRanking = async () => {
-      if (!LEADERBOARD_URL || LEADERBOARD_URL.includes('URL_QUE_COPIASTE')) {
-        setError('URL del ranking no configurada.');
-        setIsLoading(false);
-        return;
-      }
-      
-      try {
-        const response = await fetch(LEADERBOARD_URL);
-        if (!response.ok) {
-          throw new Error('La respuesta del servidor no fue correcta.');
-        }
-        const data = await response.json();
-        if (data.error) {
-           throw new Error(data.error);
-        }
-        setRanking(data);
-      } catch (err) {
-        setError('No se pudo cargar el ranking. Intenta más tarde.');
-        console.error("Error al obtener el ranking:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  React.useEffect(() => {
+    const fetchRanking = async () => {
+      if (!LEADERBOARD_URL || LEADERBOARD_URL.includes('URL_QUE_COPIASTE')) {
+        setError('URL del ranking no configurada.');
+        setIsLoading(false);
+        return;
+      }
+      
+      try {
+        const response = await fetch(LEADERBOARD_URL);
+        if (!response.ok) {
+          throw new Error('La respuesta del servidor no fue correcta.');
+        }
+        const data = await response.json();
+        if (data.error) {
+           throw new Error(data.error);
+        }
+        setRanking(data);
+      } catch (err) {
+        setError('No se pudo cargar el ranking. Intenta más tarde.');
+        console.error("Error al obtener el ranking:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    fetchRanking();
-  }, []);
+    fetchRanking();
+  }, []);
 
-  if (isLoading) {
-    return <p className="feedback">Cargando el Ranking de Guardianes...</p>;
-  }
+  if (isLoading) {
+    return <p className="feedback">Cargando el Ranking de Guardianes...</p>;
+  }
 
-  if (error) {
-    return <p className="feedback error">{error}</p>;
-  }
+  if (error) {
+    return <p className="feedback error">{error}</p>;
+  }
 
-  return (
-    <div className="leaderboard-container">
-      <h3>CONCILIO DE GUARDIANES</h3>
-      <table className="leaderboard-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Guardián</th>
-            <th>Fragmentos</th>
-            <th>Tiempo</th>
-          </tr>
-        </thead>
-        <tbody>
-          {ranking.slice(0, 10).map((team, index) => (
-            <tr key={index}>
-              <td>{index + 1}</td>
-              <td>{team.teamName}</td>
-              <td>{team.score}</td>
-              <td>{team.time}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+  return (
+    <div className="leaderboard-container">
+      <h3>CONCILIO DE GUARDIANES</h3>
+      <table className="leaderboard-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Guardián</th>
+            <th>Fragmentos</th>
+            <th>Tiempo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ranking.slice(0, 10).map((team, index) => (
+            <tr key={index}>
+              <td>{index + 1}</td>
+              <td>{team.teamName}</td>
+              <td>{team.score}</td>
+              <td>{team.time}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 };
 
 
 // --- BLOQUE PRINCIPAL DE LA APP ---
-const getInitialState = () => ({ 
-    status: 'login', 
-    squadCode: null, 
-    teamName: '', 
-    currentMissionId: eventData.length > 0 ? eventData[0].id : 1, 
-    subStage: 'anchor', 
-    score: 0, 
-    mainTimer: 0, 
-    finalTimeDisplay: '', 
-    errorMessage: '', 
-    missionResults: [], 
-    pendingAnchorResult: null,
-    activeDistortionEventId: null,
-    postDistortionStatus: null,
+const getInitialState = () => ({ 
+    status: 'login', 
+    squadCode: null, 
+    teamName: '', 
+    currentMissionId: eventData.length > 0 ? eventData[0].id : 1, 
+    subStage: 'anchor', 
+    score: 0, 
+    mainTimer: 0, 
+    finalTimeDisplay: '', 
+    errorMessage: '', 
+    missionResults: [], 
+    pendingAnchorResult: null,
+    activeDistortionEventId: null,
+    postDistortionStatus: null,
 });
 
 const App = () => {
-    const [appState, setAppState] = React.useState(() => {
-        const savedState = localStorage.getItem('guardianesAppState');
-        try {
-            const parsedState = savedState ? JSON.parse(savedState) : null;
-            if (parsedState && typeof parsedState.status === 'string' && parsedState.status !== 'login') {
-                return parsedState;
-            }
-        } catch (e) {
-            console.error("Error al parsear localStorage, usando estado inicial.", e);
-            localStorage.removeItem('guardianesAppState');
-        }
-        return getInitialState();
-    });
+    const [appState, setAppState] = React.useState(() => {
+        const savedState = localStorage.getItem('guardianesAppState');
+        try {
+            const parsedState = savedState ? JSON.parse(savedState) : null;
+            if (parsedState && typeof parsedState.status === 'string' && parsedState.status !== 'login') {
+                return parsedState;
+            }
+        } catch (e) {
+            console.error("Error al parsear localStorage, usando estado inicial.", e);
+            localStorage.removeItem('guardianesAppState');
+        }
+        return getInitialState();
+    });
 
-    React.useEffect(() => {
-        localStorage.setItem('guardianesAppState', JSON.stringify(appState));
-    }, [appState]);
+    React.useEffect(() => {
+        localStorage.setItem('guardianesAppState', JSON.stringify(appState));
+    }, [appState]);
 
-    React.useEffect(() => {
-        let interval;
-        if (appState.status !== 'login' && appState.status !== 'finished' && appState.status !== 'aborted' && appState.status !== 'distortion_event') {
-            interval = setInterval(() => {
-                setAppState(prev => ({ ...prev, mainTimer: prev.mainTimer + 1 }));
-            }, 1000);
-        }
-        return () => clearInterval(interval);
-    }, [appState.status]);
+    React.useEffect(() => {
+        let interval;
+        if (appState.status !== 'login' && appState.status !== 'finished' && appState.status !== 'aborted' && appState.status !== 'distortion_event') {
+            interval = setInterval(() => {
+                setAppState(prev => ({ ...prev, mainTimer: prev.mainTimer + 1 }));
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [appState.status]);
 
-    const currentStageData = eventData.find(m => m.id === appState.currentMissionId);
-    const activeDistortionEvent = distortionEventsData.find(e => e.id === appState.activeDistortionEventId);
+    const currentStageData = eventData.find(m => m.id === appState.currentMissionId);
+    const activeDistortionEvent = distortionEventsData.find(e => e.id === appState.activeDistortionEventId);
 
-    const handleLogin = (code, name) => {
-        const initialState = getInitialState();
-        const fullState = { ...initialState, status: 'in_game', squadCode: code, teamName: name };
-        setAppState(fullState);
-        sendResultsToBackend(fullState);
-    };
-    
-    const handleAnchorComplete = (anchorResult) => {
-        if (!currentStageData) return;
-        const newScore = appState.score + anchorResult.points;
-        setAppState(prev => ({ ...prev, score: newScore, subStage: 'trivia', pendingAnchorResult: anchorResult }));
-    };
-    
-    const handleRequestHint = () => {
-        setAppState(prev => ({
-            ...prev,
-            score: Math.max(0, prev.score - 25)
-        }));
-    };
-    
-    const handleTriviaComplete = (triviaResult) => {
-        if (!currentStageData || !appState.pendingAnchorResult) return;
-        
-        const newScore = appState.score + triviaResult.points;
-        const completeMissionRecord = {
-            missionId: currentStageData.id,
-            missionName: currentStageData.anchor.missionName.replace("Ancla: ", ""),
-            anchorTime: appState.pendingAnchorResult.time,
-            anchorPoints: appState.pendingAnchorResult.points,
-            triviaTime: triviaResult.time,
-            triviaPoints: triviaResult.points
-        };
+    const handleLogin = (code, name) => {
+        const initialState = getInitialState();
+        const fullState = { ...initialState, status: 'in_game', squadCode: code, teamName: name };
+        setAppState(fullState);
+        sendResultsToBackend(fullState);
+    };
+    
+    const handleAnchorComplete = (anchorResult) => {
+        if (!currentStageData) return;
+        const newScore = appState.score + anchorResult.points;
+        setAppState(prev => ({ ...prev, score: newScore, subStage: 'trivia', pendingAnchorResult: anchorResult }));
+    };
+    
+    const handleRequestHint = () => {
+        setAppState(prev => ({
+            ...prev,
+            score: Math.max(0, prev.score - 25)
+        }));
+    };
+    
+    const handleTriviaComplete = (triviaResult) => {
+        if (!currentStageData || !appState.pendingAnchorResult) return;
+        
+        const newScore = appState.score + triviaResult.points;
+        const completeMissionRecord = {
+            missionId: currentStageData.id,
+            missionName: currentStageData.anchor.missionName.replace("Ancla: ", ""),
+            anchorTime: appState.pendingAnchorResult.time,
+            anchorPoints: appState.pendingAnchorResult.points,
+            triviaTime: triviaResult.time,
+            triviaPoints: triviaResult.points
+        };
 
-        const updatedResults = [...appState.missionResults, completeMissionRecord];
-        
-        const newState = {
-            ...appState,
-            score: newScore,
-            missionResults: updatedResults,
-            pendingAnchorResult: null,
-        };
-        
-        const triggeredEvent = distortionEventsData.find(e => e.trigger?.onMissionComplete === currentStageData.id);
-        const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
-        
-        if (triggeredEvent && nextMission) {
-            const nextStatus = nextMission.department !== currentStageData.department ? 'long_travel' : 'on_the_road';
-            setAppState({
-                ...newState,
-                status: 'distortion_event',
-                activeDistortionEventId: triggeredEvent.id, 
-                postDistortionStatus: nextStatus, 
-            });
-        } else {
-            if (!nextMission) { handleFinalComplete(0); return; }
-            const nextStatus = nextMission.department !== currentStageData.department ? 'long_travel' : 'on_the_road';
-            const finalNewState = {...newState, status: nextStatus };
-            setAppState(finalNewState);
-            sendResultsToBackend(finalNewState);
-        }
-    };
+        const updatedResults = [...appState.missionResults, completeMissionRecord];
+        
+        const newState = {
+            ...appState,
+            score: newScore,
+            missionResults: updatedResults,
+            pendingAnchorResult: null,
+        };
+        
+        const triggeredEvent = distortionEventsData.find(e => e.trigger?.onMissionComplete === currentStageData.id);
+        const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
+        
+        if (triggeredEvent && nextMission) {
+            const nextStatus = nextMission.department !== currentStageData.department ? 'long_travel' : 'on_the_road';
+            setAppState({
+                ...newState,
+                status: 'distortion_event',
+                activeDistortionEventId: triggeredEvent.id, 
+                postDistortionStatus: nextStatus, 
+            });
+        } else {
+            if (!nextMission) { handleFinalComplete(0); return; }
+            const nextStatus = nextMission.department !== currentStageData.department ? 'long_travel' : 'on_the_road';
+            const finalNewState = {...newState, status: nextStatus };
+            setAppState(finalNewState);
+            sendResultsToBackend(finalNewState);
+        }
+    };
 
-    const handleDistortionComplete = (result) => {
-        const newScore = Math.max(0, appState.score + (result.points || 0));
-        
-        const newState = {
-            ...appState,
-            score: newScore,
-            activeDistortionEventId: null, 
-            status: appState.postDistortionStatus, 
-            postDistortionStatus: null,
-        };
-        setAppState(newState);
-        sendResultsToBackend(newState);
-    }
+    const handleDistortionComplete = (result) => {
+        const newScore = Math.max(0, appState.score + (result.points || 0));
+        
+        const newState = {
+            ...appState,
+            score: newScore,
+            activeDistortionEventId: null, 
+            status: appState.postDistortionStatus, 
+            postDistortionStatus: null,
+        };
+        setAppState(newState);
+        sendResultsToBackend(newState);
+    }
 
-    const handleFinalComplete = (bonusPoints) => {
-        const totalSeconds = appState.mainTimer;
-        const finalTime = formatTime(totalSeconds);
-        const finalScore = (appState.score || 0) + (bonusPoints || 0);
-        
-        const finalState = { ...appState, score: finalScore, status: 'finished', finalTimeDisplay: finalTime };
-        
-        setAppState(finalState);
-        sendResultsToBackend(finalState);
-    };
+    const handleFinalComplete = (bonusPoints) => {
+        const totalSeconds = appState.mainTimer;
+        const finalTime = formatTime(totalSeconds);
+        const finalScore = (appState.score || 0) + (bonusPoints || 0);
+        
+        const finalState = { ...appState, score: finalScore, status: 'finished', finalTimeDisplay: finalTime };
+        
+        setAppState(finalState);
+        sendResultsToBackend(finalState);
+    };
 
-    const handleArrival = () => {
-        if (!currentStageData || typeof currentStageData.nextMissionId !== 'number') return;
-        const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
-        if (nextMission) {
-            setAppState(prev => ({ ...prev, currentMissionId: nextMission.id, status: 'in_game', subStage: 'anchor' }));
-        } else {
-            handleFinalComplete(0);
-        }
-    };
-    
-    const handleResetDevelopment = () => {
-        if (window.confirm("¿Seguro que quieres reiniciar toda la misión y borrar los datos guardados? (Solo para desarrollo)")) {
-            localStorage.removeItem('guardianesAppState');
-            setAppState(getInitialState());
-        }
-    };
+    const handleArrival = () => {
+        if (!currentStageData || typeof currentStageData.nextMissionId !== 'number') return;
+        const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
+        if (nextMission) {
+            setAppState(prev => ({ ...prev, currentMissionId: nextMission.id, status: 'in_game', subStage: 'anchor' }));
+        } else {
+            handleFinalComplete(0);
+        }
+    };
+    
+    const handleJumpToSantaLuciaEnd = () => {
+        if (window.confirm("¿Saltar al último desafío de Santa Lucía? (DEV)")) {
+            setAppState(prev => ({
+                ...prev,
+                status: 'in_game',
+                subStage: 'anchor',
+                currentMissionId: 8,
+                activeDistortionEventId: null,
+                postDistortionStatus: null
+            }));
+        }
+    };
 
-    const handleFinishEarly = () => {
-        if (window.confirm('¿Estas seguro? Esto finalizará tu partida')) {
-            const totalSeconds = appState.mainTimer;
-            const finalTime = formatTime(totalSeconds);
-            const finalScore = appState.score || 0;
-            
-            const finalState = { 
-                ...appState, 
-                score: finalScore, 
-                status: 'aborted',
-                finalTimeDisplay: finalTime 
-            };
-            
-            setAppState(finalState);
-            sendResultsToBackend(finalState);
-        }
-    };
+    const handleJumpToCapitalEnd = () => {
+        if (window.confirm("¿Saltar al último desafío de Capital? (DEV)")) {
+            setAppState(prev => ({
+                ...prev,
+                status: 'in_game',
+                subStage: 'anchor',
+                currentMissionId: 26,
+                activeDistortionEventId: null,
+                postDistortionStatus: null
+            }));
+        }
+    };
 
-    const renderContent = () => {
-        if (appState.status === 'distortion_event' && activeDistortionEvent) {
-            return <DistortionEventPage event={activeDistortionEvent} onComplete={handleDistortionComplete} />;
-        }
-        
-        if (appState.status === 'in_game' && !currentStageData) {
-            return <p style={{padding: "20px"}}>Detectando anomalía temporal...</p>;
-        }
+    const handleResetDevelopment = () => {
+        if (window.confirm("¿Seguro que quieres reiniciar toda la misión y borrar los datos guardados? (Solo para desarrollo)")) {
+            localStorage.removeItem('guardianesAppState');
+            setAppState(getInitialState());
+        }
+    };
 
-        switch (appState.status) {
-            case 'login':
-                return <LoginPage onLogin={handleLogin} setErrorMessage={(msg) => setAppState(prev => ({ ...prev, errorMessage: msg }))} errorMessage={appState.errorMessage} />;
-            
-            case 'long_travel': {
-                if (!currentStageData.nextMissionId) return null;
-                const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
-                if (!nextMission) { handleFinalComplete(0); return null; }
-                const toDept = nextMission.department;
+    const handleFinishEarly = () => {
+        if (window.confirm('¿Estas seguro? Esto finalizará tu partida')) {
+            const totalSeconds = appState.mainTimer;
+            const finalTime = formatTime(totalSeconds);
+            const finalScore = appState.score || 0;
+            
+            const finalState = { 
+                ...appState, 
+                score: finalScore, 
+                status: 'aborted',
+                finalTimeDisplay: finalTime 
+            };
+            
+            setAppState(finalState);
+            sendResultsToBackend(finalState);
+        }
+    };
 
-                return <LongTravelPage 
-                            nextDepartment={toDept} 
-                            onArrival={handleArrival} 
-                            onFinishEarly={handleFinishEarly}
-                        />;
-            }
-            
-            case 'on_the_road': {
-                const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
-                if (!nextMission) {
-                    handleFinalComplete(0);
-                    return <EndGamePage score={appState.score} finalTime={appState.finalTimeDisplay} teamName={appState.teamName} />;
-                }
-                return <EnRutaPage 
-                            nextLocation={nextMission.location} 
-                            department={nextMission.department} 
-                            onArrival={handleArrival}
-                            onFinishEarly={handleFinishEarly}
-                        />;
-            }
+    const renderContent = () => {
+        if (appState.status === 'distortion_event' && activeDistortionEvent) {
+            return <DistortionEventPage event={activeDistortionEvent} onComplete={handleDistortionComplete} />;
+        }
+        
+        if (appState.status === 'in_game' && !currentStageData) {
+            return <p style={{padding: "20px"}}>Detectando anomalía temporal...</p>;
+        }
 
-            case 'in_game': {
-                if(currentStageData.type === 'final') return <FinalSection stage={currentStageData} onComplete={handleFinalComplete} />;
-                
-                if (appState.subStage === 'anchor') return <AnchorSection 
-                                                                stage={currentStageData} 
-                                                                onComplete={handleAnchorComplete}
-                                                                onHintRequest={handleRequestHint}
-                                                                score={appState.score}
-                                                            />;
-                
-                if (appState.subStage === 'trivia') return <TriviaSection stage={currentStageData} onComplete={handleTriviaComplete} />;
-                break;
-            }
+        switch (appState.status) {
+            case 'login':
+                return <LoginPage onLogin={handleLogin} setErrorMessage={(msg) => setAppState(prev => ({ ...prev, errorMessage: msg }))} errorMessage={appState.errorMessage} />;
+            
+            case 'long_travel': {
+                if (!currentStageData.nextMissionId) return null;
+                const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
+                if (!nextMission) { handleFinalComplete(0); return null; }
+                const toDept = nextMission.department;
 
-            case 'finished':
-                return <EndGamePage score={appState.score} finalTime={appState.finalTimeDisplay} teamName={appState.teamName} />;
-            
-            case 'aborted':
-                return <AbortedGamePage score={appState.score} finalTime={appState.finalTimeDisplay} teamName={appState.teamName} />;
-            
-            default:
-                return <p>Error: Estado desconocido.</p>;
-        }
-    };
+                return <LongTravelPage 
+                            nextDepartment={toDept} 
+                            onArrival={handleArrival} 
+                            onFinishEarly={handleFinishEarly}
+                        />;
+            }
+            
+            case 'on_the_road': {
+                const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
+                if (!nextMission) {
+                    handleFinalComplete(0);
+                    return <EndGamePage score={appState.score} finalTime={appState.finalTimeDisplay} teamName={appState.teamName} />;
+                }
+                return <EnRutaPage 
+                            nextLocation={nextMission.location} 
+                            department={nextMission.department} 
+                            onArrival={handleArrival}
+                            onFinishEarly={handleFinishEarly}
+                        />;
+            }
 
-    return (
-        <div className="app-container">
-            {appState.status !== 'login' && <Header teamName={appState.teamName} score={appState.score} timer={appState.mainTimer} />}
-            <div className="dashboard-content">
-                {renderContent()}
-            </div>
-            
-            <div className="dev-controls-container">
-                {appState.status !== 'login' && (
-                    <>
-                        <button className="dev-reset-button dev-jump-sl" onClick={handleJumpToSantaLuciaEnd}>
-                            Fin Sta. Lucía
-                        </button>
-                        <button className="dev-reset-button dev-jump-cpt" onClick={handleJumpToCapitalEnd}>
-                            Fin Capital
-                        </button>
-                        <button className="dev-reset-button dev-reset" onClick={handleResetDevelopment}>
-                            RESET
-                        </button>
-                    </>
-                )}
-            </div>
-        </div>
-    );
+            case 'in_game': {
+                if(currentStageData.type === 'final') return <FinalSection stage={currentStageData} onComplete={handleFinalComplete} />;
+                
+                if (appState.subStage === 'anchor') return <AnchorSection 
+                                                                stage={currentStageData} 
+                                                                onComplete={handleAnchorComplete}
+                                                                onHintRequest={handleRequestHint}
+                                                                score={appState.score}
+                                                            />;
+                
+                if (appState.subStage === 'trivia') return <TriviaSection stage={currentStageData} onComplete={handleTriviaComplete} />;
+                break;
+            }
+
+            case 'finished':
+                return <EndGamePage score={appState.score} finalTime={appState.finalTimeDisplay} teamName={appState.teamName} />;
+            
+            case 'aborted':
+                return <AbortedGamePage score={appState.score} finalTime={appState.finalTimeDisplay} teamName={appState.teamName} />;
+            
+            default:
+                return <p>Error: Estado desconocido.</p>;
+        }
+    };
+
+    return (
+        <div className="app-container">
+            {appState.status !== 'login' && <Header teamName={appState.teamName} score={appState.score} timer={appState.mainTimer} />}
+            <div className="dashboard-content">
+                {renderContent()}
+            </div>
+            
+            <div className="dev-controls-container">
+                {appState.status !== 'login' && (
+                    <>
+                        <button className="dev-reset-button dev-jump-sl" onClick={handleJumpToSantaLuciaEnd}>
+                            Fin Sta. Lucía
+                        </button>
+                        <button className="dev-reset-button dev-jump-cpt" onClick={handleJumpToCapitalEnd}>
+                            Fin Capital
+                        </button>
+                        <button className="dev-reset-button dev-reset" onClick={handleResetDevelopment}>
+                            RESET
+                        </button>
+                    </>
+                )}
+            </div>
+        </div>
+    );
 };
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />)
+root.render(<App />);
