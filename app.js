@@ -94,7 +94,7 @@ const eventData = [
     },
     {
         id: 15, department: "Capital", location: "Casa Natal de Sarmiento",
-        anchor: { missionName: "Ancla: El Nacimiento del Prócer", enabler: "Consigna: Descubran il año en que nació en esta humilde vivienda il futuro presidente de la Nación.\nPista: Es conocido como el 'padre de la educación argentina'.", enablerKeyword: "1811", transmission: "En esta casa de adobe comenzó todo. Ancla el año de nacimiento del hombre que cambiaría la educación del país." },
+        anchor: { missionName: "Ancla: El Nacimiento del Prócer", enabler: "Consigna: Descubran el año en que nació en esta humilde vivienda el futuro presidente de la Nación.\nPista: Es conocido como el 'padre de la educación argentina'.", enablerKeyword: "1811", transmission: "En esta casa de adobe comenzó todo. Ancla el año de nacimiento del hombre que cambiaría la educación del país." },
         trivia: { missionName: "Trivia: La Higuera Histórica", challenge: { question: "¿Bajo la sombra de qué árbol hilaba doña Paula Albarracín mientras supervisaba la construcción de la casa?", options: ["Un algarrobo", "Una higuera", "Un olivo", "Un naranjo"], correctAnswer: "Una higuera" } },
         nextMissionId: 16
     },
@@ -250,10 +250,8 @@ const eventData = [
 const distortionEventsData = [
     {
         id: 'distorsion_1',
-        trigger: { onMissionComplete: 3 }, 
-        // --- INICIO DE LA MODIFICACIÓN ---
+        trigger: { onMissionComplete: 3 },
         visual: { type: 'video', src: 'imagenes/AMENAZA2.mp4' },
-        // --- FIN DE LA MODIFICACIÓN ---
         challenge: {
             type: 'corrupt_transmission',
             title: "¡Transmisión Corrupta!",
@@ -267,7 +265,7 @@ const distortionEventsData = [
     },
     {
         id: 'distorsion_2',
-        trigger: { onMissionComplete: 8 }, 
+        trigger: { onMissionComplete: 8 },
         visual: { type: 'video', src: 'imagenes/AMENAZA.mp4' },
         challenge: {
             type: 'multiple_choice',
@@ -287,7 +285,7 @@ const distortionEventsData = [
     },
     {
         id: 'distorsion_3',
-        trigger: { onMissionComplete: 26 },
+        trigger: { onMissionComplete: 24 },
         visual: { type: 'video', src: 'imagenes/amenaza1.mp4' },
         challenge: {
             type: 'narrative_echo',
@@ -296,6 +294,59 @@ const distortionEventsData = [
         }
     }
 ];
+
+// --- DATOS DE LAS MISIONES BONUS ---
+const bonusMissionData = {
+    id: 'bonus_portho_1',
+    triggerMissionId: 26,
+    sponsorName: 'Portho Gelatto',
+    title: 'Misión Bonus: El Sabor del Tiempo',
+    logoSrc: 'imagenes/portho.jpg',
+    description: 'Guardián, hemos detectado una anomalía placentera en Portho Gelatto. Tienes la oportunidad de desviarte de tu ruta para conseguir una recompensa masiva de 200 fragmentos. ¡Pero cuidado! El cronómetro principal no se detendrá. La decisión es tuya.',
+    mapsLink: 'https://maps.app.goo.gl/htvnw6Dbowx1PEw46',
+    challenge: {
+        question: 'Portho tiene un famoso sabor que refleja un dulce muy característico de San Juan. ¿Cuál es?',
+        options: ['Uva', 'Pistacho', 'Membrillo', 'Dulce de Leche'],
+        correctAnswer: 'Membrillo',
+        points: 200
+    }
+};
+
+const bonusLaProfeciaData = {
+    id: 'bonus_la_profecia_1',
+    triggerMissionId: 6,
+    sponsorName: 'Familia Monserrat - La Profecía',
+    title: 'Misión Bonus: El Sabor del Terruño',
+    logoSrc: 'imagenes/la profecia.jpg',
+    description: "Guardián, hemos detectado una poderosa concentración de memoria ancestral en 'La Profecía' de Familia Monserrat. Sus sabores son un ancla al pasado sanjuanino. Desvíate de tu ruta para probar un dulce tradicional y reclama una recompensa de 200 fragmentos. El tiempo sigue corriendo. ¿Aceptas el desafío?",
+    mapsLink: 'https://maps.app.goo.gl/cbffANJXPhTGh3nDA',
+    challenge: {
+        question: 'El maestro dulcero de La Profecía te ha dado a probar una de sus creaciones más emblemáticas, un sabor que define la tradición sanjuanina. ¿Qué dulce has probado?',
+        options: ['Dulce de Uva', 'Dulce de Tomate', 'Dulce de Membrillo', 'Mermelada de Naranja'],
+        correctAnswer: 'Dulce de Membrillo',
+        points: 200
+    }
+};
+
+// --- NUEVO BONUS PARA "LA VENE" ---
+const bonusLaVeneData = {
+    id: 'bonus_la_vene_1',
+    triggerMissionId: 20,
+    sponsorName: 'La Vene',
+    title: 'Misión Bonus: El Sabor de la Tradición',
+    logoSrc: 'imagenes/lavene.png',
+    description: "Guardián, detectamos una anomalía temporal exquisita proveniente de 'La Vene'. Desde 1959, han perfeccionado sus recetas. Desvíate de tu ruta para descifrar el secreto de uno de sus platos más codiciados y reclama una recompensa de 200 fragmentos. ¡El tiempo corre!",
+    mapsLink: 'https://maps.app.goo.gl/mCBt6hLp1yaikzyv8',
+    challenge: {
+        question: 'Has interceptado una receta secreta de los famosos sorrentinos premium de La Vene. ¿Qué combinación de ingredientes le da su sabor inconfundible?',
+        options: ['Salmón y queso azul', 'Carne braseada y provolone', 'Camarones y muzzarella', 'Espinaca y ricota de oveja'],
+        correctAnswer: 'CAMARONES Y MUZZARELLA',
+        points: 200
+    }
+};
+
+
+const allBonusData = [bonusMissionData, bonusLaProfeciaData, bonusLaVeneData]; // 
 
 
 // --- FUNCIONES GLOBALES DE AYUDA ---
@@ -374,6 +425,39 @@ async function sendResultsToBackend(data) {
         console.error("Error al enviar la actualización al backend:", error);
     }
 }
+
+// --- INICIO DE LA MODIFICACIÓN CON DEPURACIÓN ---
+// Nueva función para enviar específicamente el resultado de un bonus.
+async function sendBonusResultToBackend(data) {
+    // ----------- LÍNEAS DE DEPURACIÓN INSERTADAS -----------
+    console.log('%c[ETAPA 3] Intentando enviar datos del bonus al backend.', 'color: #22CC22; font-size: 14px; font-weight: bold;');
+    console.log('Datos que se enviarán:', data);
+    // ----------------------------------------------------
+
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('URL_QUE_COPIASTE')) {
+        console.warn("URL del script no configurada. No se enviarán los datos del bonus.");
+        return;
+    }
+
+    const params = new URLSearchParams({
+        action: 'saveBonusResult',
+        teamName: data.teamName,
+        bonusId: data.bonusId,
+        points: data.points
+    });
+
+    try {
+        await fetch(`${GOOGLE_SCRIPT_URL}?${params.toString()}`, {
+            method: 'POST'
+        });
+        // He modificado este log para que también resalte y sea más claro.
+        console.log(`%cResultado del bonus ${data.bonusId} enviado (supuestamente) con éxito.`, 'color: #22CC22;');
+    } catch (error) {
+        console.error("Error CRÍTICO al enviar el resultado del bonus al backend:", error);
+    }
+}
+// --- FIN DE LA MODIFICACIÓN CON DEPURACIÓN ---
+
 
 // --- COMPONENTES DE REACT ---
 
@@ -491,11 +575,11 @@ const DistortionEventPage = ({ event, onComplete }) => {
                 );
             case 'narrative_echo':
                  return (
-                     <div className="distortion-container">
-                         <h3>{challenge.title}</h3>
-                         <p className="distortion-narrative-text">{challenge.message}</p>
-                         <button className="primary-button" onClick={handleNarrativeContinue} disabled={isLocked}>CONTINUAR MISIÓN...</button>
-                    </div>
+                        <div className="distortion-container">
+                              <h3>{challenge.title}</h3>
+                              <p className="distortion-narrative-text">{challenge.message}</p>
+                              <button className="primary-button" onClick={handleNarrativeContinue} disabled={isLocked}>CONTINUAR MISIÓN...</button>
+                     </div>
                  );
             default:
                 onComplete({ points: 0 });
@@ -822,42 +906,48 @@ const AnchorSection = ({ stage, onComplete, onHintRequest, score }) => {
     };
 
     return (
-        <div className={`stage-container ${glowClass}`}>
-            <h3>{anchor.missionName}</h3>
-            <div className="challenge-timer">⏱️ {anchorTimer}s</div>
-            <p><strong>Departamento:</strong> {stage.department}</p>
-            {anchor.transmission && <div className="transmission-box"><p><strong>📡 Transmisión Interceptada:</strong> {anchor.transmission}</p></div>}
-            <p><strong>Objetivo de la Coordenada:</strong> {anchor.enabler}</p>
+    <div className={`stage-container ${glowClass}`}>
+        <h3>{anchor.missionName}</h3>
+        <div className="challenge-timer">⏱️ {anchorTimer}s</div>
+        <p><strong>Departamento:</strong> {stage.department}</p>
+        {anchor.transmission && <div className="transmission-box"><p><strong>📡 Transmisión Interceptada:</strong> {anchor.transmission}</p></div>}
+        <p><strong>Objetivo de la Coordenada:</strong> {anchor.enabler}</p>
 
-            {error && <p className="feedback error">{error}</p>}
-            
-            {!pistaGenerada && (
-                <div className="hint-request-container">
-                    <button
-                        className="primary-button"
-                        onClick={handleHintRequest}
-                        disabled={score < 25 || isLocked}>
-                        SOLICITAR PISTA (-25 Fragmentos)
-                    </button>
-                </div>
-            )}
-            
-            {pistaGenerada && (
-                <div className="hint-box hint-dynamic">
-                    <p><strong>💡 Pista Recuperada:</strong> {pistaGenerada}</p>
-                </div>
-            )}
-
-            <input type="text" placeholder="Ingresa el 'Ancla Temporal'" value={keyword} onChange={handleInputChange} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()} disabled={isLocked} />
-            
-            <div className="button-group">
-                <button className="secondary-button" onClick={handleSkip} disabled={isLocked}>No sé</button>
-                <button className="primary-button" onClick={handleUnlockInternal} disabled={isLocked}>🗝️ ANCLAR RECUERDO</button>
+        {error && <p className="feedback error">{error}</p>}
+        
+        {!pistaGenerada && (
+            <div className="hint-request-container">
+                <button
+                    className="primary-button"
+                    onClick={handleHintRequest}
+                    disabled={score < 25 || isLocked}>
+                    SOLICITAR PISTA (-25 Fragmentos)
+                </button>
             </div>
+        )}
+        
+        {pistaGenerada && (
+            <div className="hint-box hint-dynamic">
+                <p><strong>💡 Pista Recuperada:</strong> {pistaGenerada}</p>
+            </div>
+        )}
+
+        <input type="text" placeholder="Ingresa el 'Ancla Temporal'" value={keyword} onChange={handleInputChange} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()} disabled={isLocked} />
+        
+        {/* --- INICIO DE LA MODIFICACIÓN --- */}
+        {/* He reorganizado este contenedor para que sea una columna y he cambiado las clases de los botones */}
+        <div className="button-group-vertical"> 
+            {/* 1. Botón "Anclar Recuerdo" movido arriba y con la clase "primary-button" para que coincida con "Solicitar Pista" */}
+            <button className="primary-button" onClick={handleUnlockInternal} disabled={isLocked}>🗝️ ANCLAR RECUERDO</button>
             
-            {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
+            {/* 2. Botón "No sé" movido abajo y con una nueva clase "skip-button" para darle un estilo único y más pequeño */}
+            <button className="skip-button" onClick={handleSkip} disabled={isLocked}>No sé</button>
         </div>
-    );
+        {/* --- FIN DE LA MODIFICACIÓN --- */}
+        
+        {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
+    </div>
+);
 };
 
 
@@ -898,74 +988,152 @@ const FinalSection = ({stage, onComplete}) => {
 };
 
 const Leaderboard = () => {
-  const LEADERBOARD_URL = 'https://script.google.com/macros/s/AKfycbym5-onTOyzlqZn_G4O-5acxAZzReYjIOY5SF8tBh3TtT2jEFVw6IZ2MMMtkHGtRl0F/exec'; 
+ const LEADERBOARD_URL = 'https://script.google.com/macros/s/AKfycbym5-onTOyzlqZn_G4O-5acxAZzReYjIOY5SF8tBh3TtT2jEFVw6IZ2MMMtkHGtRl0F/exec'; 
 
-  const [ranking, setRanking] = React.useState([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
+ const [ranking, setRanking] = React.useState([]);
+ const [isLoading, setIsLoading] = React.useState(true);
+ const [error, setError] = React.useState(null);
 
-  React.useEffect(() => {
-    const fetchRanking = async () => {
-      if (!LEADERBOARD_URL || LEADERBOARD_URL.includes('URL_QUE_COPIASTE')) {
-        setError('URL del ranking no configurada.');
-        setIsLoading(false);
-        return;
+ React.useEffect(() => {
+  const fetchRanking = async () => {
+    if (!LEADERBOARD_URL || LEADERBOARD_URL.includes('URL_QUE_COPIASTE')) {
+      setError('URL del ranking no configurada.');
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      const response = await fetch(LEADERBOARD_URL);
+      if (!response.ok) {
+        throw new Error('La respuesta del servidor no fue correcta.');
       }
-      
-      try {
-        const response = await fetch(LEADERBOARD_URL);
-        if (!response.ok) {
-          throw new Error('La respuesta del servidor no fue correcta.');
-        }
-        const data = await response.json();
-        if (data.error) {
-           throw new Error(data.error);
-        }
-        setRanking(data);
-      } catch (err) {
-        setError('No se pudo cargar el ranking. Intenta más tarde.');
-        console.error("Error al obtener el ranking:", err);
-      } finally {
-        setIsLoading(false);
+      const data = await response.json();
+      if (data.error) {
+         throw new Error(data.error);
       }
+      setRanking(data);
+    } catch (err) {
+      setError('No se pudo cargar el ranking. Intenta más tarde.');
+      console.error("Error al obtener el ranking:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchRanking();
+ }, []);
+
+ if (isLoading) {
+  return <p className="feedback">Cargando el Ranking de Guardianes...</p>;
+ }
+
+ if (error) {
+  return <p className="feedback error">{error}</p>;
+ }
+
+ return (
+  <div className="leaderboard-container">
+    <h3>CONCILIO DE GUARDIANES</h3>
+    <table className="leaderboard-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Guardián</th>
+          <th>Fragmentos</th>
+          <th>Tiempo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {ranking.slice(0, 10).map((team, index) => (
+          <tr key={index}>
+            <td>{index + 1}</td>
+            <td>{team.teamName}</td>
+            <td>{team.score}</td>
+            <td>{team.time}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+ );
+};
+
+const BonusMissionModal = ({ bonusData, onComplete }) => {
+    const [view, setView] = React.useState('offer'); // 'offer' or 'challenge'
+    const [feedback, setFeedback] = React.useState({ message: '', type: '' });
+    const [glowClass, setGlowClass] = React.useState('');
+    const [selectedOption, setSelectedOption] = React.useState('');
+
+    const handleAccept = () => {
+        // Ya no necesitamos registrar solo la participación, el guardado de puntos se encarga de todo.
+        setView('challenge');
     };
 
-    fetchRanking();
-  }, []);
+    // --- INICIO DE LA MODIFICACIÓN ---
+    const handleDecline = () => {
+        // Informa al componente padre que el usuario no participó.
+        onComplete({ points: 0, participated: false });
+    };
 
-  if (isLoading) {
-    return <p className="feedback">Cargando el Ranking de Guardianes...</p>;
-  }
+    const handleSubmitChallenge = () => {
+        if (feedback.message) return;
 
-  if (error) {
-    return <p className="feedback error">{error}</p>;
-  }
+        const isCorrect = selectedOption === bonusData.challenge.correctAnswer;
+        const pointsWon = isCorrect ? bonusData.challenge.points : 0;
+        setGlowClass(isCorrect ? 'success-glow' : 'error-glow');
+        setFeedback({
+            message: isCorrect 
+                ? `✔️ ¡Correcto! ¡Has ganado ${pointsWon} Fragmentos!` 
+                : `❌ Respuesta Incorrecta. No has recuperado fragmentos.`,
+            type: isCorrect ? 'success' : 'error'
+        });
+        setTimeout(() => {
+            // Informa que el usuario sí participó y envía el resultado.
+            onComplete({ points: pointsWon, participated: true });
+        }, 3000);
+    };
+    // --- FIN DE LA MODIFICACIÓN ---
 
-  return (
-    <div className="leaderboard-container">
-      <h3>CONCILIO DE GUARDIANES</h3>
-      <table className="leaderboard-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Guardián</th>
-            <th>Fragmentos</th>
-            <th>Tiempo</th>
-          </tr>
-        </thead>
-        <tbody>
-          {ranking.slice(0, 10).map((team, index) => (
-            <tr key={index}>
-              <td>{index + 1}</td>
-              <td>{team.teamName}</td>
-              <td>{team.score}</td>
-              <td>{team.time}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+    return (
+        <div className="amenaza-modal-overlay">
+            <div className={`amenaza-modal-content ${glowClass}`}>
+                {view === 'offer' && (
+                    <div className="stage-container">
+                        <img src={bonusData.logoSrc} alt={`Logo ${bonusData.sponsorName}`} className="portal-image" style={{ width: '150px', borderRadius: '50%' }}/>
+                        <h3>{bonusData.title}</h3>
+                        <div className="transmission-box">
+                            <p><strong>ALERTA DE OPORTUNIDAD TEMPORAL</strong></p>
+                        </div>
+                        <p>{bonusData.description}</p>
+                        <a href={bonusData.mapsLink} target="_blank" rel="noopener noreferrer" className="primary-button" style={{display: 'block', textDecoration: 'none', marginBottom: '10px'}}>
+                            📍 ABRIR EN GOOGLE MAPS
+                        </a>
+                        <div className="button-group">
+                            <button className="secondary-button" onClick={handleDecline}>Rechazar Desvío</button>
+                            <button className="primary-button" onClick={handleAccept}>¡ACEPTO EL DESAFÍO!</button>
+                        </div>
+                    </div>
+                )}
+                {view === 'challenge' && (
+                    <div className="challenge-container">
+                        <h3>{bonusData.sponsorName} - Desafío</h3>
+                        <p>{bonusData.challenge.question}</p>
+                        <ul className="trivia-options">
+                            {bonusData.challenge.options.map(option => (
+                                <li key={option} className={selectedOption === option ? 'selected' : ''} onClick={() => !feedback.message && setSelectedOption(option)}>
+                                    {option}
+                                </li>
+                            ))}
+                        </ul>
+                        <button className="primary-button" onClick={handleSubmitChallenge} disabled={!selectedOption || feedback.message}>
+                            CONFIRMAR RESPUESTA
+                        </button>
+                        {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
 };
 
 
@@ -984,6 +1152,9 @@ const getInitialState = () => ({
     pendingAnchorResult: null,
     activeDistortionEventId: null,
     postDistortionStatus: null,
+    activeBonusMissionId: null,
+    bonusPorthoOffered: false,
+    bonusLaProfeciaOffered: false
 });
 
 const App = () => {
@@ -992,7 +1163,8 @@ const App = () => {
         try {
             const parsedState = savedState ? JSON.parse(savedState) : null;
             if (parsedState && typeof parsedState.status === 'string' && parsedState.status !== 'login') {
-                return parsedState;
+                const initialState = getInitialState();
+                return { ...initialState, ...parsedState };
             }
         } catch (e) {
             console.error("Error al parsear localStorage, usando estado inicial.", e);
@@ -1007,16 +1179,18 @@ const App = () => {
 
     React.useEffect(() => {
         let interval;
-        if (appState.status !== 'login' && appState.status !== 'finished' && appState.status !== 'aborted' && appState.status !== 'distortion_event') {
+        if (appState.status !== 'login' && appState.status !== 'finished' && appState.status !== 'aborted' && !appState.activeDistortionEventId && !appState.activeBonusMissionId) {
             interval = setInterval(() => {
                 setAppState(prev => ({ ...prev, mainTimer: prev.mainTimer + 1 }));
             }, 1000);
         }
         return () => clearInterval(interval);
-    }, [appState.status]);
+    }, [appState.status, appState.activeDistortionEventId, appState.activeBonusMissionId]);
 
     const currentStageData = eventData.find(m => m.id === appState.currentMissionId);
     const activeDistortionEvent = distortionEventsData.find(e => e.id === appState.activeDistortionEventId);
+    const activeBonusData = appState.activeBonusMissionId ? allBonusData.find(b => b.id === appState.activeBonusMissionId) : null;
+
 
     const handleLogin = (code, name) => {
         const initialState = getInitialState();
@@ -1038,61 +1212,92 @@ const App = () => {
         }));
     };
     
-    const handleTriviaComplete = (triviaResult) => {
-        if (!currentStageData || !appState.pendingAnchorResult) return;
-        
-        const newScore = appState.score + triviaResult.points;
-        const completeMissionRecord = {
-            missionId: currentStageData.id,
-            missionName: currentStageData.anchor.missionName.replace("Ancla: ", ""),
-            anchorTime: appState.pendingAnchorResult.time,
-            anchorPoints: appState.pendingAnchorResult.points,
-            triviaTime: triviaResult.time,
-            triviaPoints: triviaResult.points
-        };
+  // --- INICIO DE LA CORRECCIÓN CON DEPURACIÓN ---
+const handleTriviaComplete = (triviaResult) => {
+    if (!currentStageData || !appState.pendingAnchorResult) return;
 
-        const updatedResults = [...appState.missionResults, completeMissionRecord];
-        
-        const newState = {
-            ...appState,
-            score: newScore,
-            missionResults: updatedResults,
-            pendingAnchorResult: null,
-        };
-        
-        const triggeredEvent = distortionEventsData.find(e => e.trigger?.onMissionComplete === currentStageData.id);
-        const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
-        
-        if (triggeredEvent && nextMission) {
-            const nextStatus = nextMission.department !== currentStageData.department ? 'long_travel' : 'on_the_road';
-            setAppState({
-                ...newState,
-                status: 'distortion_event',
-                activeDistortionEventId: triggeredEvent.id, 
-                postDistortionStatus: nextStatus, 
-            });
-        } else {
-            if (!nextMission) { handleFinalComplete(0); return; }
-            const nextStatus = nextMission.department !== currentStageData.department ? 'long_travel' : 'on_the_road';
-            const finalNewState = {...newState, status: nextStatus };
-            setAppState(finalNewState);
-            sendResultsToBackend(finalNewState);
-        }
+    const newScore = appState.score + triviaResult.points;
+    const completeMissionRecord = {
+        missionId: currentStageData.id,
+        missionName: currentStageData.anchor.missionName.replace("Ancla: ", ""),
+        anchorTime: appState.pendingAnchorResult.time,
+        anchorPoints: appState.pendingAnchorResult.points,
+        triviaTime: triviaResult.time,
+        triviaPoints: triviaResult.points
+    };
+    const updatedResults = [...appState.missionResults, completeMissionRecord];
+
+    let baseStateForNextStep = {
+        ...appState,
+        score: newScore,
+        missionResults: updatedResults,
+        pendingAnchorResult: null,
     };
 
+    // Primero, enviamos el resultado de la misión que acaba de terminar.
+    sendResultsToBackend(baseStateForNextStep);
+
+    // Verificamos si esta misión dispara un bonus.
+    const triggeredBonus = allBonusData.find(b =>
+        b.triggerMissionId === currentStageData.id &&
+        (b.id === 'bonus_portho_1' ? !appState.bonusPorthoOffered : true) &&
+        (b.id === 'bonus_la_profecia_1' ? !appState.bonusLaProfeciaOffered : true)
+    );
+
+    if (triggeredBonus) {
+        // ----------- LÍNEA DE DEPURACIÓN INSERTADA -----------
+        console.log(`%c[ETAPA 1] Disparando Bonus: ${triggeredBonus.id}`, 'color: #00AACC; font-size: 14px; font-weight: bold;');
+        // ----------------------------------------------------
+
+        // --- LÓGICA CORREGIDA PARA BONUS ---
+        // Solo activamos el modal del bonus y marcamos como ofrecido.
+        // NO cambiamos el status a 'on_the_road' o 'long_travel' todavía.
+        setAppState({
+            ...baseStateForNextStep,
+            activeBonusMissionId: triggeredBonus.id,
+            bonusPorthoOffered: triggeredBonus.id === 'bonus_portho_1' ? true : appState.bonusPorthoOffered,
+            bonusLaProfeciaOffered: triggeredBonus.id === 'bonus_la_profecia_1' ? true : appState.bonusLaProfeciaOffered
+        });
+        return; // Detenemos la ejecución aquí, esperamos que el usuario resuelva el bonus.
+    }
+
+    // Si no hay bonus, procedemos con el flujo normal (distorsión o viaje).
+    const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
+    const nextStatus = nextMission
+        ? (nextMission.department !== currentStageData.department ? 'long_travel' : 'on_the_road')
+        : 'finished';
+    const triggeredEvent = distortionEventsData.find(e => e.trigger?.onMissionComplete === currentStageData.id);
+
+    if (triggeredEvent && nextMission) {
+        setAppState({
+            ...baseStateForNextStep,
+            status: 'distortion_event',
+            activeDistortionEventId: triggeredEvent.id,
+            postDistortionStatus: nextStatus,
+        });
+    } else {
+        if (!nextMission) {
+            handleFinalComplete(0);
+            return;
+        }
+        setAppState({ ...baseStateForNextStep, status: nextStatus });
+        // No es necesario un sendResults aquí porque ya lo hicimos al principio de la función.
+    }
+};
+// --- FIN DE LA CORRECCIÓN CON DEPURACIÓN ---
+    
     const handleDistortionComplete = (result) => {
-        const newScore = Math.max(0, appState.score + (result.points || 0));
-        
+        const newScore = Math.max(0, appState.score + (result?.points || 0));
         const newState = {
             ...appState,
             score: newScore,
             activeDistortionEventId: null, 
             status: appState.postDistortionStatus, 
             postDistortionStatus: null,
-        };
+        }
         setAppState(newState);
-        sendResultsToBackend(newState);
-    }
+        sendResultsToBackend(newState); // Envía la actualización de puntaje después de la distorsión
+    };
 
     const handleFinalComplete = (bonusPoints) => {
         const totalSeconds = appState.mainTimer;
@@ -1115,32 +1320,6 @@ const App = () => {
         }
     };
     
-    const handleJumpToSantaLuciaEnd = () => {
-        if (window.confirm("¿Saltar al último desafío de Santa Lucía? (DEV)")) {
-            setAppState(prev => ({
-                ...prev,
-                status: 'in_game',
-                subStage: 'anchor',
-                currentMissionId: 8,
-                activeDistortionEventId: null,
-                postDistortionStatus: null
-            }));
-        }
-    };
-
-    const handleJumpToCapitalEnd = () => {
-        if (window.confirm("¿Saltar al último desafío de Capital? (DEV)")) {
-            setAppState(prev => ({
-                ...prev,
-                status: 'in_game',
-                subStage: 'anchor',
-                currentMissionId: 26,
-                activeDistortionEventId: null,
-                postDistortionStatus: null
-            }));
-        }
-    };
-
     const handleResetDevelopment = () => {
         if (window.confirm("¿Seguro que quieres reiniciar toda la misión y borrar los datos guardados? (Solo para desarrollo)")) {
             localStorage.removeItem('guardianesAppState');
@@ -1166,11 +1345,99 @@ const App = () => {
         }
     };
 
-    const renderContent = () => {
-        if (appState.status === 'distortion_event' && activeDistortionEvent) {
-            return <DistortionEventPage event={activeDistortionEvent} onComplete={handleDistortionComplete} />;
+   // --- INICIO DE LA MODIFICACIÓN CON DEPURACIÓN ---
+const handleBonusModalClose = (result) => {
+    // ----------- LÍNEAS DE DEPURACIÓN INSERTADAS -----------
+    console.log('%c[ETAPA 2] Se cierra el modal del bonus.', 'color: #FF6600; font-size: 14px; font-weight: bold;');
+    console.log('Datos recibidos del modal:', result);
+    // ----------------------------------------------------
+
+    const pointsWon = result?.points || 0;
+    const participated = result?.participated || false;
+
+    // Si el usuario jugó el bonus, enviamos el resultado específico del bonus.
+    if (participated) {
+        sendBonusResultToBackend({
+            teamName: appState.teamName,
+            bonusId: appState.activeBonusMissionId,
+            points: pointsWon
+        });
+    }
+
+    // Preparamos el estado base con el puntaje actualizado.
+    const newScore = appState.score + pointsWon;
+    const baseStateAfterBonus = {
+        ...appState,
+        score: newScore,
+        activeBonusMissionId: null // Cerramos el modal del bonus.
+    };
+
+    // Ahora, aquí calculamos el siguiente paso (el viaje).
+    // Esta lógica estaba antes en handleTriviaComplete.
+    const missionThatTriggeredBonus = eventData.find(m => m.id === currentStageData.id);
+    const nextMission = eventData.find(m => m.id === missionThatTriggeredBonus.nextMissionId);
+
+    if (!nextMission) {
+        // Si el bonus estaba en la última misión, terminamos el juego.
+        handleFinalComplete(0);
+        return;
+    }
+
+    // Determinamos el tipo de viaje.
+    const nextStatus = nextMission.department !== missionThatTriggeredBonus.department
+        ? 'long_travel'
+        : 'on_the_road';
+
+    // Verificamos si hay una distorsión después de esta misión.
+    const triggeredEvent = distortionEventsData.find(e => e.trigger?.onMissionComplete === currentStageData.id);
+
+    let finalState;
+    if (triggeredEvent) {
+        finalState = {
+            ...baseStateAfterBonus,
+            status: 'distortion_event',
+            activeDistortionEventId: triggeredEvent.id,
+            postDistortionStatus: nextStatus,
+        };
+    } else {
+        finalState = {
+            ...baseStateAfterBonus,
+            status: nextStatus
+        };
+    }
+
+    setAppState(finalState);
+    // Enviamos una última actualización general con el puntaje del bonus ya sumado.
+    sendResultsToBackend(finalState);
+};
+// --- FIN DE LA MODIFICACIÓN CON DEPURACIÓN ---
+    
+    const handleJumpToBonusPortho = () => {
+        if (window.confirm("Saltar a la pantalla de viaje con el bonus Portho? (DEV)")) {
+            setAppState(prev => ({
+                ...prev,
+                status: 'long_travel',
+                currentMissionId: 26, // La mision que dispara el bonus
+                activeBonusMissionId: bonusMissionData.id,
+                bonusPorthoOffered: true,
+            }));
         }
-        
+    };
+
+    const handleJumpToBonusLaProfecia = () => {
+        if (window.confirm("Saltar a la pantalla de viaje con el bonus La Profecía? (DEV)")) {
+            setAppState(prev => ({
+                ...prev,
+                status: 'on_the_road',
+                currentMissionId: 6, // La mision que dispara el bonus
+                activeBonusMissionId: bonusLaProfeciaData.id,
+                bonusLaProfeciaOffered: true,
+            }));
+        }
+    };
+
+
+    const renderContent = () => {
         if (appState.status === 'in_game' && !currentStageData) {
             return <p style={{padding: "20px"}}>Detectando anomalía temporal...</p>;
         }
@@ -1195,7 +1462,6 @@ const App = () => {
             case 'on_the_road': {
                 const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
                 if (!nextMission) {
-                    handleFinalComplete(0);
                     return <EndGamePage score={appState.score} finalTime={appState.finalTimeDisplay} teamName={appState.teamName} />;
                 }
                 return <EnRutaPage 
@@ -1209,12 +1475,7 @@ const App = () => {
             case 'in_game': {
                 if(currentStageData.type === 'final') return <FinalSection stage={currentStageData} onComplete={handleFinalComplete} />;
                 
-                if (appState.subStage === 'anchor') return <AnchorSection 
-                                                                stage={currentStageData} 
-                                                                onComplete={handleAnchorComplete}
-                                                                onHintRequest={handleRequestHint}
-                                                                score={appState.score}
-                                                            />;
+                if (appState.subStage === 'anchor') return <AnchorSection stage={currentStageData} onComplete={handleAnchorComplete} onHintRequest={handleRequestHint} score={appState.score} />;
                 
                 if (appState.subStage === 'trivia') return <TriviaSection stage={currentStageData} onComplete={handleTriviaComplete} />;
                 break;
@@ -1234,18 +1495,22 @@ const App = () => {
     return (
         <div className="app-container">
             {appState.status !== 'login' && <Header teamName={appState.teamName} score={appState.score} timer={appState.mainTimer} />}
+            
             <div className="dashboard-content">
                 {renderContent()}
             </div>
             
+            {activeDistortionEvent && <DistortionEventPage event={activeDistortionEvent} onComplete={handleDistortionComplete} />}
+            {activeBonusData && <BonusMissionModal bonusData={{...activeBonusData, teamName: appState.teamName}} onComplete={handleBonusModalClose} />}
+
             <div className="dev-controls-container">
                 {appState.status !== 'login' && (
                     <>
-                        <button className="dev-reset-button dev-jump-sl" onClick={handleJumpToSantaLuciaEnd}>
-                            Fin Sta. Lucía
+                        <button className="dev-reset-button dev-bonus" onClick={handleJumpToBonusPortho}>
+                            B.PORTHO
                         </button>
-                        <button className="dev-reset-button dev-jump-cpt" onClick={handleJumpToCapitalEnd}>
-                            Fin Capital
+                        <button className="dev-reset-button dev-bonus" onClick={handleJumpToBonusLaProfecia}>
+                            B.PROFECIA
                         </button>
                         <button className="dev-reset-button dev-reset" onClick={handleResetDevelopment}>
                             RESET

@@ -876,3 +876,71 @@ input:not(.login-container input)::placeholder {
 .dev-reset { background-color: #c0392b; } /* Rojo (el que ya tenías) */
 
 /* --- FIN: ESTILOS PARA BOTONES DE DEPURACIÓN --- */
+
+/* Añade esto al final de tu archivo estilos.css */
+
+.dev-reset-button.dev-profecia { 
+  background-color: #27ae60; /* Verde */
+}
+
+/* Y puedes renombrar el de bonus para que sea más específico */
+.dev-reset-button.dev-bonus {
+  background-color: #8e44ad; /* Púrpura */
+}
+
+/* --- INICIO: MODIFICACIONES PARA BOTONES DE ANCLAJE (V2) --- */
+
+/* 1. Contenedor vertical con MÁS espacio superior */
+.button-group-vertical {
+    display: flex;
+    flex-direction: column;   /* Apila los botones */
+    align-items: center;     /* Centra los botones horizontalmente */
+    gap: 15px;               /* Un poco más de espacio entre botones */
+    margin-top: 40px;        /* Aumentamos el margen superior para alejarlo del input (el "renglón" extra) */
+}
+
+/* 2. Estilo para el botón "No sé", ahora idéntico al primario pero más angosto */
+.skip-button {
+    /* Heredamos la estética del botón primario */
+    font-family: var(--font-primary);
+    border-radius: 8px;
+    font-size: 1.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    background-color: var(--color-primary);
+    color: var(--color-text-on-primary);
+    border: 2px solid var(--color-primary);
+    padding: 12px;
+
+    /* La diferencia clave: el ancho */
+    width: 60%; /* Hacemos que sea más angosto que el 100% del contenedor */
+    max-width: 250px; /* Un tope para que no se vea mal en pantallas muy anchas */
+}
+
+/* Efecto hover idéntico al botón primario */
+.skip-button:hover:not(:disabled) {
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary);
+    color: white;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Estado deshabilitado, también idéntico */
+.skip-button:disabled {
+    background-color: #56595d;
+    cursor: not-allowed;
+    color: #909397;
+    box-shadow: none;
+    transform: none;
+    border-color: #56595d;
+}
+
+/* 3. Mantenemos la regla para que el botón principal ocupe todo el ancho */
+.button-group-vertical .primary-button {
+    width: 100%;
+}
+
+/* --- FIN DE LAS MODIFICACIONES --- */
