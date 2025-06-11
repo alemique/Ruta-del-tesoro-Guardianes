@@ -346,7 +346,7 @@ const bonusLaVeneData = {
 };
 
 
-const allBonusData = [bonusMissionData, bonusLaProfeciaData, bonusLaVeneData]; // 
+const allBonusData = [bonusMissionData, bonusLaProfeciaData, bonusLaVeneData];
 
 
 // --- FUNCIONES GLOBALES DE AYUDA ---
@@ -399,6 +399,88 @@ const generarPistaDinamica = (respuesta) => {
     return pistaGenerada;
 };
 
+// --- INICIO: FUNCIONES DE FEEDBACK SENSORIAL (VIBRACIÓN Y ANIMACIÓN) ---
+const triggerVibration = (duration = 100) => {
+    // Esta función depende de la configuración del navegador y del dispositivo del usuario.
+    if ('vibrate' in navigator) {
+        navigator.vibrate(duration);
+    }
+};
+
+// <<< INICIO: MODIFICACIÓN DE ANIMACIÓN DE PUNTOS >>>
+const animatePoints = (points, originElementId) => {
+    const destination = document.getElementById('score-display');
+    const origin = document.getElementById(originElementId);
+
+    // Se verifica que ambos elementos existan para evitar errores.
+    if (!destination || !origin) {
+        console.error("Elemento de destino u origen no encontrado para la animación.");
+        return;
+    }
+
+    const pointsFlyer = document.createElement('div');
+    pointsFlyer.textContent = `+${points}`;
+    
+    // Estilos para que la animación sea prominente y visible.
+    pointsFlyer.style.position = 'fixed'; // Clave: Posición relativa a la ventana del navegador.
+    pointsFlyer.style.zIndex = '10000';
+    pointsFlyer.style.padding = '8px 16px';
+    pointsFlyer.style.backgroundColor = 'var(--color-feedback-success-dark, #2a9d8f)';
+    pointsFlyer.style.color = '#FFFFFF';
+    pointsFlyer.style.fontWeight = 'bold';
+    pointsFlyer.style.fontSize = '1.5rem';
+    pointsFlyer.style.borderRadius = '20px';
+    pointsFlyer.style.border = '2px solid #FFFFFF';
+    pointsFlyer.style.boxShadow = '0 0 15px rgba(0,0,0,0.5)';
+    pointsFlyer.style.pointerEvents = 'none';
+    pointsFlyer.style.transform = 'translate(-50%, -50%)'; // Ayuda a centrar el elemento en sus coordenadas.
+
+    document.body.appendChild(pointsFlyer);
+
+    const destRect = destination.getBoundingClientRect();
+    const originRect = origin.getBoundingClientRect();
+
+    // Punto de partida: Centro horizontal de la pantalla, a la altura del botón presionado.
+    const startX = window.innerWidth / 2;
+    const startY = originRect.top + originRect.height / 2;
+
+    // Punto final: El centro del marcador de puntaje en el encabezado.
+    const endX = destRect.left + destRect.width / 2;
+    const endY = destRect.top + destRect.height / 2;
+
+    // Secuencia de animación con GSAP para un efecto más dinámico.
+    gsap.fromTo(pointsFlyer, 
+        { 
+            left: startX, 
+            top: startY, 
+            scale: 0,
+            opacity: 0,
+        }, 
+        { 
+            scale: 1.2, // Crece hasta ser grande para llamar la atención.
+            opacity: 1,
+            duration: 0.6, // Duración corta para un efecto de "pop".
+            ease: 'power3.out',
+            onComplete: () => {
+                // Después de aparecer, espera un momento y luego viaja hacia el marcador.
+                gsap.to(pointsFlyer, {
+                    left: endX,
+                    top: endY,
+                    scale: 0.1, // Se encoge al llegar al destino.
+                    opacity: 0,
+                    duration: 1.0, // Un viaje más lento para que sea fácil de seguir.
+                    ease: 'power1.in',
+                    delay: 0.4, // Pausa en el centro antes de viajar.
+                    onComplete: () => {
+                        pointsFlyer.remove(); // Limpieza del DOM para no dejar elementos basura.
+                    }
+                });
+            }
+        }
+    );
+};
+// <<< FIN: MODIFICACIÓN DE ANIMACIÓN DE PUNTOS >>>
+
 
 async function sendResultsToBackend(data) {
     const timeToSend = data.finalTimeDisplay || formatTime(data.mainTimer);
@@ -426,13 +508,10 @@ async function sendResultsToBackend(data) {
     }
 }
 
-// --- INICIO DE LA MODIFICACIÓN CON DEPURACIÓN ---
-// Nueva función para enviar específicamente el resultado de un bonus.
+
 async function sendBonusResultToBackend(data) {
-    // ----------- LÍNEAS DE DEPURACIÓN INSERTADAS -----------
     console.log('%c[ETAPA 3] Intentando enviar datos del bonus al backend.', 'color: #22CC22; font-size: 14px; font-weight: bold;');
     console.log('Datos que se enviarán:', data);
-    // ----------------------------------------------------
 
     if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('URL_QUE_COPIASTE')) {
         console.warn("URL del script no configurada. No se enviarán los datos del bonus.");
@@ -450,18 +529,15 @@ async function sendBonusResultToBackend(data) {
         await fetch(`${GOOGLE_SCRIPT_URL}?${params.toString()}`, {
             method: 'POST'
         });
-        // He modificado este log para que también resalte y sea más claro.
         console.log(`%cResultado del bonus ${data.bonusId} enviado (supuestamente) con éxito.`, 'color: #22CC22;');
     } catch (error) {
         console.error("Error CRÍTICO al enviar el resultado del bonus al backend:", error);
     }
 }
-// --- FIN DE LA MODIFICACIÓN CON DEPURACIÓN ---
 
 
 // --- COMPONENTES DE REACT ---
 
-// --- COMPONENTE PARA EVENTOS DE DISTORSIÓN (PANTALLA COMPLETA) ---
 const DistortionEventPage = ({ event, onComplete }) => {
     const [view, setView] = React.useState('visual');
     const videoRef = React.useRef(null);
@@ -575,11 +651,11 @@ const DistortionEventPage = ({ event, onComplete }) => {
                 );
             case 'narrative_echo':
                  return (
-                        <div className="distortion-container">
-                              <h3>{challenge.title}</h3>
-                              <p className="distortion-narrative-text">{challenge.message}</p>
-                              <button className="primary-button" onClick={handleNarrativeContinue} disabled={isLocked}>CONTINUAR MISIÓN...</button>
-                     </div>
+                         <div className="distortion-container">
+                                 <h3>{challenge.title}</h3>
+                                 <p className="distortion-narrative-text">{challenge.message}</p>
+                                 <button className="primary-button" onClick={handleNarrativeContinue} disabled={isLocked}>CONTINUAR MISIÓN...</button>
+                       </div>
                  );
             default:
                 onComplete({ points: 0 });
@@ -610,7 +686,7 @@ const Header = ({ teamName, score, timer }) => (
             <span className="team-title">GUARDIANES DEL TIEMPO</span>
         </div>
         <div className="header-score">
-            <span className="score">{score} FRAGMENTOS</span>
+            <span id="score-display" className="score">{score} FRAGMENTOS</span>
             <span className="timer">⏳ {formatTime(timer)}</span>
         </div>
     </div>
@@ -800,14 +876,21 @@ const TriviaSection = ({ stage, onComplete }) => {
         const finalTime = triviaTimer;
         const isCorrect = selectedOption.toUpperCase() === challenge.correctAnswer.toUpperCase();
         const pointsWon = isCorrect ? calculatePoints(finalTime) : 0;
+        
         setGlowClass(isCorrect ? 'success-glow' : 'error-glow');
         setFeedback({
             message: isCorrect ? `✔️ ¡Respuesta Correcta! Has recuperado ${pointsWon} Fragmentos.` : `❌ Respuesta Incorrecta. No se han recuperado Fragmentos.`,
             type: isCorrect ? 'success' : 'error'
         });
+
         setTimeout(() => {
             onComplete({ points: pointsWon, time: finalTime });
         }, 2500);
+
+        if (isCorrect) {
+            triggerVibration();
+            animatePoints(pointsWon, 'trivia-button');
+        }
     };
     return (
         <div className={`challenge-container ${glowClass}`}>
@@ -821,7 +904,7 @@ const TriviaSection = ({ stage, onComplete }) => {
                     </li>
                 ))}
             </ul>
-            <button className="primary-button" onClick={handleSubmit} disabled={!selectedOption || feedback.message}>VERIFICAR TRANSMISIÓN</button>
+            <button id="trivia-button" className="primary-button" onClick={handleSubmit} disabled={!selectedOption || feedback.message}>VERIFICAR TRANSMISIÓN</button>
             {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
         </div>
     );
@@ -866,12 +949,18 @@ const AnchorSection = ({ stage, onComplete, onHintRequest, score }) => {
         if (isLocked) return;
 
         if (keyword.toUpperCase().trim() === anchor.enablerKeyword.toUpperCase().trim()) {
-            setIsLocked(true);
             const points = calculateAnchorPoints(anchorTimer);
+            
+            setIsLocked(true);
             setError('');
             setGlowClass('success-glow');
             setFeedback({ message: `✔️ ¡Ancla estabilizada! Has recuperado ${points} Fragmentos.`, type: 'success' });
+            
             setTimeout(() => onComplete({ points: points, time: anchorTimer }), 2500);
+
+            triggerVibration();
+            animatePoints(points, 'anchor-button');
+
         } else {
             const newAttemptCount = incorrectAttempts + 1;
             setIncorrectAttempts(newAttemptCount);
@@ -934,16 +1023,11 @@ const AnchorSection = ({ stage, onComplete, onHintRequest, score }) => {
 
         <input type="text" placeholder="Ingresa el 'Ancla Temporal'" value={keyword} onChange={handleInputChange} onKeyPress={(e) => e.key === 'Enter' && handleUnlockInternal()} disabled={isLocked} />
         
-        {/* --- INICIO DE LA MODIFICACIÓN --- */}
-        {/* He reorganizado este contenedor para que sea una columna y he cambiado las clases de los botones */}
         <div className="button-group-vertical"> 
-            {/* 1. Botón "Anclar Recuerdo" movido arriba y con la clase "primary-button" para que coincida con "Solicitar Pista" */}
-            <button className="primary-button" onClick={handleUnlockInternal} disabled={isLocked}>🗝️ ANCLAR RECUERDO</button>
+            <button id="anchor-button" className="primary-button" onClick={handleUnlockInternal} disabled={isLocked}>🗝️ ANCLAR RECUERDO</button>
             
-            {/* 2. Botón "No sé" movido abajo y con una nueva clase "skip-button" para darle un estilo único y más pequeño */}
             <button className="skip-button" onClick={handleSkip} disabled={isLocked}>No sé</button>
         </div>
-        {/* --- FIN DE LA MODIFICACIÓN --- */}
         
         {feedback.message && <p className={`feedback ${feedback.type}`}>{feedback.message}</p>}
     </div>
@@ -1059,19 +1143,16 @@ const Leaderboard = () => {
 };
 
 const BonusMissionModal = ({ bonusData, onComplete }) => {
-    const [view, setView] = React.useState('offer'); // 'offer' or 'challenge'
+    const [view, setView] = React.useState('offer');
     const [feedback, setFeedback] = React.useState({ message: '', type: '' });
     const [glowClass, setGlowClass] = React.useState('');
     const [selectedOption, setSelectedOption] = React.useState('');
 
     const handleAccept = () => {
-        // Ya no necesitamos registrar solo la participación, el guardado de puntos se encarga de todo.
         setView('challenge');
     };
 
-    // --- INICIO DE LA MODIFICACIÓN ---
     const handleDecline = () => {
-        // Informa al componente padre que el usuario no participó.
         onComplete({ points: 0, participated: false });
     };
 
@@ -1088,11 +1169,9 @@ const BonusMissionModal = ({ bonusData, onComplete }) => {
             type: isCorrect ? 'success' : 'error'
         });
         setTimeout(() => {
-            // Informa que el usuario sí participó y envía el resultado.
             onComplete({ points: pointsWon, participated: true });
         }, 3000);
     };
-    // --- FIN DE LA MODIFICACIÓN ---
 
     return (
         <div className="amenaza-modal-overlay">
@@ -1162,26 +1241,22 @@ const App = () => {
         const savedDataJSON = localStorage.getItem('guardianesAppState');
         
         if (!savedDataJSON) {
-            return getInitialState(); // No hay nada guardado, empezamos de cero.
+            return getInitialState();
         }
 
         try {
             const savedData = JSON.parse(savedDataJSON);
 
-            // Verificamos que los datos guardados tengan la estructura correcta (estado y timestamp)
             if (savedData && savedData.state && savedData.timestamp) {
                 const now = Date.now();
                 const lastSavedTime = savedData.timestamp;
-                const hours24inMs = 24 * 60 * 60 * 1000; // Milisegundos en 24 horas
+                const hours24inMs = 24 * 60 * 60 * 1000;
 
-                // Comprobamos si el tiempo transcurrido es MENOR a 24 horas
                 if ((now - lastSavedTime) < hours24inMs) {
                     console.log("Restaurando sesión. Menos de 24hs transcurridas.");
-                    // La sesión es válida, cargamos el progreso.
                     return savedData.state; 
                 } else {
                     console.log("Sesión expirada. Han pasado más de 24hs. Reiniciando.");
-                    // La sesión ha expirado, borramos los datos viejos.
                     localStorage.removeItem('guardianesAppState');
                 }
             }
@@ -1190,16 +1265,15 @@ const App = () => {
             localStorage.removeItem('guardianesAppState');
         }
 
-        // Si la sesión expiró o hubo un error, empezamos de cero.
         return getInitialState();
     });
 
     
     React.useEffect(() => {
-    if (appState.status !== 'login') { // Solo guardamos si el juego ha comenzado
+    if (appState.status !== 'login') {
         const dataToSave = {
             state: appState,
-            timestamp: Date.now() // ¡Aquí está la magia! Guarda los milisegundos actuales.
+            timestamp: Date.now()
         };
         localStorage.setItem('guardianesAppState', JSON.stringify(dataToSave));
     }
@@ -1240,7 +1314,6 @@ const App = () => {
         }));
     };
     
-  // --- INICIO DE LA CORRECCIÓN CON DEPURACIÓN ---
 const handleTriviaComplete = (triviaResult) => {
     if (!currentStageData || !appState.pendingAnchorResult) return;
 
@@ -1262,10 +1335,8 @@ const handleTriviaComplete = (triviaResult) => {
         pendingAnchorResult: null,
     };
 
-    // Primero, enviamos el resultado de la misión que acaba de terminar.
     sendResultsToBackend(baseStateForNextStep);
 
-    // Verificamos si esta misión dispara un bonus.
     const triggeredBonus = allBonusData.find(b =>
         b.triggerMissionId === currentStageData.id &&
         (b.id === 'bonus_portho_1' ? !appState.bonusPorthoOffered : true) &&
@@ -1273,23 +1344,16 @@ const handleTriviaComplete = (triviaResult) => {
     );
 
     if (triggeredBonus) {
-        // ----------- LÍNEA DE DEPURACIÓN INSERTADA -----------
         console.log(`%c[ETAPA 1] Disparando Bonus: ${triggeredBonus.id}`, 'color: #00AACC; font-size: 14px; font-weight: bold;');
-        // ----------------------------------------------------
-
-        // --- LÓGICA CORREGIDA PARA BONUS ---
-        // Solo activamos el modal del bonus y marcamos como ofrecido.
-        // NO cambiamos el status a 'on_the_road' o 'long_travel' todavía.
         setAppState({
             ...baseStateForNextStep,
             activeBonusMissionId: triggeredBonus.id,
             bonusPorthoOffered: triggeredBonus.id === 'bonus_portho_1' ? true : appState.bonusPorthoOffered,
             bonusLaProfeciaOffered: triggeredBonus.id === 'bonus_la_profecia_1' ? true : appState.bonusLaProfeciaOffered
         });
-        return; // Detenemos la ejecución aquí, esperamos que el usuario resuelva el bonus.
+        return;
     }
 
-    // Si no hay bonus, procedemos con el flujo normal (distorsión o viaje).
     const nextMission = eventData.find(m => m.id === currentStageData.nextMissionId);
     const nextStatus = nextMission
         ? (nextMission.department !== currentStageData.department ? 'long_travel' : 'on_the_road')
@@ -1309,10 +1373,8 @@ const handleTriviaComplete = (triviaResult) => {
             return;
         }
         setAppState({ ...baseStateForNextStep, status: nextStatus });
-        // No es necesario un sendResults aquí porque ya lo hicimos al principio de la función.
     }
 };
-// --- FIN DE LA CORRECCIÓN CON DEPURACIÓN ---
     
     const handleDistortionComplete = (result) => {
         const newScore = Math.max(0, appState.score + (result?.points || 0));
@@ -1324,7 +1386,7 @@ const handleTriviaComplete = (triviaResult) => {
             postDistortionStatus: null,
         }
         setAppState(newState);
-        sendResultsToBackend(newState); // Envía la actualización de puntaje después de la distorsión
+        sendResultsToBackend(newState);
     };
 
     const handleFinalComplete = (bonusPoints) => {
@@ -1373,17 +1435,13 @@ const handleTriviaComplete = (triviaResult) => {
         }
     };
 
-   // --- INICIO DE LA MODIFICACIÓN CON DEPURACIÓN ---
 const handleBonusModalClose = (result) => {
-    // ----------- LÍNEAS DE DEPURACIÓN INSERTADAS -----------
     console.log('%c[ETAPA 2] Se cierra el modal del bonus.', 'color: #FF6600; font-size: 14px; font-weight: bold;');
     console.log('Datos recibidos del modal:', result);
-    // ----------------------------------------------------
 
     const pointsWon = result?.points || 0;
     const participated = result?.participated || false;
 
-    // Si el usuario jugó el bonus, enviamos el resultado específico del bonus.
     if (participated) {
         sendBonusResultToBackend({
             teamName: appState.teamName,
@@ -1392,31 +1450,25 @@ const handleBonusModalClose = (result) => {
         });
     }
 
-    // Preparamos el estado base con el puntaje actualizado.
     const newScore = appState.score + pointsWon;
     const baseStateAfterBonus = {
         ...appState,
         score: newScore,
-        activeBonusMissionId: null // Cerramos el modal del bonus.
+        activeBonusMissionId: null
     };
 
-    // Ahora, aquí calculamos el siguiente paso (el viaje).
-    // Esta lógica estaba antes en handleTriviaComplete.
     const missionThatTriggeredBonus = eventData.find(m => m.id === currentStageData.id);
     const nextMission = eventData.find(m => m.id === missionThatTriggeredBonus.nextMissionId);
 
     if (!nextMission) {
-        // Si el bonus estaba en la última misión, terminamos el juego.
         handleFinalComplete(0);
         return;
     }
 
-    // Determinamos el tipo de viaje.
     const nextStatus = nextMission.department !== missionThatTriggeredBonus.department
         ? 'long_travel'
         : 'on_the_road';
 
-    // Verificamos si hay una distorsión después de esta misión.
     const triggeredEvent = distortionEventsData.find(e => e.trigger?.onMissionComplete === currentStageData.id);
 
     let finalState;
@@ -1435,17 +1487,15 @@ const handleBonusModalClose = (result) => {
     }
 
     setAppState(finalState);
-    // Enviamos una última actualización general con el puntaje del bonus ya sumado.
     sendResultsToBackend(finalState);
 };
-// --- FIN DE LA MODIFICACIÓN CON DEPURACIÓN ---
     
     const handleJumpToBonusPortho = () => {
         if (window.confirm("Saltar a la pantalla de viaje con el bonus Portho? (DEV)")) {
             setAppState(prev => ({
                 ...prev,
                 status: 'long_travel',
-                currentMissionId: 26, // La mision que dispara el bonus
+                currentMissionId: 26,
                 activeBonusMissionId: bonusMissionData.id,
                 bonusPorthoOffered: true,
             }));
@@ -1457,7 +1507,7 @@ const handleBonusModalClose = (result) => {
             setAppState(prev => ({
                 ...prev,
                 status: 'on_the_road',
-                currentMissionId: 6, // La mision que dispara el bonus
+                currentMissionId: 6,
                 activeBonusMissionId: bonusLaProfeciaData.id,
                 bonusLaProfeciaOffered: true,
             }));
