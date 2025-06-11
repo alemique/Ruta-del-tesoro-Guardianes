@@ -1159,22 +1159,50 @@ const getInitialState = () => ({
 
 const App = () => {
     const [appState, setAppState] = React.useState(() => {
-        const savedState = localStorage.getItem('guardianesAppState');
+        const savedDataJSON = localStorage.getItem('guardianesAppState');
+        
+        if (!savedDataJSON) {
+            return getInitialState(); // No hay nada guardado, empezamos de cero.
+        }
+
         try {
-            const parsedState = savedState ? JSON.parse(savedState) : null;
-            if (parsedState && typeof parsedState.status === 'string' && parsedState.status !== 'login') {
-                const initialState = getInitialState();
-                return { ...initialState, ...parsedState };
+            const savedData = JSON.parse(savedDataJSON);
+
+            // Verificamos que los datos guardados tengan la estructura correcta (estado y timestamp)
+            if (savedData && savedData.state && savedData.timestamp) {
+                const now = Date.now();
+                const lastSavedTime = savedData.timestamp;
+                const hours24inMs = 24 * 60 * 60 * 1000; // Milisegundos en 24 horas
+
+                // Comprobamos si el tiempo transcurrido es MENOR a 24 horas
+                if ((now - lastSavedTime) < hours24inMs) {
+                    console.log("Restaurando sesión. Menos de 24hs transcurridas.");
+                    // La sesión es válida, cargamos el progreso.
+                    return savedData.state; 
+                } else {
+                    console.log("Sesión expirada. Han pasado más de 24hs. Reiniciando.");
+                    // La sesión ha expirado, borramos los datos viejos.
+                    localStorage.removeItem('guardianesAppState');
+                }
             }
         } catch (e) {
-            console.error("Error al parsear localStorage, usando estado inicial.", e);
+            console.error("Error al procesar datos guardados. Reiniciando.", e);
             localStorage.removeItem('guardianesAppState');
         }
+
+        // Si la sesión expiró o hubo un error, empezamos de cero.
         return getInitialState();
     });
 
+    
     React.useEffect(() => {
-        localStorage.setItem('guardianesAppState', JSON.stringify(appState));
+    if (appState.status !== 'login') { // Solo guardamos si el juego ha comenzado
+        const dataToSave = {
+            state: appState,
+            timestamp: Date.now() // ¡Aquí está la magia! Guarda los milisegundos actuales.
+        };
+        localStorage.setItem('guardianesAppState', JSON.stringify(dataToSave));
+    }
     }, [appState]);
 
     React.useEffect(() => {
