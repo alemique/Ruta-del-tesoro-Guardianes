@@ -944,3 +944,13 @@ input:not(.login-container input)::placeholder {
 }
 
 /* --- FIN DE LAS MODIFICACIONES --- */
+
+/* --- INICIO: Ocultar botones de depuración específicos --- */
+
+/* Ocultamos los botones de bonus, pero dejamos el de RESET */
+.dev-reset-button.dev-bonus,
+.dev-reset-button.dev-profecia {
+    display: none;
+}
+
+/* --- FIN: Ocultar botones de depuración específicos --- */
