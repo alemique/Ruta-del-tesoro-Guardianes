@@ -1003,3 +1003,100 @@ input:not(.login-container input)::placeholder {
 }
 
 /* --- FIN: Ocultar botones de depuración específicos --- */
+
+/* --- INICIO: ESTILOS PARA LA PANTALLA DE BIENVENIDA --- */
+.welcome-container {
+    padding: 30px 25px;
+    background: linear-gradient(145deg, var(--color-background-medium), var(--color-background-dark));
+    color: var(--color-text-primary-on-dark);
+    text-align: center;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    animation: fadeInWelcome 1s ease-in-out;
+}
+
+@keyframes fadeInWelcome {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.welcome-image {
+    width: 100%;
+    max-width: 200px;
+    margin-bottom: 25px;
+    animation: scaleIn 1s ease-out;
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.welcome-container h2 {
+    font-family: var(--font-primary);
+    font-size: 2.3rem;
+    color: var(--color-primary);
+    margin: 0 0 10px 0;
+    line-height: 1.1;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.welcome-container .team-name-welcome {
+    color: var(--color-secondary);
+    display: block; /* Para que el nombre del equipo quede en una línea propia */
+    font-size: 1.5em; /* Más grande que el resto del h2 */
+    margin-top: 5px;
+}
+
+.welcome-message {
+    font-size: 1.1rem;
+    color: var(--color-text-secondary-on-dark);
+    margin-bottom: 20px;
+    max-width: 350px;
+    line-height: 1.5;
+}
+
+.welcome-first-mission {
+    font-family: var(--font-primary);
+    font-size: 1.5rem;
+    color: var(--color-primary);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.welcome-location {
+    font-family: var(--font-primary);
+    font-size: 2rem;
+    color: var(--color-text-primary-on-dark);
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 30px;
+    text-shadow: 0 0 8px rgba(243, 156, 18, 0.5);
+}
+
+.welcome-button {
+    width: 80%; /* Un poco más ancho que el de login para que sea más visible */
+    max-width: 300px;
+    padding: 15px;
+    font-size: 2rem;
+    margin-top: 20px;
+    animation: pulseButton 2s infinite; /* Animación para llamar la atención */
+}
+
+@keyframes pulseButton {
+    0% { transform: scale(1); box-shadow: 0 0 15px rgba(243, 156, 18, 0.4); }
+    50% { transform: scale(1.03); box-shadow: 0 0 25px rgba(243, 156, 18, 0.7); }
+    100% { transform: scale(1); box-shadow: 0 0 15px rgba(243, 156, 18, 0.4); }
+}
+
+.welcome-footer {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary-on-dark);
+    margin-top: 30px;
+    font-style: italic;
+}
+/* --- FIN: ESTILOS PARA LA PANTALLA DE BIENVENIDA --- */
