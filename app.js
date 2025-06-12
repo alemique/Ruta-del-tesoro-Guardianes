@@ -793,9 +793,9 @@ const WelcomePage = ({ teamName, onContinue }) => {
             <h2>¡BIENVENIDO, GUARDIÁN <span className="team-name-welcome">{teamName}</span>!</h2>
             <p className="welcome-message">Tu Guía del Tiempo ha sido **ACTIVADA**. El legado de San Juan cuenta contigo para restaurar la línea temporal.</p>
             <p className="welcome-first-mission">Tu primera ancla te espera en:</p>
-            <p className="welcome-location">📍 **Parroquia Santa Lucía**</p>
+            <p className="welcome-location">📍 Parroquia Santa Lucía</p> {/* MODIFICADO: Quitados los ** */}
             <button className="primary-button welcome-button" onClick={onContinue}>
-                INICIAR PRIMERA MISIÓN
+                INICIAR {/* MODIFICADO: Texto más corto */}
             </button>
             <p className="welcome-footer">Mantén tus sentidos alerta. Cada decisión cuenta.</p>
         </div>
@@ -1094,7 +1094,7 @@ const FinalSection = ({stage, onComplete}) => {
             <div className="button-group">
                 <button className="primary-button" onClick={handleUnlockInternal}>✨ SELLAR BRECHA TEMPORAL ✨</button>
             </div>
-            {error && <p className="feedback error">{error}</p>}
+            {error && <p className={`feedback ${error ? 'error' : ''}`}>{error}</p>}
         </div>
     );
 };
