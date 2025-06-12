@@ -672,13 +672,17 @@ input:not(.login-container input)::placeholder {
     padding-top: 20px;
     border-top: 2px solid var(--color-secondary);
     animation: decodeIn 1s ease-out 0.5s backwards;
+    /* Nuevo: Contenedor para scroll horizontal */
+    overflow-x: auto; /* Permite el scroll horizontal si el contenido es muy ancho */
+    -webkit-overflow-scrolling: touch; /* Suaviza el scroll en iOS */
 }
 
 .leaderboard-table {
-    width: 100%;
+    width: 100%; /* La tabla ocupará todo el ancho de su contenedor */
     border-collapse: collapse;
     margin-top: 15px;
     font-family: var(--font-secondary);
+    min-width: 320px; /* Asegura un ancho mínimo para la tabla si el contenido lo permite */
 }
 
 .leaderboard-table th,
@@ -686,13 +690,14 @@ input:not(.login-container input)::placeholder {
     padding: 12px 10px;
     text-align: left;
     border-bottom: 1px solid var(--color-background-light);
+    white-space: nowrap; /* Evita que el contenido de las celdas se rompa en varias líneas */
 }
 
 .leaderboard-table thead th {
     font-family: var(--font-primary);
-    font-size: 1.5rem;
+    font-size: 1.5rem; /* Tamaño base para encabezados */
     color: var(--color-primary);
-    text-align: center;
+    text-align: center; /* Centramos los encabezados */
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -707,15 +712,60 @@ input:not(.login-container input)::placeholder {
 
 .leaderboard-table td:first-child {
     font-family: var(--font-primary);
-    font-size: 1.6rem;
+    font-size: 1.6rem; /* Tamaño base para el número de posición */
     color: var(--color-primary);
     font-weight: 700;
-    text-align: center;
+    text-align: center; /* Centramos el número de posición */
 }
 
-.leaderboard-table td:nth-child(3) {
+.leaderboard-table td:nth-child(2) { /* Para el nombre del guardián */
+    text-align: left; /* Aseguramos alineación izquierda para nombres */
+}
+
+.leaderboard-table td:nth-child(3) { /* Para "Fragmentos" (Score) */
     font-weight: bold;
     color: var(--color-text-primary-on-dark);
+    text-align: center; /* Centramos los fragmentos */
+}
+
+.leaderboard-table td:nth-child(4) { /* Para "Tiempo" */
+    text-align: center; /* Centramos el tiempo */
+}
+
+/* Media queries para adaptar la fuente en pantallas pequeñas */
+@media (max-width: 480px) {
+    .leaderboard-table th,
+    .leaderboard-table td {
+        padding: 8px 6px; /* Reducimos el padding */
+    }
+
+    .leaderboard-table thead th {
+        font-size: 1.2rem; /* Reducimos la fuente del encabezado */
+    }
+
+    .leaderboard-table td:first-child {
+        font-size: 1.3rem; /* Reducimos la fuente del número de posición */
+    }
+
+    .leaderboard-table td:nth-child(2), /* Nombre del Guardián */
+    .leaderboard-table td:nth-child(3), /* Fragmentos */
+    .leaderboard-table td:nth-child(4) { /* Tiempo */
+        font-size: 0.9rem; /* Reducimos la fuente de los datos */
+    }
+}
+
+@media (max-width: 360px) { /* Para los celulares más pequeños */
+    .leaderboard-table thead th {
+        font-size: 1.1rem;
+    }
+    .leaderboard-table td:first-child {
+        font-size: 1.2rem;
+    }
+    .leaderboard-table td:nth-child(2),
+    .leaderboard-table td:nth-child(3),
+    .leaderboard-table td:nth-child(4) {
+        font-size: 0.85rem;
+    }
 }
 
 /* --- ESTILO PARA EL BOTÓN DE FINALIZAR ANTICIPADO --- */
