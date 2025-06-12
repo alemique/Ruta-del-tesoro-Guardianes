@@ -10,7 +10,7 @@ const eventData = [
     // SANTA LUCÍA
     {
         id: 1, department: "Santa Lucía", location: "Parroquia Santa Lucía",
-        anchor: { missionName: "Ancla: Vestigios del Sismo", enabler: "Consigna: Busquen el año del catastrófico terremoto que destruyó el 'hermoso templo colonial'.\nPista: Este evento marcó un antes y un después en la arquitectura de toda la provincia.", enablerKeyword: "1944", transmission: "Guardián, detecto una cicatriz profunda en la línea de tiempo de este lugar sagrado. Debes anclar el año del evento que lo cambió todo para estabilizarla." },
+        anchor: { missionName: "Ancla: Vestigios del Sismo", enabler: "Consigna: Busquen el año del catastrófico terremoto que destruyó el 'hermoso templo colonial'.\nPista: Este evento marcó un antes y después en la arquitectura de toda la provincia.", enablerKeyword: "1944", transmission: "Guardián, detecto una cicatriz profunda en la línea de tiempo de este lugar sagrado. Debes anclar el año del evento que lo cambió todo para estabilizarla." },
         trivia: { missionName: "Trivia: El Templo de 1900", challenge: { question: "¿En qué año fue inaugurado el templo de estilo ecléctico que reemplazó a la primera capilla?", options: ["1894", "1900", "1944", "1964"], correctAnswer: "1900" } },
         nextMissionId: 2
     },
@@ -812,9 +812,24 @@ const EnRutaPage = ({ nextLocation, onArrival, department, onFinishEarly }) => {
         }, 10000);  
         return () => clearTimeout(travelTimer);
     }, []);
+
+    // Función para limpiar el nombre de la ubicación y generar el nombre del archivo de imagen
+    const getImageFileName = (locationName) => {
+        // Convierte a minúsculas, elimina caracteres especiales y reemplaza espacios con guiones bajos
+        return locationName.toLowerCase()
+                           .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Elimina acentos
+                           .replace(/[^a-z0-9\s]/g, "") // Elimina caracteres no alfanuméricos (excepto espacios)
+                           .replace(/\s+/g, "") // Elimina espacios
+                           .replace(/á/g, 'a').replace(/é/g, 'e').replace(/í/g, 'i').replace(/ó/g, 'o').replace(/ú/g, 'u') // Asegura que las tildes se manejen
+                           + '.png';
+    };
+
+    const imageSrc = `imagenes/${getImageFileName(nextLocation)}`;
+
     return (
         <div className="en-ruta-container">
-            <img src="imagenes/VIAJANDO.png" alt="Portal Temporal Estilizado" className="portal-image" onError={(e) => { e.target.onerror = null; e.target.src='https://images.unsplash.com/photo-1520034475321-cbe63696469a?q=80&w=800&auto=format&fit=crop'; }} />
+            {/* MODIFICADO: src de la imagen ahora es dinámico */}
+            <img src={imageSrc} alt={`Viajando a ${nextLocation}`} className="portal-image" onError={(e) => { e.target.onerror = null; e.target.src='imagenes/VIAJANDO.png'; }} />
             <h3>VIAJANDO A TRAVÉS DEL TIEMPO...</h3>
             <p>Próxima Sincronización: <strong>{nextLocation}</strong> ({department})</p>
             <p className="progress-info">Sincronizando coordenadas temporales...</p>
