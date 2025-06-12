@@ -668,54 +668,54 @@ input:not(.login-container input)::placeholder {
 
 /* --- ESTILOS PARA TABLA DE POSICIONES --- */
 .leaderboard-container {
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 2px solid var(--color-secondary);
-  animation: decodeIn 1s ease-out 0.5s backwards;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid var(--color-secondary);
+    animation: decodeIn 1s ease-out 0.5s backwards;
 }
 
 .leaderboard-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-  font-family: var(--font-secondary);
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-family: var(--font-secondary);
 }
 
 .leaderboard-table th,
 .leaderboard-table td {
-  padding: 12px 10px;
-  text-align: left;
-  border-bottom: 1px solid var(--color-background-light);
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-background-light);
 }
 
 .leaderboard-table thead th {
-  font-family: var(--font-primary);
-  font-size: 1.5rem;
-  color: var(--color-primary);
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+    font-family: var(--font-primary);
+    font-size: 1.5rem;
+    color: var(--color-primary);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .leaderboard-table tbody tr:nth-child(odd) {
-  background-color: rgba(26, 36, 58, 0.4);
+    background-color: rgba(26, 36, 58, 0.4);
 }
 
 .leaderboard-table tbody tr:hover {
-  background-color: var(--color-background-light);
+    background-color: var(--color-background-light);
 }
 
 .leaderboard-table td:first-child {
-  font-family: var(--font-primary);
-  font-size: 1.6rem;
-  color: var(--color-primary);
-  font-weight: 700;
-  text-align: center;
+    font-family: var(--font-primary);
+    font-size: 1.6rem;
+    color: var(--color-primary);
+    font-weight: 700;
+    text-align: center;
 }
 
 .leaderboard-table td:nth-child(3) {
-  font-weight: bold;
-  color: var(--color-text-primary-on-dark);
+    font-weight: bold;
+    color: var(--color-text-primary-on-dark);
 }
 
 /* --- ESTILO PARA EL BOTÓN DE FINALIZAR ANTICIPADO --- */
@@ -740,8 +740,6 @@ input:not(.login-container input)::placeholder {
     border-color: var(--color-feedback-error);
     transform: scale(1.05);
 }
-
-/* ... (Todo tu CSS anterior va aquí, no lo borres) ... */
 
 /* --- INICIO: NUEVOS ESTILOS PARA MODAL DE AMENAZA Y VISUALES --- */
 
@@ -879,13 +877,13 @@ input:not(.login-container input)::placeholder {
 
 /* Añade esto al final de tu archivo estilos.css */
 
-.dev-reset-button.dev-profecia { 
-  background-color: #27ae60; /* Verde */
+.dev-reset-button.dev-profecia {
+    background-color: #27ae60; /* Verde */
 }
 
 /* Y puedes renombrar el de bonus para que sea más específico */
 .dev-reset-button.dev-bonus {
-  background-color: #8e44ad; /* Púrpura */
+    background-color: #8e44ad; /* Púrpura */
 }
 
 /* --- INICIO: MODIFICACIONES PARA BOTONES DE ANCLAJE (V2) --- */
@@ -893,49 +891,50 @@ input:not(.login-container input)::placeholder {
 /* 1. Contenedor vertical con MÁS espacio superior */
 .button-group-vertical {
     display: flex;
-    flex-direction: column;   /* Apila los botones */
-    align-items: center;     /* Centra los botones horizontalmente */
-    gap: 15px;               /* Un poco más de espacio entre botones */
-    margin-top: 40px;        /* Aumentamos el margen superior para alejarlo del input (el "renglón" extra) */
+    flex-direction: column;    /* Apila los botones */
+    align-items: center;       /* Centra los botones horizontalmente */
+    gap: 15px;                 /* Un poco más de espacio entre botones */
+    margin-top: 40px;          /* Aumentamos el margen superior para alejarlo del input (el "renglón" extra) */
 }
 
-/* 2. Estilo para el botón "No sé", ahora idéntico al primario pero más angosto */
+/* 2. Estilo para el botón "No sé" (Opción 1: Ghost) */
 .skip-button {
-    /* Heredamos la estética del botón primario */
     font-family: var(--font-primary);
     border-radius: 8px;
     font-size: 1.7rem;
     font-weight: 600;
     cursor: pointer;
-    transition: transform 0.2s, background-color 0.3s, box-shadow 0.3s;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    background-color: var(--color-primary);
-    color: var(--color-text-on-primary);
-    border: 2px solid var(--color-primary);
-    padding: 12px;
+    transition: all 0.3s ease; /* Transición general para suavidad */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Sombra más sutil */
+
+    /* Estilos Ghost */
+    background-color: transparent; /* Fondo transparente */
+    color: var(--color-primary);   /* Color del texto como el primario */
+    border: 2px solid var(--color-primary); /* Borde con color primario */
 
     /* La diferencia clave: el ancho */
     width: 60%; /* Hacemos que sea más angosto que el 100% del contenedor */
     max-width: 250px; /* Un tope para que no se vea mal en pantallas muy anchas */
+    padding: 12px; /* Mantener el padding para consistencia */
 }
 
-/* Efecto hover idéntico al botón primario */
+/* Efecto hover para la Opción 1 */
 .skip-button:hover:not(:disabled) {
-    background-color: var(--color-secondary);
-    border-color: var(--color-secondary);
-    color: white;
+    background-color: rgba(243, 156, 18, 0.1); /* Ligero relleno transparente al pasar el ratón */
+    color: white; /* Texto blanco para mayor contraste */
+    border-color: var(--color-secondary); /* Borde secundario para un toque diferente */
     transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* Estado deshabilitado, también idéntico */
+/* Estado deshabilitado (ajustado para estilo ghost) */
 .skip-button:disabled {
-    background-color: #56595d;
+    background-color: transparent;
     cursor: not-allowed;
     color: #909397;
+    border-color: #56595d;
     box-shadow: none;
     transform: none;
-    border-color: #56595d;
 }
 
 /* 3. Mantenemos la regla para que el botón principal ocupe todo el ancho */
