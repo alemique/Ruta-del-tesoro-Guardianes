@@ -567,8 +567,6 @@ const DistortionEventPage = ({ event, onComplete }) => {
     React.useEffect(() => {
         if (view !== 'visual') return;
 
-        // playDistortionAppearSound(); // Ya no es necesario aquí, el sonido está en el video.
-
         if (event.visual.type === 'video' && videoRef.current) {
             videoRef.current.play().catch(e => {
                 console.error("Error al auto-reproducir video:", e);
@@ -1452,21 +1450,25 @@ const handleTriviaComplete = (triviaResult) => {
 
     sendResultsToBackend(baseStateForNextStep);
 
+    // MODIFICADO: Ajustar la lógica del bonus para el admin.
+    // Para los botones de salto de admin, NO usaremos las banderas bonusOffered/Participated
+    // La lógica de `triggeredBonus` aquí sigue siendo para el flujo normal del juego.
     const triggeredBonus = allBonusData.find(b =>
         b.triggerMissionId === currentStageData.id &&
         (b.id === 'bonus_portho_1' ? !appState.bonusPorthoOffered : true) &&
         (b.id === 'bonus_la_profecia_1' ? !appState.bonusLaProfeciaOffered : true) &&
-        (b.id === 'bonus_la_vene_1' ? !appState.bonusLaVeneOffered : true) // Verificar también el bonus de La Vene
+        (b.id === 'bonus_la_vene_1' ? !appState.bonusLaVeneOffered : true)
     );
 
     if (triggeredBonus) {
         console.log(`%c[ETAPA 1] Disparando Bonus: ${triggeredBonus.id}`, 'color: #00AACC; font-size: 14px; font-weight: bold;');
         setAppState({
             ...baseStateForNextStep,
+            status: 'in_game', // Volver a 'in_game' para que el modal se muestre sobre la misión actual si es triggered.
             activeBonusMissionId: triggeredBonus.id,
             bonusPorthoOffered: triggeredBonus.id === 'bonus_portho_1' ? true : appState.bonusPorthoOffered,
             bonusLaProfeciaOffered: triggeredBonus.id === 'bonus_la_profecia_1' ? true : appState.bonusLaProfeciaOffered,
-            bonusLaVeneOffered: triggeredBonus.id === 'bonus_la_vene_1' ? true : appState.bonusLaVeneOffered // Actualizar el estado de La Vene
+            bonusLaVeneOffered: triggeredBonus.id === 'bonus_la_vene_1' ? true : appState.bonusLaVeneOffered
         });
         return;
     }
@@ -1615,8 +1617,11 @@ const handleBonusModalClose = (result) => {
                 ...prev,
                 status: 'distortion_event',
                 activeDistortionEventId: triggeredEvent.id,
-                // Puedes definir un postDistortionStatus para que regrese a la misión actual
-                // o a un estado neutral de desarrollo. Para simplicidad, volvemos al juego.
+                // Reiniciar el estado de 'offered' para que el bonus pueda ser ofrecido en el flujo normal si es relevante
+                bonusPorthoOffered: false,
+                bonusLaProfeciaOffered: false,
+                bonusLaVeneOffered: false,
+                // Para simplicidad, volvemos al estado 'in_game' después de la distorsión del admin
                 postDistortionStatus: 'in_game' 
             }));
         }
@@ -1627,12 +1632,12 @@ const handleBonusModalClose = (result) => {
         if (bonus) {
             setAppState(prev => ({
                 ...prev,
-                status: 'in_game', // O un estado de viaje si prefieres simularlo
+                status: 'in_game', // Mostrar el modal del bonus directamente en el estado de juego
                 activeBonusMissionId: bonus.id,
-                // Asegúrate de que el estado de 'offered' se actualice para evitar ofrecerlo de nuevo en el flujo normal
-                bonusPorthoOffered: bonus.id === 'bonus_portho_1' ? true : prev.bonusPorthoOffered,
-                bonusLaProfeciaOffered: bonus.id === 'bonus_la_profecia_1' ? true : prev.bonusLaProfeciaOffered,
-                bonusLaVeneOffered: bonus.id === 'bonus_la_vene_1' ? true : prev.bonusLaVeneOffered,
+                // Reiniciar el estado de 'offered' para que el bonus pueda ser ofrecido en el flujo normal si es relevante
+                bonusPorthoOffered: false,
+                bonusLaProfeciaOffered: false,
+                bonusLaVeneOffered: false,
             }));
         }
     };
@@ -1708,19 +1713,21 @@ const handleBonusModalClose = (result) => {
             {activeBonusData && <BonusMissionModal bonusData={{...activeBonusData, teamName: appState.teamName}} onComplete={handleBonusModalClose} />}
 
             {/* MODIFICADO: Controles de desarrollo ahora se muestran si isAdmin es true O si el status no es 'login' para el RESET */}
-            {(appState.isAdmin || appState.status !== 'login') && (
+            {(appState.isAdmin || appState.status !== 'login') && ( // Si es admin O no está en login (para mostrar RESET)
                 <div className="dev-controls-container">
                     {appState.isAdmin && ( // Estos botones SÓLO aparecen para el admin
                         <>
+                            {/* CORREGIDO: Botones de bonus de admin */}
                             <button className="dev-reset-button dev-bonus" onClick={() => handleAdminJumpToBonus('bonus_portho_1')}>
                                 Jump Portho
                             </button>
-                            <button className="dev-reset-button dev-profecia" onClick={() => handleAdminJumpToBonus('bonus_la_profecia_1')}>
+                            <button className="dev-reset-button dev-bonus" onClick={() => handleAdminJumpToBonus('bonus_la_profecia_1')}>
                                 Jump Profecía
                             </button>
-                            <button className="dev-reset-button dev-vene" onClick={() => handleAdminJumpToBonus('bonus_la_vene_1')}>
+                            <button className="dev-reset-button dev-bonus" onClick={() => handleAdminJumpToBonus('bonus_la_vene_1')}>
                                 Jump La Vene
                             </button>
+                            {/* CORREGIDO: Botones de distorsión de admin */}
                             <button className="dev-reset-button dev-distortion" onClick={() => handleAdminJumpToDistortion('distorsion_1')}>
                                 Jump Dist. 1
                             </button>
