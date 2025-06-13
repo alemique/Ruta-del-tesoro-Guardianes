@@ -563,25 +563,44 @@ async function sendBonusResultToBackend(data) {
 const DistortionEventPage = ({ event, onComplete }) => {
     const [view, setView] = React.useState('visual');
     const videoRef = React.useRef(null);
+    const [videoPlaying, setVideoPlaying] = React.useState(false);
+    const [autoplayBlocked, setAutoplayBlocked] = React.useState(false);
 
     React.useEffect(() => {
-        if (view !== 'visual') return;
+        if (view !== 'visual' || !videoRef.current) return;
 
-        if (event.visual.type === 'video' && videoRef.current) {
-            videoRef.current.play().catch(e => {
-                console.error("Error al auto-reproducir video:", e);
-                setView('challenge');  
+        // Intentar reproducir el video
+        videoRef.current.play()
+            .then(() => {
+                setVideoPlaying(true);
+                setAutoplayBlocked(false); // Autoplay succeeded
+            })
+            .catch(e => {
+                console.warn("Autoplay bloqueado o error de reproducción:", e);
+                setAutoplayBlocked(true); // Autoplay failed, show controls
+                setVideoPlaying(false);
             });
-        } else if (event.visual.type === 'image') {
-            const timer = setTimeout(() => {
-                setView('challenge');
-            }, event.visual.duration);
-            return () => clearTimeout(timer);
-        }
-    }, [event, view]);
+        
+        // Si el video termina, pasar al desafío
+        const currentVideoRef = videoRef.current;
+        const handleEnded = () => setView('challenge');
+        currentVideoRef.addEventListener('ended', handleEnded);
 
-    const handleVisualEnd = () => {
-        setView('challenge');
+        // Limpiar el event listener al desmontar o antes de un nuevo render
+        return () => {
+            if (currentVideoRef) {
+                currentVideoRef.removeEventListener('ended', handleEnded);
+            }
+        };
+    }, [event, view]); // Dependencias: event data and current view
+
+    const handlePlayVideo = () => {
+        if (videoRef.current) {
+            videoRef.current.play().then(() => {
+                setVideoPlaying(true);
+                setAutoplayBlocked(false);
+            }).catch(e => console.error("Error al reproducir video manualmente:", e));
+        }
     };
 
     const ChallengeRenderer = () => {
@@ -703,7 +722,18 @@ const DistortionEventPage = ({ event, onComplete }) => {
         <div className="amenaza-modal-overlay">
             <div className="amenaza-modal-content">
                 {view === 'visual' && event.visual.type === 'video' && (
-                    <video ref={videoRef} className="amenaza-visual" src={event.visual.src} onEnded={handleVisualEnd} muted playsInline />
+                    <>
+                        {/* MODIFICADO: Eliminado 'muted', añadido 'autoplay' para intento inicial */}
+                        <video ref={videoRef} className="amenaza-visual" src={event.visual.src} autoPlay playsInline />
+                        {autoplayBlocked && ( // Mostrar botón si autoplay es bloqueado
+                            <button className="video-play-button" onClick={handlePlayVideo}>
+                                ▶️ Activar Video / Sonido
+                            </button>
+                        )}
+                        {!videoPlaying && !autoplayBlocked && ( // Mostrar mensaje de carga si no se reproduce aún y no está bloqueado
+                            <p className="video-loading-message">Cargando video...</p>
+                        )}
+                    </>
                 )}
                 {view === 'visual' && event.visual.type === 'image' && (
                     <img className="amenaza-visual" src={event.visual.src} alt="Interrupción de la Amenaza" />
@@ -1634,10 +1664,11 @@ const handleBonusModalClose = (result) => {
                 ...prev,
                 status: 'in_game', // Mostrar el modal del bonus directamente en el estado de juego
                 activeBonusMissionId: bonus.id,
-                // Reiniciar el estado de 'offered' para que el bonus pueda ser ofrecido en el flujo normal si es relevante
-                bonusPorthoOffered: false,
-                bonusLaProfeciaOffered: false,
-                bonusLaVeneOffered: false,
+                // Restablecer las banderas de "ofrecido" para estos bonus en particular
+                // para que puedan ser probados repetidamente.
+                bonusPorthoOffered: bonus.id === 'bonus_portho_1' ? false : prev.bonusPorthoOffered,
+                bonusLaProfeciaOffered: bonus.id === 'bonus_la_profecia_1' ? false : prev.bonusLaProfeciaOffered,
+                bonusLaVeneOffered: bonus.id === 'bonus_la_vene_1' ? false : prev.bonusLaVeneOffered,
             }));
         }
     };
@@ -1717,7 +1748,7 @@ const handleBonusModalClose = (result) => {
                 <div className="dev-controls-container">
                     {appState.isAdmin && ( // Estos botones SÓLO aparecen para el admin
                         <>
-                            {/* CORREGIDO: Botones de bonus de admin */}
+                            {/* CORREGIDO: Botones de bonus de admin - ahora explícitamente listados */}
                             <button className="dev-reset-button dev-bonus" onClick={() => handleAdminJumpToBonus('bonus_portho_1')}>
                                 Jump Portho
                             </button>
