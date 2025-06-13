@@ -407,6 +407,21 @@ const triggerVibration = (duration = 100) => {
     }
 };
 
+// --- NUEVAS FUNCIONES PARA SONIDO ---
+const playSound = (soundPath) => {
+    const audio = new Audio(soundPath);
+    audio.play().catch(e => console.error("Error al reproducir sonido:", e));
+};
+
+const playCorrectSound = () => {
+    playSound('imagenes/sonidos/correct.wav');
+};
+
+const playWrongSound = () => {
+    playSound('imagenes/sonidos/wrong.wav');
+};
+// --- FIN NUEVAS FUNCIONES PARA SONIDO ---
+
 // <<< INICIO: MODIFICACIÓN DE ANIMACIÓN DE PUNTOS >>>
 const animatePoints = (points, originElementId) => {
     const destination = document.getElementById('score-display');
@@ -927,6 +942,12 @@ const TriviaSection = ({ stage, onComplete }) => {
             type: isCorrect ? 'success' : 'error'
         });
 
+        if (isCorrect) { // Play sound for correct answer
+            playCorrectSound();
+        } else { // Play sound for incorrect answer
+            playWrongSound();
+        }
+
         setTimeout(() => {
             onComplete({ points: pointsWon, time: finalTime });
         }, 2500);
@@ -1000,6 +1021,8 @@ const AnchorSection = ({ stage, onComplete, onHintRequest, score }) => {
             setGlowClass('success-glow');
             setFeedback({ message: `✔️ ¡Ancla estabilizada! Has recuperado ${points} Fragmentos.`, type: 'success' });
             
+            playCorrectSound(); // Play sound for correct answer
+
             setTimeout(() => onComplete({ points: points, time: anchorTimer }), 2500);
 
             triggerVibration();
@@ -1010,6 +1033,8 @@ const AnchorSection = ({ stage, onComplete, onHintRequest, score }) => {
             setIncorrectAttempts(newAttemptCount);
             setGlowClass('error-glow');
             setTimeout(() => setGlowClass(''), 1500);
+
+            playWrongSound(); // Play sound for incorrect answer
 
             if (newAttemptCount >= 3) {
                 setError('');
@@ -1029,6 +1054,7 @@ const AnchorSection = ({ stage, onComplete, onHintRequest, score }) => {
         setError('');
         setGlowClass('error-glow');
         setFeedback({ message: `Misión de anclaje omitida. No se han recuperado Fragmentos.`, type: 'error' });
+        playWrongSound(); // Play wrong sound on skip
         setTimeout(() => onComplete({ points: 0, time: anchorTimer }), 2500);
     };
 
@@ -1088,9 +1114,11 @@ const FinalSection = ({stage, onComplete}) => {
         if (keyword.toUpperCase().trim() === stage.enablerKeyword.toUpperCase().trim()) {
             setGlowClass('success-glow');
             onComplete(200);
+            playCorrectSound(); // Play sound for correct final answer
         } else {
             setError('🚫 Código final incorrecto.');
             setGlowClass('error-glow');
+            playWrongSound(); // Play sound for incorrect final answer
             setTimeout(() => setGlowClass(''), 1500);
         }
     };
@@ -1212,6 +1240,13 @@ const BonusMissionModal = ({ bonusData, onComplete }) => {
                 : `❌ Respuesta Incorrecta. No has recuperado fragmentos.`,
             type: isCorrect ? 'success' : 'error'
         });
+
+        if (isCorrect) { // Play sound for correct answer
+            playCorrectSound();
+        } else { // Play sound for incorrect answer
+            playWrongSound();
+        }
+
         setTimeout(() => {
             onComplete({ points: pointsWon, participated: true });
         }, 3000);
