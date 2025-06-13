@@ -23,7 +23,7 @@ const eventData = [
     {
         id: 3, department: "Santa Lucía", location: "Monumento La Luz del Mundo",
         anchor: { missionName: "Ancla: El Primer Destello", enabler: "Consigna: Identifiquen el año en que los primeros pobladores se reunían en esta zona.\nPista: El lugar era conocido históricamente como 'La Legua'.", enablerKeyword: "1869", transmission: "Detecto una débil señal de luz del pasado. Viaja al año de origen, cuando esta esquina se convirtió en un punto de encuentro vital para los pioneros." },
-        trivia: { missionName: "Trivia: La Lámpara Primitiva", challenge: { question: "Según la tradición, ¿qué se utilizaba en el mangrullo para orientar a los viajeros antes de la lámpara de carburo?", options: ["Una fogata", "Una lámpara de aceite", "Antorchas", "Un farol eléctrico"], correctAnswer: "Una lámpara de aceite" } },
+        trivia: { missionName: "Trivia: La Lámpara Primitiva", challenge: { question: "¿Qué se utilizaba en el mangrullo para orientar a los viajeros antes de la lámpara de carburo?", options: ["Una fogata", "Una lámpara de aceite", "Antorchas", "Un farol eléctrico"], correctAnswer: "Una lámpara de aceite" } },
         nextMissionId: 4
     },
     {
@@ -155,7 +155,7 @@ const eventData = [
     {
         id: 25, department: "Capital", location: "Teatro del Bicentenario",
         anchor: { missionName: "Ancla: El Silbato del Pasado", enabler: "Consigna: ¿En qué año se inauguró el ferrocarril cuya histórica estación se encontraba en el predio del teatro?\nPista: El teatro conserva la memoria de este histórico medio de transporte.", enablerKeyword: "1885", transmission: "Antes del aplauso, se escuchaba el silbato del tren. Ancla el año en que el ferrocarril llegó a este histórico predio." },
-        trivia: { missionName: "Trivia: Gala Inaugural", challenge: { question: "¿Qué ópera se presentó en la gala inaugural del teatro, con la participación de la compañía española La Fura dels Baus?", options: ["Aida", "La Traviata", "El Barbero de Sevilla", "Carmina Burana"], correctAnswer: "Carmina Burana" } },
+        trivia: { missionName: "Trivia: Gala Inaugural", challenge: { question: "¿Qué ópera se presentó en la gala inaugural del teatro, con la participación de la compañía española La Fura dels Baus?", options: ["Aida", "La Traviata", "El Barbero de Sevilla", "Carmina Burana"], correctAnswer: "Carmina Buruna" } },
         nextMissionId: 26
     },
     {
@@ -418,9 +418,18 @@ const playCorrectSound = () => {
 };
 
 const playWrongSound = () => {
-    playSound('imagenes/sonidos/wrong.mp3'); // MODIFICADO: Cambiado a .mp3
+    playSound('imagenes/sonidos/wrong.wav');
 };
+
+// --- NUEVA FUNCIÓN PARA SONIDO DE DISTORSIÓN (Asumiendo que ya está en el video) ---
+// Comentada ya que el usuario indicó que se agregaría directamente al video.
+/*
+const playDistortionAppearSound = () => {
+    playSound('imagenes/sonidos/distortion_appear.wav'); 
+};
+*/
 // --- FIN NUEVAS FUNCIONES PARA SONIDO ---
+
 
 // <<< INICIO: MODIFICACIÓN DE ANIMACIÓN DE PUNTOS >>>
 const animatePoints = (points, originElementId) => {
@@ -560,6 +569,9 @@ const DistortionEventPage = ({ event, onComplete }) => {
     React.useEffect(() => {
         if (view !== 'visual') return;
 
+        // Aquí ya NO NECESITAMOS playDistortionAppearSound() porque está en el video.
+        // playDistortionAppearSound(); 
+
         if (event.visual.type === 'video' && videoRef.current) {
             videoRef.current.play().catch(e => {
                 console.error("Error al auto-reproducir video:", e);
@@ -606,6 +618,13 @@ const DistortionEventPage = ({ event, onComplete }) => {
                     : '❌ Respuesta incorrecta. La conexión se perdió.');
 
             setFeedback({ message, type: isCorrect ? 'success' : 'error' });
+
+            if (isCorrect) { // Play sound for correct answer in distortion challenge
+                playCorrectSound();
+            } else { // Play sound for incorrect answer in distortion challenge
+                playWrongSound();
+            }
+
             setTimeout(() => onComplete({ points }), 3000);
         };
         
@@ -619,6 +638,13 @@ const DistortionEventPage = ({ event, onComplete }) => {
                 : `❌ Respuesta incorrecta. No has recuperado fragmentos.`;
             
             setFeedback({ message, type: isCorrect ? 'success' : 'error' });
+            
+            if (isCorrect) { // Play sound for correct answer in distortion challenge
+                playCorrectSound();
+            } else { // Play sound for incorrect answer in distortion challenge
+                playWrongSound();
+            }
+
             setTimeout(() => onComplete({ points }), 3000);
         };
 
@@ -729,7 +755,8 @@ const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
             const data = await response.json();
 
             if (data.valid) {
-                onLogin(enteredCode, enteredCode);
+                // MODIFICADO: Pasar también isAdmin al onLogin
+                onLogin(enteredCode, enteredCode, data.isAdmin); 
             } else {
                 setErrorMessage('⚠️ Código de Guardián no válido. Verifica tus credenciales.');
             }
@@ -1313,7 +1340,8 @@ const getInitialState = () => ({
     activeBonusMissionId: null,
     bonusPorthoOffered: false,
     bonusLaProfeciaOffered: false,
-    bonusLaVeneOffered: false // ¡Asegúrate de tener esta propiedad también!
+    bonusLaVeneOffered: false, // ¡Asegúrate de tener esta propiedad también!
+    isAdmin: false // NUEVO: Para controlar el acceso a botones de administrador
 });
 
 const App = () => {
@@ -1374,10 +1402,10 @@ const App = () => {
     const activeBonusData = appState.activeBonusMissionId ? allBonusData.find(b => b.id === appState.activeBonusMissionId) : null;
 
 
-    const handleLogin = (code, name) => {
+    // MODIFICADO: onLogin ahora recibe isAdmin
+    const handleLogin = (code, name, isAdmin = false) => {
         const initialState = getInitialState();
-        // CAMBIO CLAVE: Después del login, ve a la pantalla de bienvenida
-        const fullState = { ...initialState, status: 'welcome', squadCode: code, teamName: name };
+        const fullState = { ...initialState, status: 'welcome', squadCode: code, teamName: name, isAdmin: isAdmin }; // Almacenar isAdmin
         setAppState(fullState);
         sendResultsToBackend(fullState);
     };
@@ -1582,26 +1610,32 @@ const handleBonusModalClose = (result) => {
     sendResultsToBackend(finalState);
 };
     
-    const handleJumpToBonusPortho = () => {
-        if (window.confirm("Saltar a la pantalla de viaje con el bonus Portho? (DEV)")) {
+    // NUEVAS FUNCIONES PARA SALTO DIRECTO DE ADMIN
+    const handleAdminJumpToDistortion = (distortionId) => {
+        const triggeredEvent = distortionEventsData.find(e => e.id === distortionId);
+        if (triggeredEvent) {
             setAppState(prev => ({
                 ...prev,
-                status: 'long_travel',
-                currentMissionId: 26,
-                activeBonusMissionId: bonusMissionData.id,
-                bonusPorthoOffered: true,
+                status: 'distortion_event',
+                activeDistortionEventId: triggeredEvent.id,
+                // Puedes definir un postDistortionStatus para que regrese a la misión actual
+                // o a un estado neutral de desarrollo. Para simplicidad, volvemos al juego.
+                postDistortionStatus: 'in_game' 
             }));
         }
     };
 
-    const handleJumpToBonusLaProfecia = () => {
-        if (window.confirm("Saltar a la pantalla de viaje con el bonus La Profecía? (DEV)")) {
+    const handleAdminJumpToBonus = (bonusId) => {
+        const bonus = allBonusData.find(b => b.id === bonusId);
+        if (bonus) {
             setAppState(prev => ({
                 ...prev,
-                status: 'on_the_road',
-                currentMissionId: 6,
-                activeBonusMissionId: bonusLaProfeciaData.id,
-                bonusLaProfeciaOffered: true,
+                status: 'in_game', // O un estado de viaje si prefieres simularlo
+                activeBonusMissionId: bonus.id,
+                // Asegúrate de que el estado de 'offered' se actualice para evitar ofrecerlo de nuevo en el flujo normal
+                bonusPorthoOffered: bonus.id === 'bonus_portho_1' ? true : prev.bonusPorthoOffered,
+                bonusLaProfeciaOffered: bonus.id === 'bonus_la_profecia_1' ? true : prev.bonusLaProfeciaOffered,
+                bonusLaVeneOffered: bonus.id === 'bonus_la_vene_1' ? true : prev.bonusLaVeneOffered,
             }));
         }
     };
@@ -1676,29 +1710,32 @@ const handleBonusModalClose = (result) => {
             {activeDistortionEvent && <DistortionEventPage event={activeDistortionEvent} onComplete={handleDistortionComplete} />}
             {activeBonusData && <BonusMissionModal bonusData={{...activeBonusData, teamName: appState.teamName}} onComplete={handleBonusModalClose} />}
 
-            <div className="dev-controls-container">
-                {/* Ocultamos los botones de bonus específicos para el deploy final
-                    {appState.status !== 'login' && (
-                        <>
-                            <button className="dev-reset-button dev-bonus" onClick={handleJumpToBonusPortho}>
-                                B.PORTHO
-                            </button>
-                            <button className="dev-reset-button dev-profecia" onClick={handleJumpToBonusLaProfecia}>
-                                B.PROFECIA
-                            </button>
-                            <button className="dev-reset-button dev-reset" onClick={handleResetDevelopment}>
-                                RESET
-                            </button>
-                        </>
-                    )}
-                */}
-                {/* Puedes dejar el botón de RESET para desarrollo si lo necesitas */}
-                {appState.status !== 'login' && (
-                    <button className="dev-reset-button dev-reset" onClick={handleResetDevelopment}>
-                        RESET (DEV)
+            {/* MODIFICADO: Controles de desarrollo ahora se muestran SOLO si isAdmin es true */}
+            {appState.isAdmin && appState.status !== 'login' && (
+                <div className="dev-controls-container">
+                    <button className="dev-reset-button dev-bonus" onClick={() => handleAdminJumpToBonus('bonus_portho_1')}>
+                        Jump Portho
                     </button>
-                )}
-            </div>
+                    <button className="dev-reset-button dev-profecia" onClick={() => handleAdminJumpToBonus('bonus_la_profecia_1')}>
+                        Jump Profecía
+                    </button>
+                    <button className="dev-reset-button dev-vene" onClick={() => handleAdminJumpToBonus('bonus_la_vene_1')}>
+                        Jump La Vene
+                    </button>
+                    <button className="dev-reset-button dev-distortion" onClick={() => handleAdminJumpToDistortion('distorsion_1')}>
+                        Jump Dist. 1
+                    </button>
+                    <button className="dev-reset-button dev-distortion" onClick={() => handleAdminJumpToDistortion('distorsion_2')}>
+                        Jump Dist. 2
+                    </button>
+                    <button className="dev-reset-button dev-distortion" onClick={() => handleAdminJumpToDistortion('distorsion_3')}>
+                        Jump Dist. 3
+                    </button>
+                    <button className="dev-reset-button dev-reset" onClick={handleResetDevelopment}>
+                        RESET
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
