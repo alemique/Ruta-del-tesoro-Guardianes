@@ -1,3 +1,10 @@
+/* eslint-disable no-unused-vars */
+/* global React ReactDOM gsap */
+
+// Esto es para que React y ReactDOM estén disponibles globalmente sin necesidad de 'import'.
+// También desactiva una advertencia específica de ESLint sobre variables no usadas.
+// gsap es para las animaciones de puntos.
+
 // --- CONFIGURACIÓN DEL BACKEND ---
 // URL actualizada para incluir la función del ranking.
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbym5-onTOyzlqZn_G4O-5acxAZzReYjIOY5SF8tBh3TtT2jEFVw6IZ2MMMtkHGtRl0F/exec';
@@ -232,7 +239,7 @@ const eventData = [
     },
     {
         id: 38, department: "Rivadavia", location: "Centro Ambiental Anchipurac",
-        anchor: { missionName: "Ancla: El Año del Cambio", enabler: "Consigna: Encuentren el año de inauguración del moderno edificio de Anchipurac.\nPista: Su nombre simboliza energía y renovación.", enablerKeyword: "2018", transmission: "La conciencia ambiental se materializó en este edificio. Ancla el año en que se inauguró este faro de esperanza para el planeta." },
+        anchor: { missionName: "Ancla: El Año del Cambio", enabler: "Consigna: Encuentren el año en que el museo finalmente abrió las puertas de su moderno y exclusivo edificio actual.\nPista: Su nombre simboliza energía y renovación.", enablerKeyword: "2018", transmission: "La conciencia ambiental se materializó en este edificio. Ancla el año en que se inauguró este faro de esperanza para el planeta." },
         trivia: { missionName: "Trivia: Energía Limpia", challenge: { question: "¿Qué se puede encontrar en el exterior del complejo, además de senderos interpretativos y miradores?", options: ["Un vivero de plantas nativas", "Un parque solar con paneles fotovoltaicos", "Un lago artificial", "Una granja educativa"], correctAnswer: "Un parque solar con paneles fotovoltaicos" } },
         nextMissionId: 39
     },
@@ -755,7 +762,7 @@ const Header = ({ teamName, score, timer }) => (
             <span id="score-display" className="score">{score} FRAGMENTOS</span>
             <span className="timer">⏳ {formatTime(timer)}</span>
         </div>
-    </div>
+        </div>
 );
 
 const LoginPage = ({ onLogin, setErrorMessage, errorMessage }) => {
@@ -1098,6 +1105,16 @@ const AnchorSection = ({ stage, onComplete, onHintRequest, score }) => {
                 setError(`🚫 Ancla Temporal incorrecta. Quedan ${attemptsLeft} ${attemptsLeft === 1 ? 'intento' : 'intentos'}.`);
             }
         }
+    };
+
+    const handleSkip = () => {
+        if (isLocked) return;
+        setIsLocked(true);
+        setError('');
+        setGlowClass('error-glow');
+        setFeedback({ message: `Misión de anclaje omitida. No se han recuperado Fragmentos.`, type: 'error' });
+        playWrongSound(); // Play wrong sound on skip
+        setTimeout(() => onComplete({ points: 0, time: anchorTimer }), 2500);
     };
 
     const handleInputChange = (e) => {
@@ -1576,7 +1593,6 @@ const handleTriviaComplete = (triviaResult) => {
             
             setAppState(finalState);
             sendResultsToBackend(finalState);
-        }
     };
 
 const handleBonusModalClose = (result) => {
