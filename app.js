@@ -155,7 +155,7 @@ const eventData = [
     {
         id: 25, department: "Capital", location: "Teatro del Bicentenario",
         anchor: { missionName: "Ancla: El Silbato del Pasado", enabler: "Consigna: ¿En qué año se inauguró el ferrocarril cuya histórica estación se encontraba en el predio del teatro?\nPista: El teatro conserva la memoria de este histórico medio de transporte.", enablerKeyword: "1885", transmission: "Antes del aplauso, se escuchaba el silbato del tren. Ancla el año en que el ferrocarril llegó a este histórico predio." },
-        trivia: { missionName: "Trivia: Gala Inaugural", challenge: { question: "¿Qué ópera se presentó en la gala inaugural del teatro, con la participación de la compañía española La Fura dels Baus?", options: ["Aida", "La Traviata", "El Barbero de Sevilla", "Carmina Burana"], correctAnswer: "Carmina Buruna" } },
+        trivia: { missionName: "Trivia: Gala Inaugural", challenge: { question: "¿Qué ópera se presentó en la gala inaugural del teatro, con la participación de la compañía española La Fura dels Baus?", options: ["Aida", "La Traviata", "El Barbero de Sevilla", "Carmina Buruna"], correctAnswer: "Carmina Buruna" } },
         nextMissionId: 26
     },
     {
@@ -421,13 +421,11 @@ const playWrongSound = () => {
     playSound('imagenes/sonidos/wrong.wav');
 };
 
-// --- NUEVA FUNCIÓN PARA SONIDO DE DISTORSIÓN (Asumiendo que ya está en el video) ---
-// Comentada ya que el usuario indicó que se agregaría directamente al video.
-/*
-const playDistortionAppearSound = () => {
-    playSound('imagenes/sonidos/distortion_appear.wav'); 
-};
-*/
+// NOTA: La función playDistortionAppearSound fue eliminada según tu última indicación
+// ya que el sonido de distorsión se ha integrado directamente en los videos MP4.
+// const playDistortionAppearSound = () => {
+//     playSound('imagenes/sonidos/distortion_appear.wav'); 
+// };
 // --- FIN NUEVAS FUNCIONES PARA SONIDO ---
 
 
@@ -569,8 +567,7 @@ const DistortionEventPage = ({ event, onComplete }) => {
     React.useEffect(() => {
         if (view !== 'visual') return;
 
-        // Aquí ya NO NECESITAMOS playDistortionAppearSound() porque está en el video.
-        // playDistortionAppearSound(); 
+        // playDistortionAppearSound(); // Ya no es necesario aquí, el sonido está en el video.
 
         if (event.visual.type === 'video' && videoRef.current) {
             videoRef.current.play().catch(e => {
@@ -1710,30 +1707,37 @@ const handleBonusModalClose = (result) => {
             {activeDistortionEvent && <DistortionEventPage event={activeDistortionEvent} onComplete={handleDistortionComplete} />}
             {activeBonusData && <BonusMissionModal bonusData={{...activeBonusData, teamName: appState.teamName}} onComplete={handleBonusModalClose} />}
 
-            {/* MODIFICADO: Controles de desarrollo ahora se muestran SOLO si isAdmin es true */}
-            {appState.isAdmin && appState.status !== 'login' && (
+            {/* MODIFICADO: Controles de desarrollo ahora se muestran si isAdmin es true O si el status no es 'login' para el RESET */}
+            {(appState.isAdmin || appState.status !== 'login') && (
                 <div className="dev-controls-container">
-                    <button className="dev-reset-button dev-bonus" onClick={() => handleAdminJumpToBonus('bonus_portho_1')}>
-                        Jump Portho
-                    </button>
-                    <button className="dev-reset-button dev-profecia" onClick={() => handleAdminJumpToBonus('bonus_la_profecia_1')}>
-                        Jump Profecía
-                    </button>
-                    <button className="dev-reset-button dev-vene" onClick={() => handleAdminJumpToBonus('bonus_la_vene_1')}>
-                        Jump La Vene
-                    </button>
-                    <button className="dev-reset-button dev-distortion" onClick={() => handleAdminJumpToDistortion('distorsion_1')}>
-                        Jump Dist. 1
-                    </button>
-                    <button className="dev-reset-button dev-distortion" onClick={() => handleAdminJumpToDistortion('distorsion_2')}>
-                        Jump Dist. 2
-                    </button>
-                    <button className="dev-reset-button dev-distortion" onClick={() => handleAdminJumpToDistortion('distorsion_3')}>
-                        Jump Dist. 3
-                    </button>
-                    <button className="dev-reset-button dev-reset" onClick={handleResetDevelopment}>
-                        RESET
-                    </button>
+                    {appState.isAdmin && ( // Estos botones SÓLO aparecen para el admin
+                        <>
+                            <button className="dev-reset-button dev-bonus" onClick={() => handleAdminJumpToBonus('bonus_portho_1')}>
+                                Jump Portho
+                            </button>
+                            <button className="dev-reset-button dev-profecia" onClick={() => handleAdminJumpToBonus('bonus_la_profecia_1')}>
+                                Jump Profecía
+                            </button>
+                            <button className="dev-reset-button dev-vene" onClick={() => handleAdminJumpToBonus('bonus_la_vene_1')}>
+                                Jump La Vene
+                            </button>
+                            <button className="dev-reset-button dev-distortion" onClick={() => handleAdminJumpToDistortion('distorsion_1')}>
+                                Jump Dist. 1
+                            </button>
+                            <button className="dev-reset-button dev-distortion" onClick={() => handleAdminJumpToDistortion('distorsion_2')}>
+                                Jump Dist. 2
+                            </button>
+                            <button className="dev-reset-button dev-distortion" onClick={() => handleAdminJumpToDistortion('distorsion_3')}>
+                                Jump Dist. 3
+                            </button>
+                        </>
+                    )}
+                    {/* El botón RESET (DEV) siempre visible si no está en la pantalla de login */}
+                    {appState.status !== 'login' && (
+                        <button className="dev-reset-button dev-reset" onClick={handleResetDevelopment}>
+                            RESET (DEV)
+                        </button>
+                    )}
                 </div>
             )}
         </div>
