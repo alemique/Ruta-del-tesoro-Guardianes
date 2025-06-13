@@ -418,7 +418,7 @@ const playCorrectSound = () => {
 };
 
 const playWrongSound = () => {
-    playSound('imagenes/sonidos/wrong.wav');
+    playSound('imagenes/sonidos/wrong.mp3'); // MODIFICADO: Cambiado a .mp3
 };
 // --- FIN NUEVAS FUNCIONES PARA SONIDO ---
 
